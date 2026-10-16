@@ -4,13 +4,14 @@ Son guncelleme: 16 Ekim 2026 (Claude)
 
 ## Durum
 - Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
-- Siradaki faz: Faz 3 (UX/UI tasarim), kullanici onayi bekleniyor.
+- Faz 3 (UX/UI tasarim) TAMAMLANDI ve onaylandi; taslaklar `docs/tasarim/` altinda.
+- Siradaki faz: Faz 4a (Surum 1 gelistirme). Basla: imza anahtari + otomatik dagitim, sonra ozellikler (sira kullanici onayiyla).
 - Depoda: bos Flutter uygulamasi (`lib/main.dart`, `test/widget_test.dart`), `android/` klasoru (bootstrap akisiyla uretildi), `pubspec.lock`, GitHub Actions akislari, bu belgeler.
 - Dogrulandi: paket adi `com.mytus.app` (namespace, applicationId, MainActivity). Ilk "APK derle" akisi (analiz + test + release APK) basarili, APK yaklasik 20 MB.
 - Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
 
 ## Siradaki adim
-1. Faz 3: ekran listesi, akis semasi ve tema; kullanicidan onay al. Sonra Surum 1 gelistirmesi (Faz 4a).
+1. Faz 4a: parca sirasini kullanicidan onayla, her parcayi ayri dalda gelistir, Actions'ta dogrula, APK'yi kullaniciya ilet.
 2. Surum 1 dagitimindan once kalici APK imza anahtarini GitHub Secrets'a koy (anahtar depoya girmez).
 3. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak (karar: Analytics Surum 2'de eklenir).
 

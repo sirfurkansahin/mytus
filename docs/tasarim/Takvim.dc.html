@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>MY TUS · Takvim</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;display:flex;flex-direction:column;background:#FBFAFE;color:#1D1A2B;font-family:'Figtree',system-ui,sans-serif;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:28px 12px 8px 20px">
+    <h1 style="margin:0;font-size:30px;font-weight:800;letter-spacing:-0.5px">Ekim 2026</h1>
+    <div style="display:flex;gap:2px">
+      <button type="button" aria-label="Önceki ay" style="width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:#5F5A74;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button type="button" aria-label="Sonraki ay" style="width:44px;height:44px;border:0;border-radius:22px;background:transparent;color:#5F5A74;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </div>
+
+  <div style="padding:0 14px">
+    <div style="display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));text-align:center;font-size:12px;font-weight:700;color:#5F5A74;padding-bottom:4px">
+      <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:2px">
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="35">
+        <div style="height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+          <sc-if value="{{d.show}}" hint-placeholder-val="{{ true }}">
+            <span style="width:30px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:{{d.bg}};color:{{d.fg}}">{{d.n}}</span>
+            <span style="display:flex;gap:3px;height:5px">
+              <sc-if value="{{d.plan}}" hint-placeholder-val="{{ true }}"><span style="width:5px;height:5px;border-radius:3px;background:#5B3EC8"></span></sc-if>
+              <sc-if value="{{d.rep}}" hint-placeholder-val="{{ false }}"><span style="width:5px;height:5px;border-radius:3px;background:#B45309"></span></sc-if>
+            </span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:16px;padding:6px 6px 0;font-size:12px;color:#5F5A74;font-weight:500">
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#5B3EC8"></span>Planlı konu</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#B45309"></span>Tekrar</span>
+    </div>
+  </div>
+
+  <div style="flex-grow:1;overflow:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between">
+      <h2 style="margin:0;font-size:18px;font-weight:700">16 Ekim · Bugün</h2>
+      <button type="button" style="min-height:44px;padding:0 4px;border:0;background:transparent;color:#5B3EC8;font-family:inherit;font-size:14px;font-weight:700">+ Konu yerleştir</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E6E2F3;border-radius:16px;padding:10px 14px;min-height:44px">
+      <span style="width:8px;height:8px;border-radius:4px;background:#5B3EC8"></span>
+      <span style="flex-grow:1;font-size:15px;font-weight:600">Kalp döngüsü</span><span style="font-size:13px;color:#5F5A74">Fizyoloji</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E6E2F3;border-radius:16px;padding:10px 14px;min-height:44px">
+      <span style="width:8px;height:8px;border-radius:4px;background:#5B3EC8"></span>
+      <span style="flex-grow:1;font-size:15px;font-weight:600">Pankreas hormonları</span><span style="font-size:13px;color:#5F5A74">Biyokimya</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E6E2F3;border-radius:16px;padding:10px 14px;min-height:44px">
+      <span style="width:8px;height:8px;border-radius:4px;background:#5B3EC8"></span>
+      <span style="flex-grow:1;font-size:15px;font-weight:600">Pediatrik enfeksiyonlar</span><span style="font-size:13px;color:#5F5A74">Pediatri</span>
+    </div>
+  </div>
+
+  <nav aria-label="Ana menü" style="height:72px;box-sizing:border-box;display:flex;border-top:1px solid #E6E2F3;background:#FFFFFF">
+    <a href="Main.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5F5A74;font-size:12px;font-weight:600">
+      <span style="width:52px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Bugün
+    </a>
+    <a href="Dersler.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5F5A74;font-size:12px;font-weight:600">
+      <span style="width:52px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></svg></span>Dersler
+    </a>
+    <a href="Takvim.dc.html" aria-current="page" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5B3EC8;font-size:12px;font-weight:700">
+      <span style="width:52px;height:28px;border-radius:14px;background:#E9E3FB;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>Takvim
+    </a>
+    <a href="FTAyar.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#5F5A74;font-size:12px;font-weight:600">
+      <span style="width:52px;height:28px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></span>F.T. time
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Ekim 2026: 1 Ekim Persembe (Pzt başlangıçlı ızgarada 4. sütun). Örnek veri.
+    const plan = [16, 19, 20, 22, 23, 26, 27, 29];
+    const rep = [17, 21, 24, 28];
+    const today = 16;
+    const days = [];
+    for (let i = 0; i < 35; i++) {
+      const n = i - 2; // 1 Ekim -> indeks 3
+      const show = n >= 1 && n <= 31;
+      days.push({
+        show,
+        n: show ? n : '',
+        plan: show && plan.includes(n),
+        rep: show && rep.includes(n),
+        bg: n === today ? '#5B3EC8' : 'transparent',
+        fg: n === today ? '#FFFFFF' : '#1D1A2B',
+      });
+    }
+    return { days };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-16T12:30:00Z" },
+  "title": "MY TUS Ekran Tasarımları",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Karsilama.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Karşılama", "is_interactive": true },
+    "Main.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 · Bugün", "is_interactive": true },
+    "Dersler.dc.html": { "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 · Dersler", "is_interactive": true },
+    "Konu.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 · Konu detayı", "is_interactive": true },
+    "Takvim.dc.html": { "x": 1880, "y": 0, "w": 390, "h": 844, "title": "5 · Takvim", "is_interactive": true },
+    "FTAyar.dc.html": { "x": 2350, "y": 0, "w": 390, "h": 844, "title": "6 · F.T. time ayarı", "is_interactive": true },
+    "FTSayac.dc.html": { "x": 2820, "y": 0, "w": 390, "h": 844, "title": "7 · F.T. time sayaç", "is_interactive": true },
+    "Ilerleme.dc.html": { "x": 3290, "y": 0, "w": 390, "h": 844, "title": "8 · İlerleme", "is_interactive": true },
+    "Ayarlar.dc.html": { "x": 3760, "y": 0, "w": 390, "h": 844, "title": "9 · Ayarlar", "is_interactive": true }
+  },
+  "order": [
+    "Main.dc.html",
+    "Karsilama.dc.html",
+    "Dersler.dc.html",
+    "Konu.dc.html",
+    "Takvim.dc.html",
+    "FTAyar.dc.html",
+    "FTSayac.dc.html",
+    "Ilerleme.dc.html",
+    "Ayarlar.dc.html"
+  ],
+  "notes": {
+    "baslik": { "x": 0, "y": -260, "text": "MY TUS · Sürüm 1 ekranları (örnek verilerle)", "kind": "title1", "maxW": 4150 }
+  },
+  "designSystems": []
+}
