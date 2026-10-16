@@ -100,7 +100,16 @@ jobs:
 
       - name: Release APK derle
         if: steps.check.outputs.ready == 'true'
-        run: flutter build apk --release --build-number=${{ github.run_number }}
+        run: |
+          set +e
+          flutter build apk --release --build-number=${{ github.run_number }} > derleme.txt 2>&1
+          kod=$?
+          tail -60 derleme.txt
+          if [ $kod -ne 0 ]; then
+            ozet=$(grep -vE "^\s*$" derleme.txt | grep -iE "error|fail|wrong|exception|what went|e: |warning:.*(deprecat)" | head -30 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=Derleme hatalari::${ozet}"
+          fi
+          exit $kod
 
       - name: Imza dogrulamasi (sertifika parmak izi)
         if: steps.check.outputs.ready == 'true'
