@@ -19,7 +19,7 @@ object TimerNotifier {
     private const val PREFS = "mytus_native"
     private const val CH_RUNNING = "mytus_timer_running"
     private const val CH_DONE = "mytus_timer_done"
-    private const val ID_RUNNING = 1
+    const val ID_RUNNING = 1
     private const val ID_DONE = 2
     private val VIBRATION = longArrayOf(0, 500, 250, 500, 250, 500)
 
@@ -65,17 +65,31 @@ object TimerNotifier {
     private fun newBuilder(ctx: Context, channel: String): Notification.Builder =
         if (Build.VERSION.SDK_INT >= 26) Notification.Builder(ctx, channel) else Notification.Builder(ctx)
 
-    // Alarmi kurar (telefon kilitli/uykuda olsa bile) ve geri sayimli bildirimi gosterir.
+    // Alarmi kurar (telefon kilitli/uykuda olsa bile) ve calisan sayac bildirimini gosterir.
     // setAlarmClock: Android'in "saat alarmi" turu. Pil tasarrufundan en az etkilenen turdur
     // ve ayrica "tam zamanli alarm" izni istemez.
+    // Bildirim bir on plan servisi uzerinden gosterilir: boylece sistem (ozellikle bazi
+    // telefon markalari) uygulamayi arka planda oldurup alarmi silemez.
     fun schedule(ctx: Context, endAtMs: Long) {
         ensureChannels(ctx)
         val am = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         am.setAlarmClock(AlarmManager.AlarmClockInfo(endAtMs, openAppIntent(ctx)), alarmIntent(ctx, endAtMs))
-        showRunning(ctx, endAtMs)
+        startRunningService(ctx, endAtMs)
     }
 
-    private fun showRunning(ctx: Context, endAtMs: Long) {
+    // Servis baslatilamazsa (ornegin sistem izin vermezse) duz bildirime geri donulur.
+    private fun startRunningService(ctx: Context, endAtMs: Long) {
+        try {
+            val intent = Intent(ctx, TimerService::class.java)
+            intent.putExtra(EXTRA_END_AT, endAtMs)
+            if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(intent) else ctx.startService(intent)
+        } catch (e: Exception) {
+            notificationManager(ctx).notify(ID_RUNNING, buildRunning(ctx, endAtMs))
+        }
+    }
+
+    fun buildRunning(ctx: Context, endAtMs: Long): Notification {
+        ensureChannels(ctx)
         val b = newBuilder(ctx, CH_RUNNING)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("F.T. time çalışıyor")
@@ -87,7 +101,10 @@ object TimerNotifier {
             .setOnlyAlertOnce(true)
             .setContentIntent(openAppIntent(ctx))
         if (Build.VERSION.SDK_INT >= 24) b.setChronometerCountDown(true)
-        notificationManager(ctx).notify(ID_RUNNING, b.build())
+        if (Build.VERSION.SDK_INT >= 31) {
+            b.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+        return b.build()
     }
 
     // Alarmi ve "calisiyor" bildirimini kaldirir (duraklat / sifirla).
@@ -97,7 +114,13 @@ object TimerNotifier {
         dismissRunning(ctx)
     }
 
+    // Servisi durdurur (bildirimi de kalkar); servis yoksa bildirimi dogrudan siler.
     fun dismissRunning(ctx: Context) {
+        try {
+            ctx.stopService(Intent(ctx, TimerService::class.java))
+        } catch (e: Exception) {
+            // Servis zaten yoksa bir sey yapmaya gerek yok.
+        }
         notificationManager(ctx).cancel(ID_RUNNING)
     }
 

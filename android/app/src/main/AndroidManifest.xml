@@ -2,6 +2,9 @@
     <!-- F.T. time: Android 13+ icin bildirim izni; titresim bildirim kanalindan gelir. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- Sayac calisirken sistemin uygulamayi oldurmesini zorlastiran on plan servisi. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <application
         android:label="MY TUS"
         android:name="${applicationName}"
@@ -32,6 +35,14 @@
         <receiver
             android:name=".TimerAlarmReceiver"
             android:exported="false"/>
+        <service
+            android:name=".TimerService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Odak sayaci (F.T. time) calisirken sureyi korur ve bitince uyarir"/>
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
