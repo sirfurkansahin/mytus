@@ -1,45 +1,33 @@
+import 'package:app/features/ft_time/ft_test_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyTusApp());
+void main() {
+  runApp(const MyTusApp());
+}
 
-/// Uygulamanin kok widget'i.
 class MyTusApp extends StatelessWidget {
   const MyTusApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Ana renk mor (onaylı tasarım): #5B3EC8. Tema telefonun ayarını izler.
+    const mor = Color(0xFF5B3EC8);
     return MaterialApp(
       title: 'MY TUS',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF1E6F5C),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: mor),
       ),
-      home: const HomeScreen(),
-    );
-  }
-}
-
-/// Faz 2 icin gecici ana ekran: kurulumun calistigini gosterir.
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('MY TUS')),
-      body: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_outline, size: 64),
-            SizedBox(height: 16),
-            Text('Kurulum başarılı'),
-            SizedBox(height: 8),
-            Text('Faz 2: boş uygulama'),
-          ],
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: mor,
+          brightness: Brightness.dark,
         ),
       ),
+      themeMode: ThemeMode.system,
+      home: const FtTestScreen(),
     );
   }
 }
