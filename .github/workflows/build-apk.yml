@@ -93,7 +93,7 @@ jobs:
           kod=$?
           tail -80 test.txt
           if [ $kod -ne 0 ]; then
-            ozet=$(grep -vE "^\s*$" test.txt | tail -60 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            ozet=$(grep -vE "^\s*$|✅" test.txt | sed 's/[═╞╡]/=/g' | head -70 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
             echo "::error title=Test hatalari::${ozet}"
           fi
           exit $kod
