@@ -219,6 +219,7 @@ void main() {
       h.depo.gunlukSinirBelirle(8);
       var o = h.depo.oturumBaslat(toplamDongu: 2, konuId: h.konuId);
       o = bolumuBitir(o, t0);
+      h.depo.oturumGuncelle(o);
       h.depo.oturumGuncelle(o.ilerle()!.baslat(t0 + 40 * dk));
       await h.depo.hemenKaydet();
 

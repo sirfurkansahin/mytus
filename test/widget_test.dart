@@ -193,6 +193,10 @@ class SahteNative extends FtNative {
 void ftTestleri() {
   testWidgets('F.T. time: hazırlıktan oturum başlar, duraklar, bitirilir',
       (tester) async {
+    // Uzun ekran: hazırlık ekranının altındaki satırlar da çizilsin.
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     final native = SahteNative();
     await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: native));
