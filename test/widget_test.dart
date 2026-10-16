@@ -91,6 +91,7 @@ void main() {
   });
 
   ftTestleri();
+  ilerlemeTestleri();
 
   takvimTestleri();
 }
@@ -298,6 +299,42 @@ void ftTestleri() {
     await tester.tap(find.text('Kaydet'));
     await tester.pumpAndSettle();
     expect(depo.ftAyar.calismaDk, 40);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void ilerlemeTestleri() {
+  testWidgets('İlerleme: Bugün ekranından açılır, hafta özeti ve gezinme çalışır',
+      (tester) async {
+    final depo = await doluDepo(tester);
+    final anatomi = depo.dersler(DersGrubu.temel).first;
+    final konu = depo.konuEkle(anatomi.id, 'Alt ekstremite')!;
+    final su = DateTime.now().millisecondsSinceEpoch;
+    var o = depo.oturumBaslat(toplamDongu: 1, konuId: konu.id);
+    o = o.baslat(su - 30 * 60 * 1000).guncelle(su);
+    depo.oturumGuncelle(o);
+    depo.oturumKapat();
+
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('İlerleme'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bu hafta'), findsOneWidget);
+    expect(find.text('Biten döngü'), findsOneWidget);
+    expect(find.text('25 dk'), findsWidgets);
+    expect(find.text('Anatomi'), findsOneWidget);
+    expect(find.textContaining('25 puan'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Önceki hafta'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bu hafta'), findsNothing);
+    expect(find.textContaining('henüz kayıt yok'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Sonraki hafta'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bu hafta'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

@@ -1,6 +1,7 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
 
@@ -62,6 +63,13 @@ class BugunEkrani extends StatelessWidget {
                   style: tema.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'İlerleme',
+                icon: const Icon(Icons.bar_chart_rounded),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const IlerlemeEkrani()),
                 ),
               ),
               IconButton(
