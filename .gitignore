@@ -1,0 +1,17 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+
+# Anahtar ve gizli dosyalar: ASLA depoya girmemeli
+*.jks
+*.keystore
+key.properties
+.env

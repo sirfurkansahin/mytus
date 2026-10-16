@@ -1,0 +1,64 @@
+# Her gonderimde: analiz + test + APK derleme. APK, calisma sayfasindan "Artifacts" altindan indirilir.
+# android/ klasoru henuz yoksa (ilk kurulum) bu akis hicbir sey yapmadan basarili biter.
+name: APK derle
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: android/ klasoru var mi?
+        id: check
+        run: |
+          if [ -d android ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "android/ klasoru yok; ilk kurulum akisi bekleniyor, derleme atlandi."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        if: steps.check.outputs.ready == 'true'
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter surumunu goster
+        if: steps.check.outputs.ready == 'true'
+        run: flutter --version
+
+      - name: Bagimliliklari indir
+        if: steps.check.outputs.ready == 'true'
+        run: flutter pub get
+
+      - name: Kod analizi
+        if: steps.check.outputs.ready == 'true'
+        run: flutter analyze
+
+      - name: Testler
+        if: steps.check.outputs.ready == 'true'
+        run: flutter test
+
+      - name: Release APK derle
+        if: steps.check.outputs.ready == 'true'
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          name: mytus-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error

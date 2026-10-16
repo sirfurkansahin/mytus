@@ -1,0 +1,68 @@
+# Bir kerelik kurulum: Flutter'in Android klasorunu (android/) uretir ve depoya yazar.
+# main dalina her gonderimde calisir ama android/ varsa hicbir sey yapmaz.
+# Elle de calistirilabilir: GitHub > Actions > "Android klasorunu olustur" > Run workflow.
+name: Android klasorunu olustur
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: android/ var mi?
+        id: check
+        run: |
+          if [ -d android ]; then
+            echo "android/ zaten var, bu akis bir sey yapmayacak."
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.check.outputs.needed == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        if: steps.check.outputs.needed == 'true'
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter surumunu goster
+        if: steps.check.outputs.needed == 'true'
+        run: flutter --version
+
+      - name: Android klasorunu uret (paket adi com.mytus.app)
+        if: steps.check.outputs.needed == 'true'
+        run: flutter create --org com.mytus --project-name app --platforms=android .
+
+      - name: Bagimliliklari indir
+        if: steps.check.outputs.needed == 'true'
+        run: flutter pub get
+
+      - name: Degisiklikleri depoya yaz
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Android klasorunu ve pubspec.lock dosyasini olustur"
+          git push
+
+      - name: APK derlemesini baslat
+        if: steps.check.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-apk.yml --ref main
