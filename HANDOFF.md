@@ -1,6 +1,6 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 16 Ekim 2026 (Claude), Parca 3 kodlandi
+Son guncelleme: 16 Ekim 2026 (Claude), Parca 4a kodlandi
 
 ## Durum
 - Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
@@ -11,9 +11,9 @@ Son guncelleme: 16 Ekim 2026 (Claude), Parca 3 kodlandi
 - Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
 
 ## Siradaki adim
-1. Parca 1 (sayac prototipi) ve Parca 2 (dersler, konular, notlar, karsilama, alt menu, yerel kayit) main'e BIRLESTIRILDI (PR #1, kullanici izniyle). 6. adim (pil ayari YAPILMADAN alarm testi) HENUZ YAPILMADI.
-2. Parca 3 (takvim + tekrar motoru + Bugun ekrani + Konu'da tekrar plani) KODLANDI, dal `claude/takvim-tekrar`. Kurallar DECISIONS.md "Takvim ve tekrar motoru" bolumunde (benim yorumlarim isaretli). BEKLENEN: kullanici telefonda dener; main'e birlestirme yine kullanicinin acik iznini gerektirir (PR + REST ile birlestirme; `gh pr merge` GraphQL engelli).
-3. Sonraki: Parca 4 (Bugun/Ilerleme/Ayarlar: tur sayisi ve gunluk sinir ayari; gercek F.T. time ekrani 25/5/15, 4 dongude uzun mola; puan = tamamlanan odak dakikasi). Her biri ayri dal.
+1. Parca 1-3 main'e BIRLESTIRILDI (Parca 3: PR #2, kullanici izniyle). Pil ayari YAPILMADAN alarm testi (6. adim) hala yapilmadi.
+2. Parca 4a (Ayarlar + gercek F.T. time + odak puani) KODLANDI, dal `claude/ft-ayarlar-puan`, Actions yesil, `dagit=true` ile Firebase'e yuklendi. Kurallar DECISIONS.md "Ayarlar, F.T. time ve puan" bolumunde (benim yorumlarim isaretli). BEKLENEN: kullanici telefonda dener; main'e birlestirme icin kullanicinin acik izni gerekir (PR + REST ile birlestirme).
+3. Sonraki: Parca 4b = Ilerleme ekrani (Bugun'un sag ustunden; hafta konu/dongu/odak suresi, gunluk odak grafigi, en cok calisilan dersler; veri hazir: `PlanDeposu.odaklar`, `puanGun`, `puanHafta`). Sonra Surum 1 kapanis (README/kullanim notlari, hata duzeltmeleri), sonra Surum 2.
 4. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak.
 
 ## Bilinen sorunlar / riskler
