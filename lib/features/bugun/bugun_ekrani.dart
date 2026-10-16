@@ -131,11 +131,11 @@ class BugunEkrani extends StatelessWidget {
           ],
           if (geciken > 0) ...[
             BolumBasligi(baslik: 'Geciken', bilgi: '$geciken iş'),
-            for (final c in gecikenCalismalari) ...[
+            for (final c in gecikenCalismalar) ...[
               CalismaSatiri(calisma: c, bugun: bugun, planliGunuGoster: true),
               const SizedBox(height: 8),
             ],
-            for (final t in gecikenTekrarlari) ...[
+            for (final t in gecikenTekrarlar) ...[
               TekrarSatiri(tekrar: t, bugun: bugun, tarihiGoster: true),
               const SizedBox(height: 8),
             ],
