@@ -12,12 +12,12 @@ Son guncelleme: 16 Ekim 2026 (Claude)
 
 ## Siradaki adim
 1. Faz 4a: parca sirasini kullanicidan onayla, her parcayi ayri dalda gelistir, Actions'ta dogrula, APK'yi kullaniciya ilet.
-2. Parca 0 (imza + otomatik dagitim) uygulandi; kullanici GitHub sirlarini ekledikten sonra dagitimi dogrula.
+2. Parca 0 (imza + otomatik dagitim) tamam: ilk dagitimli derleme (elle `dagit=true`) basarili, Firebase yuklemesi basarili. Kullanicinin telefona kurulumunu dogrulamasi bekleniyor. Sonra Parca 1: F.T. time sayac prototipi (arka plan guvenilirligi, realme GT 2).
 3. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak (karar: Analytics Surum 2'de eklenir).
 
 ## Bilinen sorunlar / riskler
 - Flutter surumu sabitlenmedi (`channel: stable`) ve ilk derlemede hangi surumun kullanildigi kaydedilmedi. Sabitleme: `build-apk.yml` icinde `flutter-version` ekle.
-- APK imzalama: release APK varsayilan (debug) anahtarla imzali. Her derlemede imza degisebilir; kurulu uygulama guncellenemez. Surum 1 dagitimindan ONCE kalici anahtar GitHub Secrets'a konmali (`DECISIONS.md` sonundaki nota bak).
+- APK imzalama: kalici anahtar GitHub Secrets'ta (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD); anahtarin tek yedegi kullanicida. Sirlar yoksa derleme debug anahtariyla imzalanir (kurulu uygulamanin uzerine kurulmaz). Imza sertifikasi akis icinde dogrulama bildirimi olarak yazdirilamadi; gunluk (log) indirilemedigi icin kalici anahtarla imzalandigi dolayli olarak (sirlar var, 'Imza anahtarini hazirla' adimi calisti) kabul ediliyor.
 - Kod yerelde derlenemez; sonuclar yalnizca Actions'tan gelir.
 - `analysis_options.yaml` dosyasina diskte `analyzer.exclude` (build/**, android/**) eklenmis; degisikligi kimin yaptigi bilinmiyor, zararsiz gorundugu icin korundu.
 
