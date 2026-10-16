@@ -1,6 +1,6 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 16 Ekim 2026 (Claude)
+Son guncelleme: 16 Ekim 2026 (Claude), Parca 1 kodlandi
 
 ## Durum
 - Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
@@ -11,12 +11,16 @@ Son guncelleme: 16 Ekim 2026 (Claude)
 - Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
 
 ## Siradaki adim
-1. Faz 4a: parca sirasini kullanicidan onayla, her parcayi ayri dalda gelistir, Actions'ta dogrula, APK'yi kullaniciya ilet.
-2. Parca 0 (imza + otomatik dagitim) tamam: ilk dagitimli derleme (elle `dagit=true`) basarili, Firebase yuklemesi basarili. Kullanicinin telefona kurulumunu dogrulamasi bekleniyor. Sonra Parca 1: F.T. time sayac prototipi (arka plan guvenilirligi, realme GT 2).
-3. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak (karar: Analytics Surum 2'de eklenir).
+1. Parca 0 (imza + otomatik dagitim) TAMAM, kullanici telefona kurulumu dogruladi (16 Ekim 2026).
+2. Parca 1 (F.T. time sayac prototipi) KODLANDI, dalda: `claude/ft-sayac-prototip` (main'e HENUZ birlestirilmedi). Actions yesil (analiz, 14 test, APK). `dagit=true` ile Firebase'e yuklendi (run 38910578252). BEKLENEN: kullanici realme GT 2'de test edecek (ekran kilitli / uygulama arka planda / pil ayari kapali-acik) ve sonucu bildirecek.
+   - Sonuc iyiyse: dali main'e birlestir (PR), Parca 2'ye gec (ders/konu/not + karsilama + yerel depolama + hazir ders listesi).
+   - Alarm gelmezse: ekrandaki "Alarm olcumu" paneli ne dedigine bak; cozum sirasi: pil rehberi ayarlari -> on plan servisi (foreground service) eklemek -> telefon yeniden baslarsa alarmi tekrar kurmak (BOOT_COMPLETED).
+3. Sonraki parcalar: 2 (ders/konu/not), 3 (takvim + tekrar motoru), 4 (Bugun/Ilerleme/Ayarlar + puan). Her biri ayri dal.
+4. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak.
 
 ## Bilinen sorunlar / riskler
-- Flutter surumu sabitlenmedi (`channel: stable`) ve ilk derlemede hangi surumun kullanildigi kaydedilmedi. Sabitleme: `build-apk.yml` icinde `flutter-version` ekle.
+- Flutter surumu sabitlenmedi (`channel: stable`). Son derlemede kullanilan surum: Flutter 3.47.7 (Actions "Flutter surumu" bildiriminden). Sabitleme: `build-apk.yml` icinde `flutter-version: 3.47.7` ekle (kullanici onayiyla / Parca 2 oncesi).
+- Prototipte on plan servisi (foreground service) yok; alarm `setAlarmClock` ile kuruluyor. Telefon yeniden baslarsa alarm silinir.
 - APK imzalama: kalici anahtar GitHub Secrets'ta (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD); anahtarin tek yedegi kullanicida. Sirlar yoksa derleme debug anahtariyla imzalanir (kurulu uygulamanin uzerine kurulmaz). Imza sertifikasi akis icinde dogrulama bildirimi olarak yazdirilamadi; gunluk (log) indirilemedigi icin kalici anahtarla imzalandigi dolayli olarak (sirlar var, 'Imza anahtarini hazirla' adimi calisti) kabul ediliyor.
 - Kod yerelde derlenemez; sonuclar yalnizca Actions'tan gelir.
 - `analysis_options.yaml` dosyasina diskte `analyzer.exclude` (build/**, android/**) eklenmis; degisikligi kimin yaptigi bilinmiyor, zararsiz gorundugu icin korundu.
