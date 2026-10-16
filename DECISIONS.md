@@ -49,4 +49,5 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 - Android gelistirici dogrulamasi 2027'de kuresel olabilir; "sinirli dagitim hesabi" (en fazla 20 cihaz) not edildi, acilis durumu dogrulanmadi.
 - Firebase App Distribution tester limiti ve GitHub Actions ucretsiz kotasi dogrulanmadi.
 - Ileride arkadas disina acilma karari yok; guvenlik kurallari bastan cok kullanicili yazilacak.
-- APK imzalama: Release APK simdilik varsayilan (debug) anahtarla imzalaniyor. Her derlemede imza degisirse kurulu uygulama guncellenemez. Surum 1 dagitimindan ONCE kalici bir imza anahtari GitHub Secrets'a konmali (anahtar depoya girmez).
+- APK imzalama: Kalici anahtar (alias `mytus`) uretildi; kullanici yedekledi ve GitHub Secrets'a koydu (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD). Anahtar ASLA depoya girmez. Sirlar yoksa derleme debug anahtariyla imzalanir ve o APK ile kalici anahtarli APK birbirinin uzerine kurulamaz (once silmek gerekir).
+- Dagitim otomasyonu: sirlar FIREBASE_APP_ID, FIREBASE_SERVICE_ACCOUNT, FIREBASE_TESTERS. main dalina gonderimde veya elle `dagit` secilince APK Firebase App Distribution'a yuklenir. Build numarasi her derlemede `github.run_number` ile artar.

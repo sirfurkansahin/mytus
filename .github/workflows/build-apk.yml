@@ -1,5 +1,8 @@
 # Her gonderimde: analiz + test + APK derleme. APK, calisma sayfasindan "Artifacts" altindan indirilir.
-# android/ klasoru henuz yoksa (ilk kurulum) bu akis hicbir sey yapmadan basarili biter.
+# android/ klasoru yoksa bu akis hicbir sey yapmadan basarili biter.
+# Imza sirlari (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD) varsa kalici anahtarla imzalar, yoksa debug anahtariyla.
+# Firebase sirlari (FIREBASE_APP_ID, FIREBASE_SERVICE_ACCOUNT, FIREBASE_TESTERS) varsa APK'yi
+# main dalina gonderimde veya elle "Run workflow > dagit" secildiginde Firebase App Distribution'a yukler.
 name: APK derle
 
 on:
@@ -8,6 +11,11 @@ on:
       - "**.md"
       - "docs/**"
   workflow_dispatch:
+    inputs:
+      dagit:
+        description: "APK'yi Firebase App Distribution'a da yukle"
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -15,15 +23,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: android/ klasoru var mi?
+      - name: Durumu belirle
         id: check
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          FB_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FB_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FB_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         run: |
-          if [ -d android ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "android/ klasoru yok; ilk kurulum akisi bekleniyor, derleme atlandi."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          fi
+          if [ -d android ]; then echo "ready=true" >> "$GITHUB_OUTPUT"; else
+            echo "android/ klasoru yok; derleme atlandi."; echo "ready=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASS" ]; then echo "sign=true" >> "$GITHUB_OUTPUT"; else
+            echo "Imza sirlari yok: debug anahtariyla imzalanacak."; echo "sign=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -n "$FB_APP_ID" ] && [ -n "$FB_SA" ] && [ -n "$FB_TESTERS" ]; then echo "fb=true" >> "$GITHUB_OUTPUT"; else
+            echo "Firebase sirlari eksik: yukleme yapilmayacak."; echo "fb=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Imza anahtarini hazirla
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.sign == 'true'
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/mytus-upload.jks"
+          echo "MYTUS_KEYSTORE_PATH=$RUNNER_TEMP/mytus-upload.jks" >> "$GITHUB_ENV"
+          echo "MYTUS_KEYSTORE_PASSWORD=$KEYSTORE_PASS" >> "$GITHUB_ENV"
 
       - uses: actions/setup-java@v4
         if: steps.check.outputs.ready == 'true'
@@ -55,7 +79,13 @@ jobs:
 
       - name: Release APK derle
         if: steps.check.outputs.ready == 'true'
-        run: flutter build apk --release
+        run: flutter build apk --release --build-number=${{ github.run_number }}
+
+      - name: Imza dogrulamasi (sertifika parmak izi)
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs build/app/outputs/flutter-apk/app-release.apk | grep -E "Signer #1 certificate (DN|SHA-256)"
 
       - uses: actions/upload-artifact@v4
         if: steps.check.outputs.ready == 'true'
@@ -63,3 +93,13 @@ jobs:
           name: mytus-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+
+      - name: Firebase App Distribution'a yukle
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.fb == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.dagit))
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          testers: ${{ secrets.FIREBASE_TESTERS }}
+          file: build/app/outputs/flutter-apk/app-release.apk
+          releaseNotes: ${{ github.event.head_commit.message || 'Elle baslatilan derleme' }}

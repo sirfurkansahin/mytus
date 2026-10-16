@@ -4,6 +4,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Kalici imza anahtari: derleme akisi (GitHub Actions) bu ortam degiskenlerini verir.
+// Degiskenler yoksa (yerel veya anahtarsiz derleme) varsayilan debug anahtari kullanilir.
+val mytusKeystorePath: String? = System.getenv("MYTUS_KEYSTORE_PATH")
+val mytusKeystorePassword: String? = System.getenv("MYTUS_KEYSTORE_PASSWORD")
+val mytusSigningReady = !mytusKeystorePath.isNullOrEmpty() && !mytusKeystorePassword.isNullOrEmpty()
+
 android {
     namespace = "com.mytus.app"
     compileSdk = flutter.compileSdkVersion
@@ -29,11 +35,24 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (mytusSigningReady) {
+            create("mytusRelease") {
+                storeFile = file(mytusKeystorePath!!)
+                storePassword = mytusKeystorePassword
+                keyAlias = "mytus"
+                keyPassword = mytusKeystorePassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (mytusSigningReady) {
+                signingConfigs.getByName("mytusRelease")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

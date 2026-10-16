@@ -12,7 +12,7 @@ Son guncelleme: 16 Ekim 2026 (Claude)
 
 ## Siradaki adim
 1. Faz 4a: parca sirasini kullanicidan onayla, her parcayi ayri dalda gelistir, Actions'ta dogrula, APK'yi kullaniciya ilet.
-2. Surum 1 dagitimindan once kalici APK imza anahtarini GitHub Secrets'a koy (anahtar depoya girmez).
+2. Parca 0 (imza + otomatik dagitim) uygulandi; kullanici GitHub sirlarini ekledikten sonra dagitimi dogrula.
 3. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak (karar: Analytics Surum 2'de eklenir).
 
 ## Bilinen sorunlar / riskler
