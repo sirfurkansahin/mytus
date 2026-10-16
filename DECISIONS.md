@@ -84,6 +84,20 @@ Kullanici cevaplari: bolme 1-a, konu secimi 2-a (istege bagli), 3-c (odak bitinc
 | Prototip | Sayac prototipi (`ft_test_screen.dart`) Ayarlar > Sayac testi altinda kaldi (alarm olcumu icin; 6. test hala yapilmadi). Calisan oturum varken acilmaz. |
 | Bildirim metni | "Sure bitti / Uygulamayi acip devam edebilirsin" (calisma ve mola icin ortak). |
 
+## Ilerleme ekrani (Parca 4b, 17 Ekim 2026)
+Kullanici cevaplari: 1-a (hafta oklari), 2-a ("Calistim" denen konular), 3-a (odak suresine gore ders sirasi), 4-a (ders ilerlemesi bolumu YOK, tasarimdaki gibi sade).
+
+| Konu | Karar |
+|---|---|
+| Erisim | Bugun ekraninin sag ustunde grafik simgesi (disli simgesinin yaninda). |
+| Hafta | Pazartesi-Pazar. Oklarla gecmis haftalara bakilir; gelecege gidilmez (bu haftada sonraki ok kapali). |
+| Calisilan konu | O hafta "Calistim" isaretlenen FARKLI konu sayisi (ayni konu iki tur isaretlenirse 1). |
+| Biten dongu / odak suresi | O haftaki odak kayitlari. 1 dk = 1 puan; hafta puani da gosterilir. |
+| Gunluk grafik | 7 cubuk (dakika), cubuk yuksekligi haftanin en yuksek gunune gore olceklenir; bugun vurgulu. Ek paket yok. |
+| En cok calisilan dersler | Konuya bagli odaklardan derse gore toplam sure, coktan aza, en cok 5 ders. Konusuz odak toplama girer ama ders listesine girmez. Konusu silinmis odak da yalnizca toplama girer. |
+| Sure yazimi | 60 dk altinda "45 dk", ustunde "5,8 sa" (virgullu). |
+| Ek bolum | "Ders ilerlemesi (x/y konu)" EKLENMEDI (kullanici karari). Istenirse Surum 1 sonrasi eklenir. |
+
 ## Tekrar sistemi
 - Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).
 - Sinava kalan gune gore tekrar gunleri (ilk calismadan sonra gun sayisi):
