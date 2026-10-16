@@ -63,7 +63,9 @@ jobs:
 
       - name: Flutter surumunu goster
         if: steps.check.outputs.ready == 'true'
-        run: flutter --version
+        run: |
+          flutter --version
+          echo "::notice title=Flutter surumu::$(flutter --version | head -1)"
 
       - name: Bagimliliklari indir
         if: steps.check.outputs.ready == 'true'
@@ -103,4 +105,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           testers: ${{ secrets.FIREBASE_TESTERS }}
           file: build/app/outputs/flutter-apk/app-release.apk
-          releaseNotes: ${{ github.event.head_commit.message || 'Elle baslatilan derleme' }}
+          releaseNotes: ${{ github.event.head_commit.message || format('Elle baslatilan derleme - {0}', github.ref_name) }}

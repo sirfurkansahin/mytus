@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Turkce tarih secici ve sistem yazilari icin (Flutter'in kendi paketi, ek surum riski yok).
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
