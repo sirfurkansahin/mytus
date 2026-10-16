@@ -131,51 +131,48 @@ class _FtTestScreenState extends State<FtTestScreen>
       widget.native.kayitYaz(_durumAnahtari, durum.toJsonString());
 
   Future<void> _baslat() async {
-    if (_bildirimAcik == false) {
-      await widget.native.bildirimIzniIste();
-    }
     final yeni = _state.baslat(_simdi());
     final bitis = yeni.endAtMs;
     if (yeni.phase != FtPhase.calisiyor || bitis == null) return;
-    // Eski alarm kaydını temizle: ölçüm yalnızca bu çalıştırmaya ait olsun.
-    await widget.native.kayitYaz('last_fired_at', '');
-    await widget.native.kayitYaz('last_expected_end', '');
-    await _kaydet(yeni);
-    await widget.native.alarmKur(bitis);
-    if (!mounted) return;
+    // Önce ekranı güncelle (anında tepki), sonra alarmı kur ve kaydet.
     setState(() {
       _state = yeni;
       _sonTetik = null;
       _sonBeklenen = null;
     });
     _tickerAyarla();
+    if (_bildirimAcik == false) {
+      await widget.native.bildirimIzniIste();
+    }
+    // Eski alarm kaydını temizle: ölçüm yalnızca bu çalıştırmaya ait olsun.
+    await widget.native.kayitYaz('last_fired_at', '');
+    await widget.native.kayitYaz('last_expected_end', '');
+    await _kaydet(yeni);
+    await widget.native.alarmKur(bitis);
   }
 
   Future<void> _duraklat() async {
     final yeni = _state.duraklat(_simdi());
-    await widget.native.alarmIptal();
-    await _kaydet(yeni);
-    if (!mounted) return;
     setState(() => _state = yeni);
     _tickerAyarla();
+    await widget.native.alarmIptal();
+    await _kaydet(yeni);
   }
 
   Future<void> _sifirla() async {
     final yeni = _state.sifirla();
+    setState(() => _state = yeni);
+    _tickerAyarla();
     await widget.native.alarmIptal();
     await widget.native.bitenBildirimiKaldir();
     await _kaydet(yeni);
-    if (!mounted) return;
-    setState(() => _state = yeni);
-    _tickerAyarla();
   }
 
   Future<void> _sureSec(int dakika) async {
     if (_state.phase != FtPhase.bosta) return;
     final yeni = FtTimerState.bosta(dakika * _dakikaMs);
-    await _kaydet(yeni);
-    if (!mounted) return;
     setState(() => _state = yeni);
+    await _kaydet(yeni);
   }
 
   Future<void> _anaDugme() {
