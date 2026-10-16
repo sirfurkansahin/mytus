@@ -1,6 +1,6 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 16 Ekim 2026 (Claude), Parca 2 kodlandi
+Son guncelleme: 16 Ekim 2026 (Claude), Parca 3 kodlandi
 
 ## Durum
 - Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
@@ -11,11 +11,10 @@ Son guncelleme: 16 Ekim 2026 (Claude), Parca 2 kodlandi
 - Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
 
 ## Siradaki adim
-1. Parca 1 (sayac prototipi) kullanici tarafindan realme GT 2'de test edildi: A (ekran kilitli), B (arka plan), C (uygulama kapali) GECTI, alarm gecikmesi ~0,1 sn. 6. adim (pil ayari YAPILMADAN test) HENUZ YAPILMADI.
-2. Dal `claude/ft-sayac-prototip` main'e HENUZ birlestirilmedi: otomatik guvenlik denetimi "inceleme olmadan birlestirme" diyerek engelledi. Kullanici GitHub'da Pull requests sekmesinden birlestirebilir (veya acikca izin verirse REST ile birlestirilir). `claude/ders-konu-not` dali bu dalin USTUNDE kurulu; ikisi birlikte birlesecek.
-3. Parca 2 (dersler, konular, notlar, karsilama, alt menu, yerel dosya kaydi) KODLANDI, dalda `claude/ders-konu-not`. Actions yesil, `dagit=true` ile Firebase'e yuklendi (run 38937564381). BEKLENEN: kullanici telefonda dener (karsilama, ders/konu/not ekleme, uygulamayi kapatip acinca verinin durmasi, Bugun'de sinav tarihi degistirme).
-4. Sonraki: Parca 3 (takvim + tekrar motoru, birim testli; takvime yerlestirme iki yolla), Parca 4 (Bugun/Ilerleme/Ayarlar + puan). Her biri ayri dal.
-5. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak.
+1. Parca 1 (sayac prototipi) ve Parca 2 (dersler, konular, notlar, karsilama, alt menu, yerel kayit) main'e BIRLESTIRILDI (PR #1, kullanici izniyle). 6. adim (pil ayari YAPILMADAN alarm testi) HENUZ YAPILMADI.
+2. Parca 3 (takvim + tekrar motoru + Bugun ekrani + Konu'da tekrar plani) KODLANDI, dal `claude/takvim-tekrar`. Kurallar DECISIONS.md "Takvim ve tekrar motoru" bolumunde (benim yorumlarim isaretli). BEKLENEN: kullanici telefonda dener; main'e birlestirme yine kullanicinin acik iznini gerektirir (PR + REST ile birlestirme; `gh pr merge` GraphQL engelli).
+3. Sonraki: Parca 4 (Bugun/Ilerleme/Ayarlar: tur sayisi ve gunluk sinir ayari; gercek F.T. time ekrani 25/5/15, 4 dongude uzun mola; puan = tamamlanan odak dakikasi). Her biri ayri dal.
+4. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak.
 
 ## Bilinen sorunlar / riskler
 - Flutter surumu sabitlenmedi (`channel: stable`). Son derlemede kullanilan surum: Flutter 3.47.7 (Actions "Flutter surumu" bildiriminden). Sabitleme: `build-apk.yml` icinde `flutter-version: 3.47.7` ekle (kullanici onayiyla / Parca 2 oncesi).

@@ -16,3 +16,9 @@ Color klinikYazi(BuildContext context) =>
 
 /// Açık temada tasarımın ışıklı zemin rengi; koyu temada sistem rengi kullanılır.
 const Color acikZemin = Color(0xFFFBFAFE);
+
+/// Tekrar vurgusu: kehribar (onaylı tasarım). Koyu temada daha açık ton.
+Color tekrarRengi(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFFF5B25F)
+        : const Color(0xFFB45309);
