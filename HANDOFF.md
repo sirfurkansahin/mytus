@@ -1,22 +1,21 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 16 Ekim 2026 (Claude), Parca 1 kodlandi
+Son guncelleme: 16 Ekim 2026 (Claude), Parca 2 kodlandi
 
 ## Durum
 - Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
 - Faz 3 (UX/UI tasarim) TAMAMLANDI ve onaylandi; taslaklar `docs/tasarim/` altinda.
 - Siradaki faz: Faz 4a (Surum 1 gelistirme). Basla: imza anahtari + otomatik dagitim, sonra ozellikler (sira kullanici onayiyla).
-- Depoda: bos Flutter uygulamasi (`lib/main.dart`, `test/widget_test.dart`), `android/` klasoru (bootstrap akisiyla uretildi), `pubspec.lock`, GitHub Actions akislari, bu belgeler.
+- Depoda (main dalinda): bos Flutter uygulamasi (`lib/main.dart`, `test/widget_test.dart`), `android/` klasoru (bootstrap akisiyla uretildi), `pubspec.lock`, GitHub Actions akislari, bu belgeler.
 - Dogrulandi: paket adi `com.mytus.app` (namespace, applicationId, MainActivity). Ilk "APK derle" akisi (analiz + test + release APK) basarili, APK yaklasik 20 MB.
 - Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
 
 ## Siradaki adim
-1. Parca 0 (imza + otomatik dagitim) TAMAM, kullanici telefona kurulumu dogruladi (16 Ekim 2026).
-2. Parca 1 (F.T. time sayac prototipi) KODLANDI, dalda: `claude/ft-sayac-prototip` (main'e HENUZ birlestirilmedi). Actions yesil (analiz, 14 test, APK). `dagit=true` ile Firebase'e yuklendi (run 38910578252). BEKLENEN: kullanici realme GT 2'de test edecek (ekran kilitli / uygulama arka planda / pil ayari kapali-acik) ve sonucu bildirecek.
-   - Sonuc iyiyse: dali main'e birlestir (PR), Parca 2'ye gec (ders/konu/not + karsilama + yerel depolama + hazir ders listesi).
-   - Alarm gelmezse: ekrandaki "Alarm olcumu" paneli ne dedigine bak; cozum sirasi: pil rehberi ayarlari -> on plan servisi (foreground service) eklemek -> telefon yeniden baslarsa alarmi tekrar kurmak (BOOT_COMPLETED).
-3. Sonraki parcalar: 2 (ders/konu/not), 3 (takvim + tekrar motoru), 4 (Bugun/Ilerleme/Ayarlar + puan). Her biri ayri dal.
-4. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak.
+1. Parca 1 (sayac prototipi) kullanici tarafindan realme GT 2'de test edildi: A (ekran kilitli), B (arka plan), C (uygulama kapali) GECTI, alarm gecikmesi ~0,1 sn. 6. adim (pil ayari YAPILMADAN test) HENUZ YAPILMADI.
+2. Dal `claude/ft-sayac-prototip` main'e HENUZ birlestirilmedi: otomatik guvenlik denetimi "inceleme olmadan birlestirme" diyerek engelledi. Kullanici GitHub'da Pull requests sekmesinden birlestirebilir (veya acikca izin verirse REST ile birlestirilir). `claude/ders-konu-not` dali bu dalin USTUNDE kurulu; ikisi birlikte birlesecek.
+3. Parca 2 (dersler, konular, notlar, karsilama, alt menu, yerel dosya kaydi) KODLANDI, dalda `claude/ders-konu-not`. Actions yesil, `dagit=true` ile Firebase'e yuklendi (run 38937564381). BEKLENEN: kullanici telefonda dener (karsilama, ders/konu/not ekleme, uygulamayi kapatip acinca verinin durmasi, Bugun'de sinav tarihi degistirme).
+4. Sonraki: Parca 3 (takvim + tekrar motoru, birim testli; takvime yerlestirme iki yolla), Parca 4 (Bugun/Ilerleme/Ayarlar + puan). Her biri ayri dal.
+5. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak.
 
 ## Bilinen sorunlar / riskler
 - Flutter surumu sabitlenmedi (`channel: stable`). Son derlemede kullanilan surum: Flutter 3.47.7 (Actions "Flutter surumu" bildiriminden). Sabitleme: `build-apk.yml` icinde `flutter-version: 3.47.7` ekle (kullanici onayiyla / Parca 2 oncesi).

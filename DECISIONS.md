@@ -37,6 +37,16 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Prototip kapsami | Tek test ekrani (1/5/25 dk, baslat/duraklat/sifirla). Amac: arka plan guvenilirligini realme GT 2'de olcmek. Ekranda "Alarm olcumu" paneli: alarm gercekten ne zaman tetiklendi, kac sn gecikti, hic tetiklenmedi mi. |
 | Pil rehberi | Ilk acilista ve istenince "Pil ayarlarini ac" rehberi (kullanici karari 3-a): bildirim izni, pil kisitlamasi yok, arka planda calismaya izin / otomatik baslatma. Menu adlari markaya gore degisebilir; realme icin yollar DOGRULANMADI. |
 | Bilinen sinirlar | Telefon yeniden baslarsa alarm silinir (sayac acilinca bitis saatine bakilip "bitti" gosterilir). Zorla durdurulan (Force stop) uygulamada alarm calismaz. |
+| Veri saklama (Parca 2) | Tum plan (sinav tarihi, dersler, konular, notlar) tek JSON dosyasinda, telefonun uygulama klasorunde (`mytus_data.json`). Yazma once gecici dosyaya, sonra yer degistirme (yazarken kapanirsa eski veri bozulmaz). Ek paket yok (kendi Kotlin kanali `com.mytus.app/storage`). Dosya bozuksa/okunamazsa uygulama ustune yazmaz, "Tekrar dene" ekrani gosterir. Sinir: her degisiklikte dosya bastan yazilir; veri birkac MB'yi gecerse SQLite'a gecilir. Surum 2'de bulut esitlemesi bu yapinin ustune kurulur. |
+| Not yazma kaydi | Yazarken her tusta degil, 500 ms sessizlikten sonra veya sayfa kapanirken/uygulama arka plana giderken kaydedilir. |
+| Ek Flutter paketi | Yalnizca `flutter_localizations` (Flutter'in kendi paketi): tarih secici ve sistem yazilari Turkce. |
+| Karsilama (Parca 2) | Sinav tarihi ZORUNLU (secilmeden "Basla" kapali; kullanici karari: her planda tarih sorulur). Hazir dersler baslangicta secili; istemedigi kaldirilir; "+ Kendi dersimi ekle" ile Temel/Klinik'e ders eklenir. |
+| Konu ekleme (Parca 2) | Tek tek, ders detayinda hizli ekleme kutusu (kullanici karari 3-a). Toplu yapistirma yok. |
+| Not bicimi (Parca 2) | Duz yazi, konu basina tek not alani (kullanici karari 4-a). |
+| Ders/konu kurallari | Ad bosluklari temizlenir, bos olamaz, en fazla 80 karakter. Ayni grupta ayni adli ders, ayni derste ayni adli konu eklenemez (buyuk/kucuk harf ayirt edilmez). Ders silinince konulari ve notlari da silinir (onay sorulur). Ders ve konu adi degistirilebilir. |
+| Ders detayi ekrani | Onayli tasarimda yoktu; Dersler -> konu listesi icin ayni gorsel dille EKLENDI. |
+| "Calisildi" sayisi | Bir konu ilk calisma gunu atandiginda (takvim parcasinda) "calisildi" sayilir. Parca 2'de hep 0. |
+| Bugun ekrani (gecici) | Parca 2'de yalnizca "sinava N gun kaldi" ve sinav tarihini degistirme. Gunun plani Parca 3-4'te. |
 
 ## Tekrar sistemi
 - Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).
