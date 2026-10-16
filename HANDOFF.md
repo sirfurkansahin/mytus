@@ -3,15 +3,16 @@
 Son guncelleme: 16 Ekim 2026 (Claude)
 
 ## Durum
-- Faz 2 (kurulum) devam ediyor.
+- Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
+- Siradaki faz: Faz 3 (UX/UI tasarim), kullanici onayi bekleniyor.
 - Depoda: bos Flutter uygulamasi (`lib/main.dart`, `test/widget_test.dart`), `android/` klasoru (bootstrap akisiyla uretildi), `pubspec.lock`, GitHub Actions akislari, bu belgeler.
 - Dogrulandi: paket adi `com.mytus.app` (namespace, applicationId, MainActivity). Ilk "APK derle" akisi (analiz + test + release APK) basarili, APK yaklasik 20 MB.
 - Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
 
 ## Siradaki adim
-1. Kullanici son basarili "APK derle" calismasindan `mytus-apk` dosyasini indirir (GitHub > Actions > calisma > Artifacts), zip'ten cikan `app-release.apk` dosyasini telefonuna kurar. Bu adim GitHub'a girisli tarayici ister.
-2. Firebase projesini kullaniciyla birlikte olustur (Spark plani, Android uygulamasi: com.mytus.app). `google-services.json` Faz 2 sonunda degil, Surum 2'de Firebase eklenirken depoya girer.
-3. Firebase App Distribution'a ilk APK'yi yukle, kullanici kendi e-postasini test kullanicisi olarak ekler.
+1. Faz 3: ekran listesi, akis semasi ve tema; kullanicidan onay al. Sonra Surum 1 gelistirmesi (Faz 4a).
+2. Surum 1 dagitimindan once kalici APK imza anahtarini GitHub Secrets'a koy (anahtar depoya girmez).
+3. Analytics paketi ve google-services.json konusu Surum 2'de ele alinacak (karar: Analytics Surum 2'de eklenir).
 
 ## Bilinen sorunlar / riskler
 - Flutter surumu sabitlenmedi (`channel: stable`) ve ilk derlemede hangi surumun kullanildigi kaydedilmedi. Sabitleme: `build-apk.yml` icinde `flutter-version` ekle.
