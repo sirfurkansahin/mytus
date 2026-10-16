@@ -2,6 +2,7 @@ import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -89,22 +90,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('F.T. time sekmesi sayaç testini açar, süre seçimi çalışır',
-      (tester) async {
-    final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('F.T. time'));
-    await tester.pumpAndSettle();
-    expect(find.text('25:00'), findsOneWidget);
-
-    await tester.tap(find.text('5 dk'));
-    await tester.pumpAndSettle();
-    expect(find.text('05:00'), findsOneWidget);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+  ftTestleri();
 
   takvimTestleri();
 }
@@ -167,6 +153,151 @@ void takvimTestleri() {
 
     expect(find.text('Tekrar planı'), findsOneWidget);
     expect(find.textContaining('Tur 1/'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+/// Android köprüsü olmadan (testte) her çağrı hemen tamamlanır.
+class SahteNative extends FtNative {
+  SahteNative();
+
+  final List<String> cagrilar = [];
+
+  @override
+  Future<bool> kullanilabilir() async => true;
+  @override
+  Future<void> alarmKur(int bitisMs) async => cagrilar.add('kur');
+  @override
+  Future<void> alarmIptal() async => cagrilar.add('iptal');
+  @override
+  Future<void> calisanBildirimiKaldir() async {}
+  @override
+  Future<void> bitenBildirimiKaldir() async {}
+  @override
+  Future<bool?> bildirimAcik() async => true;
+  @override
+  Future<void> bildirimIzniIste() async {}
+  @override
+  Future<bool?> pilKisitsiz() async => true;
+  @override
+  Future<void> pilAyarlariniAc() async {}
+  @override
+  Future<void> uygulamaAyarlariniAc() async {}
+  @override
+  Future<String?> kayitOku(String anahtar) async => '1';
+  @override
+  Future<void> kayitYaz(String anahtar, String deger) async {}
+}
+
+void ftTestleri() {
+  testWidgets('F.T. time: hazırlıktan oturum başlar, duraklar, bitirilir',
+      (tester) async {
+    // Uzun ekran: hazırlık ekranının altındaki satırlar da çizilsin.
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    final native = SahteNative();
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: native));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('F.T. time'));
+    await tester.pumpAndSettle();
+    expect(find.text('Toplam yaklaşık süre'), findsOneWidget);
+    expect(find.text('1 sa 55 dk'), findsOneWidget);
+
+    await tester.tap(find.text('Başlat'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(depo.oturum, isNotNull);
+    expect(find.text('Döngü 1 / 4'), findsOneWidget);
+    expect(find.text('Konusuz çalışma'), findsOneWidget);
+    expect(native.cagrilar, contains('kur'));
+
+    await tester.tap(find.text('Duraklat'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Devam et'), findsOneWidget);
+    expect(native.cagrilar, contains('iptal'));
+
+    await tester.tap(find.text('Bitir'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Oturum bitirilsin mi?'), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Bitir'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(depo.oturum, isNull);
+    expect(find.text('Toplam yaklaşık süre'), findsOneWidget);
+    expect(depo.toplamPuan, 0);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Tamamlanan oturumda konu için Çalıştım sorusu gelir',
+      (tester) async {
+    final depo = await doluDepo(tester);
+    final anatomi = depo.dersler(DersGrubu.temel).first;
+    final konu = depo.konuEkle(anatomi.id, 'Alt ekstremite')!;
+    final su = DateTime.now().millisecondsSinceEpoch;
+    var o = depo.oturumBaslat(toplamDongu: 1, konuId: konu.id);
+    o = o.baslat(su - 30 * 60 * 1000).guncelle(su);
+    depo.oturumGuncelle(o);
+    expect(depo.toplamPuan, 25);
+
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('F.T. time'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Oturum tamamlandı'), findsOneWidget);
+    expect(find.textContaining('+25 puan'), findsOneWidget);
+    expect(find.text('Alt ekstremite'), findsOneWidget);
+
+    await tester.tap(find.text('Bitir'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      find.text('Konuyu çalıştım olarak işaretleyeyim mi?'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Evet, işaretle'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(depo.konuCalisildi(konu.id), isTrue);
+    expect(depo.oturum, isNull);
+    expect(depo.toplamPuan, 25);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Ayarlar: Bugün ekranından açılır, tur sayısı değişir',
+      (tester) async {
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Ayarlar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tur sayısı'), findsOneWidget);
+    expect(find.text('Günlük tekrar sınırı'), findsOneWidget);
+
+    await tester.tap(find.text('Tur sayısı'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '3');
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+    expect(depo.turSayisi, 3);
+
+    await tester.tap(find.text('Çalışma süresi'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '40');
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+    expect(depo.ftAyar.calismaDk, 40);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

@@ -65,6 +65,25 @@ Kullanici onayli (1-a 2-a 3-a 4-b) kurallar ve BENIM YORUMLARIM ayri belirtilmis
 | Tur sayisi | Varsayilan 2 (Ayarlardan degistirme Parca 4). |
 | Kod yeri | `lib/features/takvim/` (motor saf fonksiyon: `tekrar_motoru.dart`, birim testli). Tum veri hala tek JSON dosyasinda (`calismalar` anahtari). |
 
+## Ayarlar, F.T. time ve puan (Parca 4a, 16 Ekim 2026)
+Kullanici cevaplari: bolme 1-a, konu secimi 2-a (istege bagli), 3-c (odak bitince "Calistim mi?" diye sor), puan gorunumu 4-a (F.T. time + Ilerleme). BENIM YORUMLARIM ayri belirtilmistir.
+
+| Konu | Karar |
+|---|---|
+| Kapsam | 4a: Ayarlar + gercek F.T. time (hazirlik, sayac, mola, puan). 4b: Ilerleme ekrani (sonra). |
+| Oturum akisi | Calisma 1, mola, calisma 2, ... calisma N. Son calismadan sonra mola yok. Uzun mola her `uzunMolaAraligi` (4) donguden sonra. Varsayilan 25/5/15 dk, 4 dongu. Toplam sure tasarim ornegiyle uyumlu (4 dongu = 1 sa 55 dk). |
+| Bolum gecisi | Bolum bitince sonraki bolume kullanici dugmeyle gecer ("Molayi baslat", "Dongu N baslat"); OTOMATIK baslamaz. Neden: arka planda alarm bildirimi zaten uyarir; kullanici hazir degilken sayac kosmaz. (BENIM YORUMUM) |
+| Molayi atla | Molada "Molayi atla" ile sonraki calismaya hemen gecilir. (BENIM YORUMUM) |
+| Puan | Calisma bolumu BITINCE o dongunun suresi kadar puan (1 dk = 1 puan). Yarim birakilan dongu ve mola puan getirmez. Ayni dongu iki kez puanlanmaz ("oturumNo:donguNo" anahtari). Uygulama kapaliyken biten bolum, uygulama acilinca bitis saatiyle puanlanir. |
+| Sure kilidi | Oturum baslarken sureler ayarlardan alinip oturuma yazilir; sonradan ayar degisse de oturum etkilenmez. (BENIM YORUMUM) |
+| Konu | Istege bagli ("Konusuz calis" olabilir). Konu silinirse puanlar kalir, kayit konusuz olur. |
+| Calistim sorusu | Oturum biterken konu secilmisse ve en az 1 dongu bittiyse "Konuyu calistim olarak isaretleyeyim mi?" diye sorulur. Evet: konunun bekleyen en erken yerlestirmesi bugune alinip "Calistim" yapilir; bekleyen yoksa bugune yeni yerlestirme acilir. Hayir: hicbir sey degismez. (soru: kullanici karari; "en erken bekleyen yerlestirme" secimi BENIM YORUMUM) |
+| Ayarlar | Bugun ekraninin sag ustundeki disli simgesinden acilir. Sinav tarihi, tur sayisi (1-5), gunluk tekrar siniri (3-30), F.T. sureleri, arka plan/pil durumu, sayac testi (gelismis). Sinirlar BENIM YORUMUM. "Dersleri duzenle" satiri eklenmedi (Dersler sekmesi var). |
+| Veri | Oturum, odak kayitlari ve F.T. ayarlari ayni JSON dosyasinda (`oturum`, `odaklar`, `ftAyar`); puan ve oturum birlikte atomik yazilir. |
+| Pil rehberi | Ilk oturum acildiginda bir kez gosterilir; Ayarlar'dan tekrar acilir. |
+| Prototip | Sayac prototipi (`ft_test_screen.dart`) Ayarlar > Sayac testi altinda kaldi (alarm olcumu icin; 6. test hala yapilmadi). Calisan oturum varken acilmaz. |
+| Bildirim metni | "Sure bitti / Uygulamayi acip devam edebilirsin" (calisma ve mola icin ortak). |
+
 ## Tekrar sistemi
 - Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).
 - Sinava kalan gune gore tekrar gunleri (ilk calismadan sonra gun sayisi):

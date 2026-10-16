@@ -145,3 +145,11 @@ String saatYaz(int epochMs) {
   String iki(int n) => n.toString().padLeft(2, '0');
   return '${iki(t.hour)}:${iki(t.minute)}:${iki(t.second)}';
 }
+
+/// Dakikayı "45 dk", "2 sa", "1 sa 55 dk" biçiminde yazar.
+String dakikaYaz(int dakika) {
+  if (dakika < 60) return '$dakika dk';
+  final sa = dakika ~/ 60;
+  final dk = dakika % 60;
+  return dk == 0 ? '$sa sa' : '$sa sa $dk dk';
+}

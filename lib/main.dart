@@ -2,6 +2,7 @@ import 'package:app/app/ana_iskelet.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/karsilama/karsilama_ekrani.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,10 +12,12 @@ void main() {
 }
 
 class MyTusApp extends StatefulWidget {
-  /// [deposu] yalnızca testler içindir; verilmezse telefondaki dosya kullanılır.
-  const MyTusApp({super.key, this.deposu});
+  /// [deposu] ve [ftNative] yalnızca testler içindir; verilmezse telefondaki dosya
+  /// ve gerçek Android köprüsü kullanılır.
+  const MyTusApp({super.key, this.deposu, this.ftNative = const FtNative()});
 
   final PlanDeposu? deposu;
+  final FtNative ftNative;
 
   @override
   State<MyTusApp> createState() => _MyTusAppState();
@@ -69,14 +72,16 @@ class _MyTusAppState extends State<MyTusApp> {
         deposu: _deposu,
         child: child ?? const SizedBox.shrink(),
       ),
-      home: const _AcilisKapisi(),
+      home: _AcilisKapisi(ftNative: widget.ftNative),
     );
   }
 }
 
 /// Verinin durumuna göre doğru ekranı açar: yükleniyor, hata, karşılama veya ana ekran.
 class _AcilisKapisi extends StatelessWidget {
-  const _AcilisKapisi();
+  const _AcilisKapisi({required this.ftNative});
+
+  final FtNative ftNative;
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +121,7 @@ class _AcilisKapisi extends StatelessWidget {
         );
       case YuklemeDurumu.hazir:
         return depo.karsilamaTamam
-            ? const AnaIskelet()
+            ? AnaIskelet(ftNative: ftNative)
             : const KarsilamaEkrani();
     }
   }

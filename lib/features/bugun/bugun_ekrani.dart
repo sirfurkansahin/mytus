@@ -1,4 +1,5 @@
 import 'package:app/core/tarih.dart';
+import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
@@ -6,21 +7,6 @@ import 'package:flutter/material.dart';
 /// "Bugün" ekranı: geciken işler, bugünün planı, bugünkü tekrarlar ve sınav sayacı.
 class BugunEkrani extends StatelessWidget {
   const BugunEkrani({super.key});
-
-  Future<void> _tarihDegistir(BuildContext context, PlanDeposu depo) async {
-    final ilk = gunBasi(DateTime.now());
-    final mevcut = depo.sinavTarihi;
-    final secilen = await showDatePicker(
-      context: context,
-      initialDate: mevcut != null && !mevcut.isBefore(ilk)
-          ? mevcut
-          : ilk.add(const Duration(days: 90)),
-      firstDate: ilk,
-      lastDate: DateTime(ilk.year + 3, ilk.month, ilk.day),
-      helpText: 'Sınav tarihi',
-    );
-    if (secilen != null) depo.sinavTarihiBelirle(secilen);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +54,24 @@ class BugunEkrani extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
         children: [
-          Text(
-            'Bugün',
-            style: tema.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Bugün',
+                  style: tema.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Ayarlar',
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const AyarlarEkrani()),
+                ),
+              ),
+            ],
           ),
           Text(
             gunAdiIleTarih(bugun),
@@ -115,7 +114,7 @@ class BugunEkrani extends StatelessWidget {
                   ],
                   const SizedBox(height: 4),
                   TextButton(
-                    onPressed: () => _tarihDegistir(context, depo),
+                    onPressed: () => sinavTarihiSec(context, depo),
                     child: const Text('Sınav tarihini değiştir'),
                   ),
                 ],

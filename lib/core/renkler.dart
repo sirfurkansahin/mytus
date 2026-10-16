@@ -22,3 +22,10 @@ Color tekrarRengi(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark
         ? const Color(0xFFF5B25F)
         : const Color(0xFFB45309);
+
+/// F.T. time sayaç ekranı (koyu mor, onaylı tasarım).
+const Color ftZemin = Color(0xFF241757);
+const Color ftVurgu = Color(0xFF7A63DD);
+const Color ftAcikYazi = Color(0xFFC9C2E8);
+const Color ftIyi = Color(0xFF7EE0C3);
+const Color ftUyari = Color(0xFFFFC46B);
