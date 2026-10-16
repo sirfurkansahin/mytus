@@ -44,7 +44,6 @@ class AyarlarEkrani extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
-    final tema = Theme.of(context);
     final sinav = depo.sinavTarihi;
     return Scaffold(
       appBar: AppBar(title: const Text('Ayarlar')),
