@@ -168,6 +168,8 @@ class SahteNative extends FtNative {
   @override
   Future<bool> kullanilabilir() async => true;
   @override
+  Future<String?> derlemeNo() async => '1';
+  @override
   Future<void> alarmKur(int bitisMs) async => cagrilar.add('kur');
   @override
   Future<void> alarmIptal() async => cagrilar.add('iptal');

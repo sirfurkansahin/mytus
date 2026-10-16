@@ -35,6 +35,10 @@ class _FtTestScreenState extends State<FtTestScreen>
   bool? _pilKisitsiz;
   int? _sonTetik;
   int? _sonBeklenen;
+  int? _servisBasladi;
+  int? _servisDurdu;
+  String? _servisHata;
+  String? _derlemeNo;
 
   int _simdi() => DateTime.now().millisecondsSinceEpoch;
 
@@ -90,6 +94,10 @@ class _FtTestScreenState extends State<FtTestScreen>
     final pil = await widget.native.pilKisitsiz();
     final tetik = await widget.native.kayitOku('last_fired_at');
     final beklenen = await widget.native.kayitOku('last_expected_end');
+    final svcBasladi = await widget.native.kayitOku('svc_started_at');
+    final svcDurdu = await widget.native.kayitOku('svc_destroyed_at');
+    final svcHata = await widget.native.kayitOku('svc_error');
+    final derleme = await widget.native.derlemeNo();
     if (!mounted) return;
     setState(() {
       _state = guncel;
@@ -97,6 +105,10 @@ class _FtTestScreenState extends State<FtTestScreen>
       _pilKisitsiz = pil;
       _sonTetik = int.tryParse(tetik ?? '');
       _sonBeklenen = int.tryParse(beklenen ?? '');
+      _servisBasladi = int.tryParse(svcBasladi ?? '');
+      _servisDurdu = int.tryParse(svcDurdu ?? '');
+      _servisHata = (svcHata == null || svcHata.isEmpty) ? null : svcHata;
+      _derlemeNo = derleme;
     });
     _tickerAyarla();
     if (yeniBitti) {
@@ -147,6 +159,9 @@ class _FtTestScreenState extends State<FtTestScreen>
     // Eski alarm kaydını temizle: ölçüm yalnızca bu çalıştırmaya ait olsun.
     await widget.native.kayitYaz('last_fired_at', '');
     await widget.native.kayitYaz('last_expected_end', '');
+    await widget.native.kayitYaz('svc_started_at', '');
+    await widget.native.kayitYaz('svc_destroyed_at', '');
+    await widget.native.kayitYaz('svc_error', '');
     await _kaydet(yeni);
     await widget.native.alarmKur(bitis);
   }
@@ -463,6 +478,27 @@ class _FtTestScreenState extends State<FtTestScreen>
               ),
               const SizedBox(height: 16),
               _Kart(baslik: 'Alarm ölçümü', children: _tanilamaSatirlari()),
+              const SizedBox(height: 16),
+              _Kart(
+                baslik: 'Servis ölçümü',
+                children: [
+                  _Satir(etiket: 'Derleme no', deger: _derlemeNo ?? '-'),
+                  _Satir(
+                    etiket: 'Servis başladı',
+                    deger: _servisBasladi == null ? 'Hayır' : saatYaz(_servisBasladi!),
+                    renk: _servisBasladi == null ? _uyari : _iyi,
+                  ),
+                  _Satir(
+                    etiket: 'Servis durdu',
+                    deger: _servisDurdu == null ? 'Hayır' : saatYaz(_servisDurdu!),
+                  ),
+                  _Satir(
+                    etiket: 'Servis hatası',
+                    deger: _servisHata ?? 'Yok',
+                    renk: _servisHata == null ? _acikYazi : _uyari,
+                  ),
+                ],
+              ),
             ],
           ),
         ),

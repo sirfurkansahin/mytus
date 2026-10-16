@@ -20,6 +20,9 @@ class FtNative {
   /// Android köprüsü çalışıyor mu?
   Future<bool> kullanilabilir() async => (await _cagir<bool>('ping')) ?? false;
 
+  /// Derleme numarası (hangi sürümün kurulu olduğunu anlamak için). Bilinmiyorsa null.
+  Future<String?> derlemeNo() => _cagir<String>('buildNumber');
+
   /// Bitiş saatinde (epoch ms) çalacak alarmı kurar ve geri sayımlı bildirimi gösterir.
   Future<void> alarmKur(int bitisMs) async {
     await _cagir<Object>('schedule', {'endAtMs': bitisMs});

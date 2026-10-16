@@ -1,6 +1,7 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/ft_time/ft_test_screen.dart';
 import 'package:app/features/ft_time/pil_rehberi.dart';
 import 'package:flutter/material.dart';
@@ -117,16 +118,48 @@ class AyarlarEkrani extends StatelessWidget {
             },
           ),
           const SizedBox(height: 24),
-          Center(
-            child: Text(
-              'MY TUS · Sürüm 0.4\nVerilerin yalnızca bu telefonda tutulur.',
-              textAlign: TextAlign.center,
-              style: tema.textTheme.bodySmall?.copyWith(
-                color: tema.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
+          const _SurumYazisi(),
         ],
+      ),
+    );
+  }
+}
+
+/// "MY TUS · Sürüm 0.4 · derleme N" ve gizlilik notu. Derleme numarası hangi
+/// sürümün kurulu olduğunu anlamaya yarar.
+class _SurumYazisi extends StatefulWidget {
+  const _SurumYazisi();
+
+  @override
+  State<_SurumYazisi> createState() => _SurumYazisiState();
+}
+
+class _SurumYazisiState extends State<_SurumYazisi> {
+  String? _derleme;
+
+  @override
+  void initState() {
+    super.initState();
+    _oku();
+  }
+
+  Future<void> _oku() async {
+    final no = await const FtNative().derlemeNo();
+    if (!mounted) return;
+    setState(() => _derleme = no);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final derleme = _derleme == null ? '' : ' · derleme $_derleme';
+    return Center(
+      child: Text(
+        'MY TUS · Sürüm 0.4$derleme\nVerilerin yalnızca bu telefonda tutulur.',
+        textAlign: TextAlign.center,
+        style: tema.textTheme.bodySmall?.copyWith(
+          color: tema.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

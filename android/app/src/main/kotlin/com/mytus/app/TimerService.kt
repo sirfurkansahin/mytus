@@ -14,6 +14,11 @@ class TimerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val endAt = intent?.getLongExtra(TimerNotifier.EXTRA_END_AT, 0L) ?: 0L
+        // Olcum kaydi: servis gercekten basladi mi? (Sayac testi ekraninda gosterilir.)
+        TimerNotifier.prefs(this).edit()
+            .putString("svc_started_at", System.currentTimeMillis().toString())
+            .remove("svc_destroyed_at")
+            .apply()
         val bildirim = TimerNotifier.buildRunning(this, endAt)
         if (Build.VERSION.SDK_INT >= 34) {
             startForeground(
@@ -25,5 +30,12 @@ class TimerService : Service() {
             startForeground(TimerNotifier.ID_RUNNING, bildirim)
         }
         return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        TimerNotifier.prefs(this).edit()
+            .putString("svc_destroyed_at", System.currentTimeMillis().toString())
+            .apply()
+        super.onDestroy()
     }
 }

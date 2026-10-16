@@ -84,6 +84,7 @@ object TimerNotifier {
             intent.putExtra(EXTRA_END_AT, endAtMs)
             if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(intent) else ctx.startService(intent)
         } catch (e: Exception) {
+            prefs(ctx).edit().putString("svc_error", e.toString()).apply()
             notificationManager(ctx).notify(ID_RUNNING, buildRunning(ctx, endAtMs))
         }
     }
