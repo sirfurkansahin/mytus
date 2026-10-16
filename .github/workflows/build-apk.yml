@@ -73,15 +73,43 @@ jobs:
 
       - name: Kod analizi
         if: steps.check.outputs.ready == 'true'
-        run: flutter analyze
+        run: |
+          set +e
+          flutter analyze > analiz.txt 2>&1
+          kod=$?
+          cat analiz.txt
+          if [ $kod -ne 0 ]; then
+            # Gunluk indirilemedigi icin hatalari tek bir ozet bildirimine yaz.
+            ozet=$(grep -E "^ *(error|warning|info) " analiz.txt | head -60 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=Analiz hatalari::${ozet}"
+          fi
+          exit $kod
 
       - name: Testler
         if: steps.check.outputs.ready == 'true'
-        run: flutter test
+        run: |
+          set +e
+          flutter test > test.txt 2>&1
+          kod=$?
+          tail -80 test.txt
+          if [ $kod -ne 0 ]; then
+            ozet=$(grep -vE "^\s*$|✅" test.txt | sed 's/[═╞╡]/=/g' | head -70 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=Test hatalari::${ozet}"
+          fi
+          exit $kod
 
       - name: Release APK derle
         if: steps.check.outputs.ready == 'true'
-        run: flutter build apk --release --build-number=${{ github.run_number }}
+        run: |
+          set +e
+          flutter build apk --release --build-number=${{ github.run_number }} > derleme.txt 2>&1
+          kod=$?
+          tail -60 derleme.txt
+          if [ $kod -ne 0 ]; then
+            ozet=$(grep -vE "^\s*$" derleme.txt | grep -iE "error|fail|wrong|exception|what went|e: |warning:.*(deprecat)" | head -30 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=Derleme hatalari::${ozet}"
+          fi
+          exit $kod
 
       - name: Imza dogrulamasi (sertifika parmak izi)
         if: steps.check.outputs.ready == 'true'

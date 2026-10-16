@@ -105,4 +105,69 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  takvimTestleri();
+}
+
+void takvimTestleri() {
+  testWidgets('Takvimde konu yerleştirilir, Bugün\'de Çalıştım denir',
+      (tester) async {
+    // Uzun ekran: takvimin altındaki liste de çizilsin.
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    final anatomi = depo.dersler(DersGrubu.temel).first;
+    depo.konuEkle(anatomi.id, 'Üst ekstremite');
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Takvim'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bu güne planlanmış bir şey yok.'), findsOneWidget);
+
+    await tester.tap(find.text('+ Konu yerleştir'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Anatomi'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Üst ekstremite'));
+    await tester.pumpAndSettle();
+
+    expect(depo.tumCalismalar().length, 1);
+    expect(find.text('Üst ekstremite'), findsOneWidget);
+
+    await tester.tap(find.text('Bugün'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bugünün planı'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Çalıştım'));
+    await tester.pumpAndSettle();
+    final c = depo.tumCalismalar().single;
+    expect(c.tamam, isTrue);
+    expect(depo.konuCalisildi(c.konuId), isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Konu ekranında tekrar planı görünür', (tester) async {
+    final depo = await doluDepo(tester);
+    final anatomi = depo.dersler(DersGrubu.temel).first;
+    final konu = depo.konuEkle(anatomi.id, 'Alt ekstremite')!;
+    final c = depo.calismaEkle(konu.id, DateTime.now())!;
+    depo.calistim(c.id, DateTime.now());
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Dersler'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Anatomi'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Alt ekstremite'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tekrar planı'), findsOneWidget);
+    expect(find.textContaining('Tur 1/'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

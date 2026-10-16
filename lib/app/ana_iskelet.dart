@@ -1,6 +1,7 @@
 import 'package:app/features/bugun/bugun_ekrani.dart';
 import 'package:app/features/dersler/dersler_ekrani.dart';
 import 'package:app/features/ft_time/ft_test_screen.dart';
+import 'package:app/features/takvim/takvim_ekrani.dart';
 import 'package:flutter/material.dart';
 
 /// Alt menülü ana çerçeve: Bugün · Dersler · Takvim · F.T. time.
@@ -25,7 +26,7 @@ class _AnaIskeletState extends State<AnaIskelet> {
       case 1:
         return const DerslerEkrani();
       case 2:
-        return const _TakvimYakinda();
+        return const TakvimEkrani();
       default:
         return const FtTestScreen();
     }
@@ -66,39 +67,6 @@ class _AnaIskeletState extends State<AnaIskelet> {
             label: 'F.T. time',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TakvimYakinda extends StatelessWidget {
-  const _TakvimYakinda();
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Takvim',
-              style: tema.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Konuları günlere yerleştirme ve otomatik tekrarlar bir sonraki '
-              'adımda gelecek.',
-              style: tema.textTheme.bodyMedium?.copyWith(
-                color: tema.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

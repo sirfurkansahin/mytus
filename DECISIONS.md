@@ -45,8 +45,25 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Not bicimi (Parca 2) | Duz yazi, konu basina tek not alani (kullanici karari 4-a). |
 | Ders/konu kurallari | Ad bosluklari temizlenir, bos olamaz, en fazla 80 karakter. Ayni grupta ayni adli ders, ayni derste ayni adli konu eklenemez (buyuk/kucuk harf ayirt edilmez). Ders silinince konulari ve notlari da silinir (onay sorulur). Ders ve konu adi degistirilebilir. |
 | Ders detayi ekrani | Onayli tasarimda yoktu; Dersler -> konu listesi icin ayni gorsel dille EKLENDI. |
-| "Calisildi" sayisi | Bir konu ilk calisma gunu atandiginda (takvim parcasinda) "calisildi" sayilir. Parca 2'de hep 0. |
+| "Calisildi" sayisi | Bir konuda en az bir yerlestirme "Calistim" ile isaretlenince konu "calisildi" sayilir (Parca 3'te baglandi). |
 | Bugun ekrani (gecici) | Parca 2'de yalnizca "sinava N gun kaldi" ve sinav tarihini degistirme. Gunun plani Parca 3-4'te. |
+
+## Takvim ve tekrar motoru (Parca 3, 16 Ekim 2026)
+Kullanici onayli (1-a 2-a 3-a 4-b) kurallar ve BENIM YORUMLARIM ayri belirtilmistir.
+
+| Konu | Karar |
+|---|---|
+| Her yerlestirme kendi serisi | Bir konu birden fazla gune yerlestirilebilir; her yerlestirme ("Calisma") kendi tekrar serisine sahiptir ("Tur 1/2, Tur 2/2"). Tur numarasi = ayni konunun yerlestirmeleri arasinda tarih sirasi. (ONAYLI) |
+| "Calistim" | Yerlestirmenin gunu bugune cekilir ve tekrar zinciri BUGUNDEN baslar. Geri alinabilir (yapilan tekrar kayitlari da silinir). (ONAYLI) |
+| Tekrar gunleri | Yukaridaki tablo; sinava kalan gun, ilk calismanin gununden hesaplanir. Tablodaki satirlar arasi degerlerde en yakin ALT satir kullanilir; 7 gunden azda 7 gunluk satir. (BENIM YORUMUM) |
+| Gecikme kaymasi | Bir tekrar gec yapilirsa sonrakiler ayni gun sayisi kadar kayar (ornek: 1. tekrar 2 gun gec yapilirsa sonrakiler de 2 gun gecikir). Tekrarlar saklanmaz, taban tarih + birikmis gecikmeden TURETILIR. (ONAYLI) |
+| Sinav siniri | Hicbir tekrar sinavdan sonraya kalmaz; en gec sinavdan 1 gun once. (ONAYLI) |
+| Gunluk sinir | Varsayilan 10 tekrar/gun; fazlasi ertesi gune kayar. Yapilan ve geciken tekrarlar sinira sayilmaz. Ayarlardan degistirme Parca 4'te. (sayi BENIM YORUMUM) |
+| Siralama | Tekrar yalnizca konu "Calistim" yapildiktan sonra ve yalnizca SIRADAKI tekrar yapilabilir; sonrakiler gorunur ama kapali. (BENIM YORUMUM) |
+| Gecikenler | Bugun ekraninda "Geciken": gunu gecmis ama yapilmamis yerlestirmeler + gunu gecmis, sirasi gelmis tekrarlar. |
+| Yerlestirme sinirlari | Gecmis gune ve sinav gunu/sonrasina yerlestirilemez. Sinav tarihi yoksa 1 yila kadar. |
+| Tur sayisi | Varsayilan 2 (Ayarlardan degistirme Parca 4). |
+| Kod yeri | `lib/features/takvim/` (motor saf fonksiyon: `tekrar_motoru.dart`, birim testli). Tum veri hala tek JSON dosyasinda (`calismalar` anahtari). |
 
 ## Tekrar sistemi
 - Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).

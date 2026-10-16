@@ -1,5 +1,3 @@
-import 'package:app/core/tarih.dart';
-
 /// Dersler iki gruba ayrılır (onaylı karar): Temel ve Klinik.
 enum DersGrubu { temel, klinik }
 
@@ -45,7 +43,6 @@ class Konu {
     required this.dersId,
     required this.ad,
     this.not = '',
-    this.ilkCalisma,
   });
 
   final int id;
@@ -55,15 +52,11 @@ class Konu {
   /// Kullanıcının özel notu. Hiçbir zaman paylaşılmaz.
   final String not;
 
-  /// İlk çalışma günü. Boşsa konu henüz çalışılmamıştır (takvim parçasında dolacak).
-  final DateTime? ilkCalisma;
-
   Konu kopya({String? ad, String? not}) => Konu(
         id: id,
         dersId: dersId,
         ad: ad ?? this.ad,
         not: not ?? this.not,
-        ilkCalisma: ilkCalisma,
       );
 
   Map<String, Object?> toJson() => {
@@ -71,7 +64,6 @@ class Konu {
         'dersId': dersId,
         'ad': ad,
         'not': not,
-        'ilkCalisma': ilkCalisma == null ? null : tarihAnahtari(ilkCalisma!),
       };
 
   static Konu? fromJson(Object? veri) {
@@ -80,16 +72,9 @@ class Konu {
     final dersId = veri['dersId'];
     final ad = veri['ad'];
     final not = veri['not'];
-    final ilk = veri['ilkCalisma'];
     if (id is! int || dersId is! int || ad is! String || ad.isEmpty) {
       return null;
     }
-    return Konu(
-      id: id,
-      dersId: dersId,
-      ad: ad,
-      not: not is String ? not : '',
-      ilkCalisma: ilk is String ? tarihCoz(ilk) : null,
-    );
+    return Konu(id: id, dersId: dersId, ad: ad, not: not is String ? not : '');
   }
 }

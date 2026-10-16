@@ -5,6 +5,8 @@ import 'dart:math' as math;
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/modeller.dart';
+import 'package:app/features/takvim/calisma.dart';
+import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:flutter/widgets.dart';
 
 enum YuklemeDurumu { yukleniyor, hazir, hata }
@@ -33,6 +35,13 @@ class PlanDeposu extends ChangeNotifier {
   int _sonId = 0;
   final List<Ders> _dersler = [];
   final List<Konu> _konular = [];
+  final List<Calisma> _calismalar = [];
+
+  /// Her konu kaç tur çalışılacak (varsayılan 2). Ayarlar ekranı sonraki parçada.
+  int turSayisi = 2;
+
+  /// Bir güne düşebilecek en çok tekrar sayısı (varsayılan 10).
+  int gunlukTekrarSiniri = 10;
 
   Timer? _zamanlayici;
   bool _kirli = false;
@@ -86,12 +95,25 @@ class PlanDeposu extends ChangeNotifier {
         }
       }
 
+      final konuNumaralari = konular.map((k) => k.id).toSet();
+      final calismalar = <Calisma>[];
+      final calismaListesi = veri['calismalar'];
+      if (calismaListesi is List) {
+        for (final e in calismaListesi) {
+          final c = Calisma.fromJson(e);
+          if (c != null && konuNumaralari.contains(c.konuId)) calismalar.add(c);
+        }
+      }
+
       var enBuyuk = 0;
       for (final d in dersler) {
         enBuyuk = math.max(enBuyuk, d.id);
       }
       for (final k in konular) {
         enBuyuk = math.max(enBuyuk, k.id);
+      }
+      for (final c in calismalar) {
+        enBuyuk = math.max(enBuyuk, c.id);
       }
       final kayitliSon = veri['sonId'];
 
@@ -105,6 +127,13 @@ class PlanDeposu extends ChangeNotifier {
       _konular
         ..clear()
         ..addAll(konular);
+      _calismalar
+        ..clear()
+        ..addAll(calismalar);
+      final tur = veri['turSayisi'];
+      turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 2;
+      final sinir = veri['gunlukTekrarSiniri'];
+      gunlukTekrarSiniri = sinir is int && sinir >= 0 ? sinir : 10;
       return true;
     } on FormatException {
       return false;
@@ -118,6 +147,9 @@ class PlanDeposu extends ChangeNotifier {
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
         'dersler': [for (final d in _dersler) d.toJson()],
         'konular': [for (final k in _konular) k.toJson()],
+        'calismalar': [for (final c in _calismalar) c.toJson()],
+        'turSayisi': turSayisi,
+        'gunlukTekrarSiniri': gunlukTekrarSiniri,
       };
 
   // ---------------------------------------------------------------- okuma
@@ -145,7 +177,7 @@ class PlanDeposu extends ChangeNotifier {
   int konuSayisi(int dersId) => konular(dersId).length;
 
   int calisilanSayisi(int dersId) =>
-      konular(dersId).where((k) => k.ilkCalisma != null).length;
+      konular(dersId).where((k) => konuCalisildi(k.id)).length;
 
   // ---------------------------------------------------------------- yazma
 
@@ -215,6 +247,9 @@ class PlanDeposu extends ChangeNotifier {
 
   /// Dersi ve ona bağlı tüm konuları (notlarıyla) siler.
   void dersSil(int id) {
+    final konuNumaralari =
+        _konular.where((k) => k.dersId == id).map((k) => k.id).toSet();
+    _calismalar.removeWhere((c) => konuNumaralari.contains(c.konuId));
     _dersler.removeWhere((d) => d.id == id);
     _konular.removeWhere((k) => k.dersId == id);
     _degisti();
@@ -251,6 +286,7 @@ class PlanDeposu extends ChangeNotifier {
   }
 
   void konuSil(int id) {
+    _calismalar.removeWhere((c) => c.konuId == id);
     _konular.removeWhere((k) => k.id == id);
     _degisti();
   }
@@ -261,6 +297,135 @@ class PlanDeposu extends ChangeNotifier {
     if (indeks < 0) return;
     _konular[indeks] = _konular[indeks].kopya(not: metin);
     _degisti(bildir: false);
+  }
+
+  // ---------------------------------------------------------- çalışmalar
+
+  Calisma? calismaBul(int id) {
+    for (final c in _calismalar) {
+      if (c.id == id) return c;
+    }
+    return null;
+  }
+
+  static int _calismaSirala(Calisma a, Calisma b) {
+    final k = a.tarih.compareTo(b.tarih);
+    return k != 0 ? k : a.id.compareTo(b.id);
+  }
+
+  /// Bir konunun tüm çalışmaları (tarih sırasıyla).
+  List<Calisma> calismalarKonu(int konuId) =>
+      _calismalar.where((c) => c.konuId == konuId).toList()
+        ..sort(_calismaSirala);
+
+  /// Belirli güne planlanmış çalışmalar.
+  List<Calisma> calismalarGun(DateTime gun) =>
+      _calismalar.where((c) => ayniGun(c.tarih, gun)).toList()
+        ..sort(_calismaSirala);
+
+  /// Planlanmış tüm çalışmalar (tarih sırasıyla).
+  List<Calisma> tumCalismalar() => [..._calismalar]..sort(_calismaSirala);
+
+  /// Çalışmanın tur numarası: aynı konunun çalışmaları arasında tarih sırası (1'den başlar).
+  int turNo(Calisma c) {
+    final sirali = calismalarKonu(c.konuId);
+    final i = sirali.indexWhere((x) => x.id == c.id);
+    return i < 0 ? 1 : i + 1;
+  }
+
+  bool konuCalisildi(int konuId) =>
+      _calismalar.any((c) => c.konuId == konuId && c.tamam);
+
+  /// Konunun ilk "Çalıştım" günü (yoksa null).
+  DateTime? ilkCalisma(int konuId) {
+    DateTime? en;
+    for (final c in _calismalar) {
+      if (c.konuId == konuId && c.tamam && (en == null || c.tarih.isBefore(en))) {
+        en = c.tarih;
+      }
+    }
+    return en;
+  }
+
+  /// Tüm tekrarlar (sınav tarihi seçilmediyse boş).
+  List<TekrarOgesi> tekrarlar(DateTime bugun) {
+    final sinav = sinavTarihi;
+    if (sinav == null) return const [];
+    return tekrarlariHesapla(
+      calismalar: _calismalar,
+      sinavTarihi: sinav,
+      bugun: bugun,
+      gunlukSinir: gunlukTekrarSiniri,
+    );
+  }
+
+  /// Konuyu bir güne yerleştirir. Aynı konu tekrar yerleştirilebilir (sonraki tur).
+  Calisma? calismaEkle(int konuId, DateTime gun) {
+    if (konuBul(konuId) == null) return null;
+    final c = Calisma(id: _yeniId(), konuId: konuId, tarih: gunBasi(gun));
+    _calismalar.add(c);
+    _degisti();
+    return c;
+  }
+
+  void calismaSil(int id) {
+    _calismalar.removeWhere((c) => c.id == id);
+    _degisti();
+  }
+
+  /// Henüz çalışılmamış bir çalışmanın gününü değiştirir (ör. "Bugüne al").
+  bool calismaGunuDegistir(int id, DateTime gun) {
+    final i = _calismalar.indexWhere((c) => c.id == id);
+    if (i < 0 || _calismalar[i].tamam) return false;
+    _calismalar[i] = _calismalar[i].kopya(tarih: gunBasi(gun));
+    _degisti();
+    return true;
+  }
+
+  /// "Çalıştım": çalışma bugün yapıldı sayılır ve tekrarlar bugünden başlar.
+  bool calistim(int id, DateTime bugun) {
+    final i = _calismalar.indexWhere((c) => c.id == id);
+    if (i < 0 || _calismalar[i].tamam) return false;
+    _calismalar[i] = _calismalar[i].kopya(tarih: gunBasi(bugun), tamam: true);
+    _degisti();
+    return true;
+  }
+
+  /// "Çalıştım" işaretini geri alır; yapılmış tekrar kayıtları da silinir.
+  bool calismaGeriAl(int id) {
+    final i = _calismalar.indexWhere((c) => c.id == id);
+    if (i < 0 || !_calismalar[i].tamam) return false;
+    _calismalar[i] = _calismalar[i].kopya(tamam: false, tekrarlar: const []);
+    _degisti();
+    return true;
+  }
+
+  /// "Tekrar yaptım". Önceki tekrarlar yapılmadıysa veya çalışma bitmediyse false döner.
+  bool tekrarYapildi(int calismaId, int no, DateTime bugun) {
+    final i = _calismalar.indexWhere((c) => c.id == calismaId);
+    final sinav = sinavTarihi;
+    if (i < 0 || sinav == null || no < 1) return false;
+    final c = _calismalar[i];
+    if (!c.tamam || c.tekrarKaydi(no) != null) return false;
+    if (no > tekrarGunleri(gunFarki(sinav, c.tarih)).length) return false;
+    for (var onceki = 1; onceki < no; onceki++) {
+      if (c.tekrarKaydi(onceki) == null) return false;
+    }
+    final yeni = [...c.tekrarlar, TekrarKaydi(no: no, tarih: gunBasi(bugun))]
+      ..sort((a, b) => a.no.compareTo(b.no));
+    _calismalar[i] = c.kopya(tekrarlar: yeni);
+    _degisti();
+    return true;
+  }
+
+  /// Tekrar işaretini ve ondan sonrakileri geri alır.
+  bool tekrarGeriAl(int calismaId, int no) {
+    final i = _calismalar.indexWhere((c) => c.id == calismaId);
+    if (i < 0 || _calismalar[i].tekrarKaydi(no) == null) return false;
+    final kalan = _calismalar[i].tekrarlar.where((k) => k.no < no).toList();
+    _calismalar[i] = _calismalar[i].kopya(tekrarlar: kalan);
+    _degisti();
+    return true;
   }
 
   // ---------------------------------------------------------------- kayıt
