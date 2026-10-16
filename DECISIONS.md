@@ -21,7 +21,7 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Derleme | GitHub Actions |
 | Yapay zeka ozelligi | Ileride dusunulecek |
 | Firebase projesi | Ad: mytus, Spark plani, Google hesabi: kullanicinin kendi hesabi. Google Analytics ACIK (kullanici karari, 16 Ekim 2026). |
-| Analytics sonucu | Analytics, cihaz/kullanim verisi toplar. Uygulamaya eklendiginde aydinlatma metnine yazilmali ve ilk giriste onay alinmali. SDK'nin hangi surume ekleneceği henuz karara baglanmadi (oneri: Surum 2, cunku Surum 1 hicbir veriyi cihazdan cikarmiyor). |
+| Analytics sonucu | Analytics, cihaz/kullanim verisi toplar. Uygulamaya eklendiginde aydinlatma metnine yazilmali ve ilk giriste onay alinmali. KARAR (16 Ekim 2026): Analytics SDK'si Surum 2'de, Google girisi ve KVKK ekranlariyla birlikte eklenecek. Surum 1 hicbir veriyi cihazdan cikarmaz. |
 
 ## Tekrar sistemi
 - Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).
