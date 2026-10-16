@@ -89,3 +89,6 @@ int gunFarki(DateTime sonra, DateTime once) {
   final o = DateTime.utc(once.year, once.month, once.day);
   return s.difference(o).inDays;
 }
+
+/// Günün ait olduğu haftanın Pazartesi'si.
+DateTime haftaBasi(DateTime t) => gunEkle(gunBasi(t), -(t.weekday - 1));
