@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/modeller.dart';
+import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/takvim/calisma.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:flutter/widgets.dart';
@@ -37,11 +38,17 @@ class PlanDeposu extends ChangeNotifier {
   final List<Konu> _konular = [];
   final List<Calisma> _calismalar = [];
 
-  /// Her konu kaç tur çalışılacak (varsayılan 2). Ayarlar ekranı sonraki parçada.
+  /// Her konu kaç tur çalışılacak (varsayılan 2). Ayarlar ekranından değişir.
   int turSayisi = 2;
 
   /// Bir güne düşebilecek en çok tekrar sayısı (varsayılan 10).
   int gunlukTekrarSiniri = 10;
+
+  /// F.T. time süre ayarları.
+  FtAyarlari ftAyar = const FtAyarlari();
+
+  final List<OdakKaydi> _odaklar = [];
+  FtOturum? _oturum;
 
   Timer? _zamanlayici;
   bool _kirli = false;
@@ -134,6 +141,33 @@ class PlanDeposu extends ChangeNotifier {
       turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 2;
       final sinir = veri['gunlukTekrarSiniri'];
       gunlukTekrarSiniri = sinir is int && sinir >= 0 ? sinir : 10;
+      ftAyar = FtAyarlari.fromJson(veri['ftAyar']);
+      final odaklar = <OdakKaydi>[];
+      final odakListesi = veri['odaklar'];
+      if (odakListesi is List) {
+        final gorulen = <String>{};
+        for (final e in odakListesi) {
+          final o = OdakKaydi.fromJson(e);
+          if (o == null || !gorulen.add(o.anahtar)) continue;
+          odaklar.add(
+            o.konuId != null && !konuNumaralari.contains(o.konuId)
+                ? o.konuSiz()
+                : o,
+          );
+        }
+      }
+      _odaklar
+        ..clear()
+        ..addAll(odaklar);
+      var oturum = FtOturum.fromJson(veri['oturum']);
+      if (oturum != null &&
+          oturum.konuId != null &&
+          !konuNumaralari.contains(oturum.konuId)) {
+        oturum = oturum.konuSiz();
+      }
+      _oturum = oturum;
+      if (oturum != null) enBuyuk = math.max(enBuyuk, oturum.id);
+      _sonId = math.max(_sonId, enBuyuk);
       return true;
     } on FormatException {
       return false;
@@ -150,6 +184,9 @@ class PlanDeposu extends ChangeNotifier {
         'calismalar': [for (final c in _calismalar) c.toJson()],
         'turSayisi': turSayisi,
         'gunlukTekrarSiniri': gunlukTekrarSiniri,
+        'ftAyar': ftAyar.toJson(),
+        'odaklar': [for (final o in _odaklar) o.toJson()],
+        'oturum': _oturum?.toJson(),
       };
 
   // ---------------------------------------------------------------- okuma
@@ -250,6 +287,7 @@ class PlanDeposu extends ChangeNotifier {
     final konuNumaralari =
         _konular.where((k) => k.dersId == id).map((k) => k.id).toSet();
     _calismalar.removeWhere((c) => konuNumaralari.contains(c.konuId));
+    _konuBaginiTemizle(konuNumaralari);
     _dersler.removeWhere((d) => d.id == id);
     _konular.removeWhere((k) => k.dersId == id);
     _degisti();
@@ -287,8 +325,23 @@ class PlanDeposu extends ChangeNotifier {
 
   void konuSil(int id) {
     _calismalar.removeWhere((c) => c.konuId == id);
+    _konuBaginiTemizle({id});
     _konular.removeWhere((k) => k.id == id);
     _degisti();
+  }
+
+  /// Silinen konulara bağlı odak kayıtları ve oturum konusuz kalır (puanlar silinmez).
+  void _konuBaginiTemizle(Set<int> konuNumaralari) {
+    for (var i = 0; i < _odaklar.length; i++) {
+      final k = _odaklar[i].konuId;
+      if (k != null && konuNumaralari.contains(k)) {
+        _odaklar[i] = _odaklar[i].konuSiz();
+      }
+    }
+    final o = _oturum;
+    if (o != null && o.konuId != null && konuNumaralari.contains(o.konuId)) {
+      _oturum = o.konuSiz();
+    }
   }
 
   /// Notu günceller. Ekranı yeniden çizdirmez (yazarken gereksiz), yalnızca kaydı planlar.
@@ -426,6 +479,122 @@ class PlanDeposu extends ChangeNotifier {
     _calismalar[i] = _calismalar[i].kopya(tekrarlar: kalan);
     _degisti();
     return true;
+  }
+
+
+  // ------------------------------------------------------------- ayarlar
+
+  void turSayisiBelirle(int sayi) {
+    turSayisi = sayi < 1 ? 1 : (sayi > 5 ? 5 : sayi);
+    _degisti();
+  }
+
+  void gunlukSinirBelirle(int sayi) {
+    gunlukTekrarSiniri = sayi < 3 ? 3 : (sayi > 30 ? 30 : sayi);
+    _degisti();
+  }
+
+  void ftAyarBelirle(FtAyarlari ayar) {
+    ftAyar = ayar;
+    _degisti();
+  }
+
+  // ------------------------------------------------------ F.T. time oturumu
+
+  FtOturum? get oturum => _oturum;
+
+  List<OdakKaydi> get odaklar => List.unmodifiable(_odaklar);
+
+  /// Yeni oturum başlatır (varsa eskisinin yerine). Süreler o anki ayarlardan alınır.
+  FtOturum oturumBaslat({required int toplamDongu, int? konuId}) {
+    final gecerliKonu = konuId != null && konuBul(konuId) != null ? konuId : null;
+    final o = FtOturum.yeni(
+      id: _yeniId(),
+      toplamDongu: toplamDongu,
+      ayar: ftAyar,
+      konuId: gecerliKonu,
+    );
+    _oturum = o;
+    _degisti();
+    return o;
+  }
+
+  /// Oturumun yeni durumunu kaydeder. Çalışma bölümü bittiyse döngü puanlanır.
+  /// Aynı döngü ikinci kez puanlanmaz.
+  void oturumGuncelle(FtOturum yeni) {
+    _oturum = yeni;
+    _donguyuPuanla(yeni);
+    _degisti();
+  }
+
+  void oturumKapat() {
+    if (_oturum == null) return;
+    _oturum = null;
+    _degisti();
+  }
+
+  void _donguyuPuanla(FtOturum o) {
+    if (o.faz != FtFaz.calisma || !o.bolumBitti) return;
+    final anahtar = '${o.id}:${o.dongu}';
+    if (_odaklar.any((x) => x.anahtar == anahtar)) return;
+    _odaklar.add(
+      OdakKaydi(
+        anahtar: anahtar,
+        tarihMs: o.sayac.endAtMs ?? DateTime.now().millisecondsSinceEpoch,
+        dakika: o.donguPuani,
+        konuId: o.konuId,
+      ),
+    );
+  }
+
+  /// Süresi dolan bölümü "bitti" yapar ve gerekirse puanlar. Uygulama açılırken
+  /// ve arka plandan dönerken çağrılır. Bir şey değiştiyse true döner.
+  bool oturumuTazele(int nowMs) {
+    final o = _oturum;
+    if (o == null) return false;
+    final yeni = o.guncelle(nowMs);
+    if (identical(yeni, o)) return false;
+    oturumGuncelle(yeni);
+    return true;
+  }
+
+  int get toplamPuan => _odaklar.fold(0, (t, o) => t + o.puan);
+
+  /// [bas] dahil, [son] hariç aralıktaki puan.
+  int puanAraligi(DateTime bas, DateTime son) {
+    var t = 0;
+    for (final o in _odaklar) {
+      final g = o.tarih;
+      if (!g.isBefore(bas) && g.isBefore(son)) t += o.puan;
+    }
+    return t;
+  }
+
+  int puanGun(DateTime gun) {
+    final bas = gunBasi(gun);
+    return puanAraligi(bas, gunEkle(bas, 1));
+  }
+
+  /// Pazartesi başlangıçlı hafta puanı.
+  int puanHafta(DateTime gun) {
+    final bas = gunEkle(gunBasi(gun), -(gun.weekday - 1));
+    return puanAraligi(bas, gunEkle(bas, 7));
+  }
+
+  /// Odak sonrası "Çalıştım" onayı: konunun bekleyen en erken yerleştirmesini
+  /// bugüne alıp çalışıldı yapar; hiç bekleyeni yoksa bugüne yeni bir tane açar.
+  bool konuCalistimIsaretle(int konuId, DateTime bugun) {
+    if (konuBul(konuId) == null) return false;
+    Calisma? hedef;
+    for (final c in calismalarKonu(konuId)) {
+      if (!c.tamam) {
+        hedef = c;
+        break;
+      }
+    }
+    hedef ??= calismaEkle(konuId, bugun);
+    if (hedef == null) return false;
+    return calistim(hedef.id, bugun);
   }
 
   // ---------------------------------------------------------------- kayıt

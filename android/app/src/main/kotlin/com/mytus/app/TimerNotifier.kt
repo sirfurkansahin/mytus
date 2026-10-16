@@ -112,7 +112,7 @@ object TimerNotifier {
         val b = newBuilder(ctx, CH_DONE)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("Süre bitti")
-            .setContentText("Odak süren tamamlandı. Uygulamayı açıp devam edebilirsin.")
+            .setContentText("Uygulamayı açıp devam edebilirsin.")
             .setAutoCancel(true)
             .setCategory(Notification.CATEGORY_ALARM)
             .setVisibility(Notification.VISIBILITY_PUBLIC)
