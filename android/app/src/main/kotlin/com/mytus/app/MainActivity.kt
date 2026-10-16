@@ -10,6 +10,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 // Flutter (Dart) ile Android arasindaki kopru. Kanal adi Dart tarafiyla ayni olmali.
 class MainActivity : FlutterActivity() {
@@ -23,6 +24,37 @@ class MainActivity : FlutterActivity() {
                     result.error("native_error", e.message, null)
                 }
             }
+        // Ikinci kanal: tum uygulama verisini tek bir dosyada saklar (dersler, konular, notlar).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.mytus.app/storage")
+            .setMethodCallHandler { call, result ->
+                try {
+                    handleStorage(call, result)
+                } catch (e: Exception) {
+                    result.error("storage_error", e.message, null)
+                }
+            }
+    }
+
+    // Yazma: once gecici dosyaya yazilir, sonra asil dosyanin yerine gecirilir.
+    // Boylece yazarken uygulama kapansa bile eski veri bozulmaz.
+    private fun handleStorage(call: MethodCall, result: MethodChannel.Result) {
+        val dosya = File(filesDir, "mytus_data.json")
+        when (call.method) {
+            "read" -> {
+                result.success(if (dosya.exists()) dosya.readText(Charsets.UTF_8) else null)
+            }
+            "write" -> {
+                val icerik = call.argument<String>("content") ?: ""
+                val gecici = File(filesDir, "mytus_data.json.tmp")
+                gecici.writeText(icerik, Charsets.UTF_8)
+                if (!gecici.renameTo(dosya)) {
+                    dosya.writeText(icerik, Charsets.UTF_8)
+                    gecici.delete()
+                }
+                result.success(null)
+            }
+            else -> result.notImplemented()
+        }
     }
 
     private fun handle(call: MethodCall, result: MethodChannel.Result) {
