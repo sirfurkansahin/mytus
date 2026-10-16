@@ -112,6 +112,10 @@ void main() {
 void takvimTestleri() {
   testWidgets('Takvimde konu yerleştirilir, Bugün\'de Çalıştım denir',
       (tester) async {
+    // Uzun ekran: takvimin altındaki liste de çizilsin.
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     final anatomi = depo.dersler(DersGrubu.temel).first;
     depo.konuEkle(anatomi.id, 'Üst ekstremite');
