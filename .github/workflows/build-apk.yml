@@ -58,6 +58,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         if: steps.check.outputs.ready == 'true'
         with:
+          # Surum sabit: derleme her gun ayni sonucu versin (3.47.7 ile test edildi).
+          flutter-version: "3.47.7"
           channel: stable
           cache: true
 
