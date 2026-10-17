@@ -261,16 +261,18 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
             ],
           ),
           const Divider(height: 24),
-          Row(
+          // Büyük yazıda veya dar ekranda buton başlığın altına iner.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 8,
             children: [
-              Expanded(
-                child: Text(
-                  bugunMu
-                      ? '${tarihKisa(_secili)} · Bugün'
-                      : gunAdiIleTarih(_secili),
-                  style: tema.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              Text(
+                bugunMu
+                    ? '${tarihKisa(_secili)} · Bugün'
+                    : gunAdiIleTarih(_secili),
+                style: tema.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               FilledButton.tonal(
