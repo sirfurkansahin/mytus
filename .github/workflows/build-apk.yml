@@ -56,6 +56,13 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Imza sertifikasi parmak izi (Firebase icin)
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.sign == 'true'
+        continue-on-error: true
+        run: |
+          OUT=$(keytool -list -v -alias mytus -keystore "$MYTUS_KEYSTORE_PATH" -storepass "$MYTUS_KEYSTORE_PASSWORD" 2>&1 | grep -E "SHA1|SHA256" | sed 's/^ *//' | head -2 | tr '\n' ' ')
+          echo "::notice title=Imza parmak izi::${OUT}"
+
       - uses: subosito/flutter-action@v2
         if: steps.check.outputs.ready == 'true'
         with:
