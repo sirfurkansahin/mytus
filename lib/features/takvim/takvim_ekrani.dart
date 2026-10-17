@@ -115,7 +115,7 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
         borderRadius: BorderRadius.circular(12),
         onTap: () => setState(() => _secili = gun),
         child: Container(
-          height: 52,
+          constraints: const BoxConstraints(minHeight: 52),
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             color: secili ? tema.colorScheme.primaryContainer : null,
@@ -126,6 +126,7 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 '$gunNo',
@@ -248,13 +249,14 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
           const SizedBox(height: 4),
           _ayIzgarasi(calismaGunleri, tekrarGunleri, bugun),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 20,
+            runSpacing: 0,
             children: [
               _aciklama(tema.colorScheme.primary, 'Planlı konu'),
-              const SizedBox(width: 20),
               _aciklama(tekrarRengi(context), 'Tekrar'),
-              const SizedBox(width: 20),
               TextButton(onPressed: _bugunuSec, child: const Text('Bugüne git')),
             ],
           ),
