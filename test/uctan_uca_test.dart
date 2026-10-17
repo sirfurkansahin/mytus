@@ -73,7 +73,11 @@ void main() {
 
     // Uygulama kapanıp yeniden açılır: veri diskten geri gelir.
     depo = await bosDepo(tester, kayit);
-    expect(depo.karsilamaTamam, isTrue);
+    expect(
+      depo.karsilamaTamam,
+      isTrue,
+      reason: 'yazma=${kayit.yazmaSayisi} icerik=${(kayit.icerik ?? "YOK").substring(0, (kayit.icerik ?? "YOK").length.clamp(0, 160))}',
+    );
     await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
     expect(find.text('Çalışma planını kuralım'), findsNothing);
@@ -228,45 +232,50 @@ void main() {
       await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
       await tester.pumpAndSettle();
 
-      Future<void> sekme(String ad) async {
-        await tester.tap(find.text(ad));
-        await tester.pumpAndSettle();
+      void kontrol(String adim) {
+        final e = tester.takeException();
+        if (e != null) {
+          fail('[$adim] ${e.toString().split("\n").take(8).join(" | ")}');
+        }
       }
 
-      await sekme('Dersler');
-      await tester.tap(find.text('Klinik'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Temel'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(ders.ad));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Üst ekstremitenin arteriyel dolaşımı'));
-      await tester.pumpAndSettle();
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-      await tester.pageBack();
-      await tester.pumpAndSettle();
+      Future<void> dokun(String adim, Finder f) async {
+        expect(f, findsWidgets, reason: '[$adim] bulunamadi');
+        await tester.tap(f.first);
+        await tester.pumpAndSettle();
+        kontrol(adim);
+      }
 
-      await sekme('Takvim');
-      await tester.tap(find.text('+ Konu yerleştir'));
-      await tester.pumpAndSettle();
-      await tester.pageBack();
-      await tester.pumpAndSettle();
+      Future<void> geri(String adim) async {
+        final b = find.byType(BackButton);
+        expect(b, findsWidgets, reason: '[$adim] geri dugmesi yok');
+        await tester.tap(b.first);
+        await tester.pumpAndSettle();
+        kontrol(adim);
+      }
 
-      await sekme('Bugün');
-      await tester.tap(find.byTooltip('İlerleme'));
-      await tester.pumpAndSettle();
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Ayarlar'));
-      await tester.pumpAndSettle();
-      await tester.pageBack();
-      await tester.pumpAndSettle();
+      await dokun('sekme Dersler', find.text('Dersler'));
+      await dokun('Klinik', find.text('Klinik'));
+      await dokun('Temel', find.text('Temel'));
+      await dokun('ders ekrani', find.text(ders.ad));
+      await dokun('konu ekrani', find.text('Üst ekstremitenin arteriyel dolaşımı'));
+      await geri('konudan geri');
+      await geri('dersten geri');
 
-      await sekme('F.T. time');
+      await dokun('sekme Takvim', find.text('Takvim'));
+      await dokun('konu sec', find.text('+ Konu yerleştir'));
+      await geri('konu secten geri');
+
+      await dokun('sekme Bugun', find.text('Bugün'));
+      await dokun('Ilerleme', find.byTooltip('İlerleme'));
+      await geri('ilerlemeden geri');
+      await dokun('Ayarlar', find.byTooltip('Ayarlar'));
+      await geri('ayarlardan geri');
+
+      await dokun('sekme F.T. time', find.text('F.T. time'));
       await tester.tap(find.text('Başlat'), warnIfMissed: false);
       await tester.pump(const Duration(milliseconds: 300));
-      expect(tester.takeException(), isNull);
+      kontrol('F.T. time Baslat');
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
