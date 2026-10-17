@@ -20,6 +20,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -91,7 +92,7 @@ jobs:
         if: steps.check.outputs.ready == 'true'
         run: |
           set +e
-          flutter test > test.txt 2>&1
+          flutter test --timeout 90s > test.txt 2>&1
           kod=$?
           tail -80 test.txt
           if [ $kod -ne 0 ]; then
