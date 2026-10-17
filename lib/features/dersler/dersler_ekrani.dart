@@ -177,19 +177,19 @@ class _DersKarti extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+              // Dar ekranda veya büyük yazıda "N konu · M çalışıldı" alt satıra iner.
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.end,
+                spacing: 8,
+                runSpacing: 2,
                 children: [
-                  Expanded(
-                    child: Text(
-                      ders.ad,
-                      style: tema.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  Text(
+                    ders.ad,
+                    style: tema.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(width: 8),
                   Text(
                     '$toplam konu · $calisilan çalışıldı',
                     style: tema.textTheme.bodySmall?.copyWith(

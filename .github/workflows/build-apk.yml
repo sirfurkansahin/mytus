@@ -20,6 +20,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -91,14 +92,22 @@ jobs:
         if: steps.check.outputs.ready == 'true'
         run: |
           set +e
-          flutter test > test.txt 2>&1
-          kod=$?
-          tail -80 test.txt
-          if [ $kod -ne 0 ]; then
-            ozet=$(grep -vE "^\s*$|✅" test.txt | sed 's/[═╞╡]/=/g' | head -70 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
-            echo "::error title=Test hatalari::${ozet}"
-          fi
-          exit $kod
+          : > test.txt
+          genel=0
+          for dosya in test/*_test.dart; do
+            echo "== $dosya" | tee -a test.txt
+            timeout 240 flutter test --reporter expanded "$dosya" > parca.txt 2>&1
+            kod=$?
+            cat parca.txt >> test.txt
+            if [ $kod -ne 0 ]; then
+              genel=1
+              if [ $kod -eq 124 ]; then echo "ZAMAN ASIMI (takildi): $dosya" | tee -a test.txt; fi
+              ozet=$( { echo "DOSYA: $dosya (cikis $kod)"; grep -E "\[E\]|Expected|Actual|Which|EXCEPTION|overflow|OVERFLOW|_test.dart:[0-9]+|Bad state|yazma=|\\[[a-zA-Z .]+\\] |lib/features|package:app/|relevant error-causing|StateError|No element|Found 0|Found [0-9]+ widgets" parca.txt | head -25; echo "--- tasan bilesen"; grep -A5 "relevant error-causing widget" parca.txt | head -24; echo "--- son satirlar"; tail -8 parca.txt; } | sed 's/[═╞╡]/=/g' | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+              echo "::error title=Test hatasi ${dosya}::${ozet}"
+            fi
+          done
+          tail -40 test.txt
+          exit $genel
 
       - name: Release APK derle
         if: steps.check.outputs.ready == 'true'
