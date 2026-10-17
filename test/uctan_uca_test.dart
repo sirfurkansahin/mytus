@@ -5,7 +5,6 @@ import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/main.dart';
-import 'package:flutter/foundation.dart' show DiagnosticLevel;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
