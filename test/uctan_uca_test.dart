@@ -236,7 +236,14 @@ void main() {
       void kontrol(String adim) {
         final e = tester.takeException();
         if (e != null) {
-          fail('[$adim] ${e.toString().split("\n").take(8).join(" | ")}');
+          final satirlar = e
+              .toString()
+              .split('\n')
+              .where((l) => l.contains('overflowed') || l.contains('lib/'))
+              .map((l) => l.trim())
+              .take(6)
+              .join(' | ');
+          fail('[$adim] $satirlar');
         }
       }
 
