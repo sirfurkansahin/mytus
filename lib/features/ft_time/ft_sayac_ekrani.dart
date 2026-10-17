@@ -23,6 +23,8 @@ class FtSayacEkrani extends StatefulWidget {
 class _FtSayacEkraniState extends State<FtSayacEkrani>
     with WidgetsBindingObserver {
   Timer? _ticker;
+  bool? _pilKisitsiz;
+  bool _uyariKapali = false;
 
   int _simdi() => DateTime.now().millisecondsSinceEpoch;
 
@@ -34,9 +36,17 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
       if (!mounted) return;
       // Ekran açıldığında süre dolmuşsa işle; ilk oturumda pil rehberini göster.
       widget.kontrol.tazele();
+      _pilOku();
       pilRehberiniBirKezGoster(context, widget.kontrol.native);
     });
     _tickerAyarla();
+  }
+
+  /// Pil tasarrufu uygulamayı kısıtlıyorsa sayaç ekranında uyarı göstermek için okunur.
+  Future<void> _pilOku() async {
+    final pil = await widget.kontrol.native.pilKisitsiz();
+    if (!mounted) return;
+    setState(() => _pilKisitsiz = pil);
   }
 
   @override
@@ -48,7 +58,10 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState durum) {
-    if (durum == AppLifecycleState.resumed) widget.kontrol.tazele();
+    if (durum == AppLifecycleState.resumed) {
+      widget.kontrol.tazele();
+      _pilOku();
+    }
   }
 
   void _tickerAyarla() {
@@ -200,6 +213,13 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                   ders.ad,
                   style: const TextStyle(fontSize: 15, color: ftAcikYazi),
                 ),
+              if (_pilKisitsiz == false && !_uyariKapali) ...[
+                const SizedBox(height: 16),
+                _PilUyarisi(
+                  onAyar: widget.kontrol.native.pilAyarlariniAc,
+                  onKapat: () => setState(() => _uyariKapali = true),
+                ),
+              ],
               const SizedBox(height: 32),
               Text(
                 sureYaz(kalan),
@@ -292,6 +312,51 @@ class _Dugme extends StatelessWidget {
         minimumSize: const Size.fromHeight(52),
       ),
       child: Text(yazi),
+    );
+  }
+}
+
+/// Pil tasarrufu uygulamayı kısıtlıyorsa süre bitince uyarının gecikebileceğini söyler.
+class _PilUyarisi extends StatelessWidget {
+  const _PilUyarisi({required this.onAyar, required this.onKapat});
+
+  final VoidCallback onAyar;
+  final VoidCallback onKapat;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 4, 6),
+      decoration: BoxDecoration(
+        color: const Color(0x26FFC46B),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Telefonun pil tasarrufu MY TUS\'u kısıtlıyor olabilir; süre '
+                  'bitince uyarı gecikebilir.',
+                  style: TextStyle(fontSize: 13, color: ftUyari),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Uyarıyı kapat',
+                onPressed: onKapat,
+                icon: const Icon(Icons.close, size: 18, color: ftUyari),
+              ),
+            ],
+          ),
+          TextButton(
+            onPressed: onAyar,
+            style: TextButton.styleFrom(foregroundColor: Colors.white),
+            child: const Text('Pil ayarlarını aç'),
+          ),
+        ],
+      ),
     );
   }
 }

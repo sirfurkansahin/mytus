@@ -168,6 +168,8 @@ class SahteNative extends FtNative {
   @override
   Future<bool> kullanilabilir() async => true;
   @override
+  Future<String?> derlemeNo() async => '1';
+  @override
   Future<void> alarmKur(int bitisMs) async => cagrilar.add('kur');
   @override
   Future<void> alarmIptal() async => cagrilar.add('iptal');
@@ -191,7 +193,35 @@ class SahteNative extends FtNative {
   Future<void> kayitYaz(String anahtar, String deger) async {}
 }
 
+/// Pil kısıtlaması olan telefonu taklit eder.
+class KisitliNative extends SahteNative {
+  @override
+  Future<bool?> pilKisitsiz() async => false;
+}
+
 void ftTestleri() {
+  testWidgets('Pil kısıtlaması varsa sayaç ekranında uyarı çıkar, kapatılabilir',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: KisitliNative()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('F.T. time'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Başlat'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.textContaining('pil tasarrufu'), findsOneWidget);
+    await tester.tap(find.byTooltip('Uyarıyı kapat'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('pil tasarrufu'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('F.T. time: hazırlıktan oturum başlar, duraklar, bitirilir',
       (tester) async {
     // Uzun ekran: hazırlık ekranının altındaki satırlar da çizilsin.

@@ -60,6 +60,11 @@ class MainActivity : FlutterActivity() {
     private fun handle(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "ping" -> result.success(true)
+            "buildNumber" -> {
+                val bilgi = packageManager.getPackageInfo(packageName, 0)
+                val no = if (Build.VERSION.SDK_INT >= 28) bilgi.longVersionCode else bilgi.versionCode.toLong()
+                result.success(no.toString())
+            }
             "schedule" -> {
                 val endAt = (call.argument<Number>("endAtMs") ?: 0L).toLong()
                 TimerNotifier.schedule(this, endAt)
