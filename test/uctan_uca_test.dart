@@ -67,8 +67,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Sistol ve diyastol');
     await tester.pump();
+    // Kayıt bellek tabanlı ve gecikmesizdir; bekleyen yazmaların bitmesi için bir kare daha.
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.runAsync(depo.hemenKaydet);
+    await tester.pump();
 
     // Uygulama kapanıp yeniden açılır: veri diskten geri gelir.
     depo = await bosDepo(tester, kayit);
