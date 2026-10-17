@@ -236,7 +236,7 @@ void main() {
 
       final eskiHata = FlutterError.onError;
       final raporlar = <String>[];
-      FlutterError.onError = (d) => raporlar.add(d.toStringDeep(minLevel: DiagnosticLevel.debug));
+      FlutterError.onError = (d) => raporlar.add(d.toDiagnosticsNode().toStringDeep(minLevel: DiagnosticLevel.debug));
 
       void kontrol(String adim) {
         if (raporlar.isEmpty) return;
