@@ -96,10 +96,11 @@ jobs:
           genel=0
           for dosya in test/*_test.dart; do
             echo "== $dosya" | tee -a test.txt
-            timeout 240 flutter test "$dosya" >> test.txt 2>&1
+            timeout 240 flutter test --reporter expanded "$dosya" >> test.txt 2>&1
             kod=$?
             if [ $kod -eq 124 ]; then
               echo "ZAMAN ASIMI (takildi): $dosya" | tee -a test.txt
+              echo "SON SATIRLAR:" >> test.txt
               genel=1
             elif [ $kod -ne 0 ]; then
               genel=1
@@ -107,7 +108,7 @@ jobs:
           done
           tail -80 test.txt
           if [ $genel -ne 0 ]; then
-            ozet=$(grep -vE "^\s*$|✅" test.txt | grep -E "^==|ZAMAN|❌|Expected|Actual|EXCEPTION|overflow|OVERFLOW|Which|tests? (passed|failed)|_test.dart:[0-9]+" | sed 's/[═╞╡]/=/g' | head -70 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            ozet=$(grep -vE "^\s*$|✅" test.txt | grep -E "^==|ZAMAN|[0-9]+:[0-9]+ \+[0-9]+|❌|Expected|Actual|EXCEPTION|overflow|OVERFLOW|Which|tests? (passed|failed)|_test.dart:[0-9]+" | sed 's/[═╞╡]/=/g' | head -70 | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
             echo "::error title=Test hatalari::${ozet}"
           fi
           exit $genel
