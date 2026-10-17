@@ -100,6 +100,12 @@ Kullanici cevaplari: 1-a (hafta oklari), 2-a ("Calistim" denen konular), 3-a (od
 | Sure yazimi | 60 dk altinda "45 dk", ustunde "5,8 sa" (virgullu). |
 | Ek bolum | "Ders ilerlemesi (x/y konu)" EKLENMEDI (kullanici karari). Istenirse Surum 1 sonrasi eklenir. |
 
+## Uctan uca otomatik test (17 Ekim 2026)
+- `test/uctan_uca_test.dart`: karsilamadan basla, ders/konu/not, yeniden acilis, takvim -> Bugun -> tekrar zinciri, F.T. time dongu/mola/puan; ayrica 3 durumda (320x568 kucuk telefon, 1.6x buyuk yazi, koyu tema) tum ekranlarin tasmadan acildigi sinanir.
+- Bulunan ve duzeltilen hatalar: Dersler ders karti, Takvim gun basligi + "+ Konu yerlestir", Takvim aciklama satiri ve gun hucresi dar ekran/buyuk yazida tasiyordu (Row -> Wrap, sabit yukseklik -> en az yukseklik).
+- Sinirlar: gercek telefon, bildirim, pil ayarlari ve disk yazma bu testlerle sinanmaz (bildirim sorunu "Bilinen sorunlar"da).
+- CI artik testleri dosya dosya, 240 sn zaman asimiyla calistirir; basarisiz dosyanin ozeti ayri bildirim olarak yazilir.
+
 ## Tekrar sistemi
 - Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).
 - Sinava kalan gune gore tekrar gunleri (ilk calismadan sonra gun sayisi):
