@@ -249,7 +249,7 @@ void main() {
             .map((l) => l.trim())
             .toSet()
             .take(8)
-            .join(' | ');
+            .join('\n');
         fail('[$adim] $satirlar');
       }
 
