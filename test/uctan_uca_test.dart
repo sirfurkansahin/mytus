@@ -233,18 +233,24 @@ void main() {
       await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
       await tester.pumpAndSettle();
 
+      final eskiHata = FlutterError.onError;
+      final raporlar = <String>[];
+      FlutterError.onError = (d) => raporlar.add(d.toString());
+
       void kontrol(String adim) {
-        final e = tester.takeException();
-        if (e != null) {
-          final satirlar = e
-              .toString()
-              .split('\n')
-              .where((l) => l.contains('overflowed') || l.contains('lib/'))
-              .map((l) => l.trim())
-              .take(6)
-              .join(' | ');
-          fail('[$adim] $satirlar');
-        }
+        if (raporlar.isEmpty) return;
+        FlutterError.onError = eskiHata;
+        final satirlar = raporlar
+            .expand((r) => r.split('\n'))
+            .where((l) =>
+                l.contains('overflowed') ||
+                l.contains('lib/') ||
+                l.contains('Exception'))
+            .map((l) => l.trim())
+            .toSet()
+            .take(8)
+            .join(' | ');
+        fail('[$adim] $satirlar');
       }
 
       Future<void> dokun(String adim, Finder f) async {
@@ -303,6 +309,7 @@ void main() {
       await tester.tap(baslat.first);
       await tester.pump(const Duration(milliseconds: 300));
       kontrol('F.T. time Baslat');
+      FlutterError.onError = eskiHata;
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
