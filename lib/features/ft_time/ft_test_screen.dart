@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:app/core/renkler.dart';
 import 'package:app/features/ft_time/ft_native.dart';
+import 'package:app/features/ft_time/ft_test_bilesenleri.dart';
 import 'package:app/features/ft_time/ft_timer.dart';
 import 'package:flutter/material.dart';
 
@@ -18,11 +20,6 @@ class FtTestScreen extends StatefulWidget {
 
 class _FtTestScreenState extends State<FtTestScreen>
     with WidgetsBindingObserver {
-  static const Color _zemin = Color(0xFF241757);
-  static const Color _vurgu = Color(0xFF7A63DD);
-  static const Color _acikYazi = Color(0xFFC9C2E8);
-  static const Color _iyi = Color(0xFF7EE0C3);
-  static const Color _uyari = Color(0xFFFFC46B);
 
   static const String _durumAnahtari = 'timer_state';
   static const String _rehberAnahtari = 'guide_seen';
@@ -232,7 +229,7 @@ class _FtTestScreenState extends State<FtTestScreen>
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFBFAFE),
+      backgroundColor: acikZemin,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -307,33 +304,33 @@ class _FtTestScreenState extends State<FtTestScreen>
     if (durum.phase == FtPhase.bitti && bitis != null) {
       final tetik = _sonTetik;
       return [
-        _Satir(etiket: 'Beklenen bitiş', deger: saatYaz(bitis)),
+        FtSatir(etiket: 'Beklenen bitiş', deger: saatYaz(bitis)),
         if (tetik != null && _sonBeklenen == bitis)
-          _Satir(
+          FtSatir(
             etiket: 'Alarm tetiklendi',
             deger:
                 '${saatYaz(tetik)} (${((tetik - bitis) / 1000).toStringAsFixed(1)} sn gecikme)',
-            renk: _iyi,
+            renk: ftIyi,
           )
         else
-          const _Satir(
+          const FtSatir(
             etiket: 'Alarm kaydı',
             deger: 'Yok. Alarm çalışmamış olabilir.',
-            renk: _uyari,
+            renk: ftUyari,
           ),
       ];
     }
     if (durum.phase == FtPhase.calisiyor && bitis != null) {
       return [
-        _Satir(etiket: 'Beklenen bitiş', deger: saatYaz(bitis)),
-        const _Satir(
+        FtSatir(etiket: 'Beklenen bitiş', deger: saatYaz(bitis)),
+        const FtSatir(
           etiket: 'Test',
           deger: 'Ekranı kapat veya başka uygulamaya geç; süre bitince bildirim gelmeli.',
         ),
       ];
     }
     return const [
-      _Satir(
+      FtSatir(
         etiket: 'Nasıl test edilir',
         deger: 'Başlat, ekranı kapat, süre bitince bildirimi bekle.',
       ),
@@ -346,8 +343,8 @@ class _FtTestScreenState extends State<FtTestScreen>
   }
 
   Color _izinRengi(bool? deger) {
-    if (deger == null) return _acikYazi;
-    return deger ? _iyi : _uyari;
+    if (deger == null) return ftAcikYazi;
+    return deger ? ftIyi : ftUyari;
   }
 
   @override
@@ -355,7 +352,7 @@ class _FtTestScreenState extends State<FtTestScreen>
     final kalan = _state.kalanMs(_simdi());
     final secimAcik = _state.phase == FtPhase.bosta;
     return Scaffold(
-      backgroundColor: _zemin,
+      backgroundColor: ftZemin,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
@@ -373,7 +370,7 @@ class _FtTestScreenState extends State<FtTestScreen>
               const SizedBox(height: 4),
               const Text(
                 'Sayaç testi (prototip)',
-                style: TextStyle(fontSize: 15, color: _acikYazi),
+                style: TextStyle(fontSize: 15, color: ftAcikYazi),
               ),
               const SizedBox(height: 32),
               Text(
@@ -388,7 +385,7 @@ class _FtTestScreenState extends State<FtTestScreen>
               Text(
                 _durumYazisi,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, color: _acikYazi),
+                style: const TextStyle(fontSize: 16, color: ftAcikYazi),
               ),
               const SizedBox(height: 24),
               Wrap(
@@ -401,9 +398,9 @@ class _FtTestScreenState extends State<FtTestScreen>
                       selected: _state.durationMs == dakika * _dakikaMs,
                       onSelected: secimAcik ? (_) => _sureSec(dakika) : null,
                       showCheckmark: false,
-                      backgroundColor: const Color(0x1FFFFFFF),
-                      disabledColor: const Color(0x14FFFFFF),
-                      selectedColor: _vurgu,
+                      backgroundColor: ftYuzeyOrta,
+                      disabledColor: ftYuzeyHafif,
+                      selectedColor: ftVurgu,
                       side: BorderSide.none,
                       labelStyle: const TextStyle(
                         color: Colors.white,
@@ -419,7 +416,7 @@ class _FtTestScreenState extends State<FtTestScreen>
                     child: FilledButton(
                       onPressed: _anaDugme,
                       style: FilledButton.styleFrom(
-                        backgroundColor: _vurgu,
+                        backgroundColor: ftVurgu,
                         foregroundColor: Colors.white,
                         minimumSize: const Size.fromHeight(52),
                       ),
@@ -431,7 +428,7 @@ class _FtTestScreenState extends State<FtTestScreen>
                     onPressed: _sifirla,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0x66FFFFFF)),
+                      side: const BorderSide(color: ftCizgi),
                       minimumSize: const Size(96, 52),
                     ),
                     child: const Text('Sıfırla'),
@@ -439,15 +436,15 @@ class _FtTestScreenState extends State<FtTestScreen>
                 ],
               ),
               const SizedBox(height: 24),
-              _Kart(
+              FtKart(
                 baslik: 'Arka plan durumu',
                 children: [
-                  _Satir(
+                  FtSatir(
                     etiket: 'Bildirim izni',
                     deger: _izinYazisi(_bildirimAcik, 'Açık', 'Kapalı'),
                     renk: _izinRengi(_bildirimAcik),
                   ),
-                  _Satir(
+                  FtSatir(
                     etiket: 'Pil kısıtlaması',
                     deger: _izinYazisi(
                       _pilKisitsiz,
@@ -460,15 +457,15 @@ class _FtTestScreenState extends State<FtTestScreen>
                   Wrap(
                     spacing: 4,
                     children: [
-                      _LinkDugme(
+                      FtLinkDugme(
                         yazi: 'Pil ayarlarını aç',
                         onPressed: widget.native.pilAyarlariniAc,
                       ),
-                      _LinkDugme(
+                      FtLinkDugme(
                         yazi: 'Uygulama ayarlarını aç',
                         onPressed: widget.native.uygulamaAyarlariniAc,
                       ),
-                      _LinkDugme(
+                      FtLinkDugme(
                         yazi: 'Rehberi göster',
                         onPressed: _rehberiGoster,
                       ),
@@ -477,25 +474,25 @@ class _FtTestScreenState extends State<FtTestScreen>
                 ],
               ),
               const SizedBox(height: 16),
-              _Kart(baslik: 'Alarm ölçümü', children: _tanilamaSatirlari()),
+              FtKart(baslik: 'Alarm ölçümü', children: _tanilamaSatirlari()),
               const SizedBox(height: 16),
-              _Kart(
+              FtKart(
                 baslik: 'Servis ölçümü',
                 children: [
-                  _Satir(etiket: 'Derleme no', deger: _derlemeNo ?? '-'),
-                  _Satir(
+                  FtSatir(etiket: 'Derleme no', deger: _derlemeNo ?? '-'),
+                  FtSatir(
                     etiket: 'Servis başladı',
                     deger: _servisBasladi == null ? 'Hayır' : saatYaz(_servisBasladi!),
-                    renk: _servisBasladi == null ? _uyari : _iyi,
+                    renk: _servisBasladi == null ? ftUyari : ftIyi,
                   ),
-                  _Satir(
+                  FtSatir(
                     etiket: 'Servis durdu',
                     deger: _servisDurdu == null ? 'Hayır' : saatYaz(_servisDurdu!),
                   ),
-                  _Satir(
+                  FtSatir(
                     etiket: 'Servis hatası',
                     deger: _servisHata ?? 'Yok',
-                    renk: _servisHata == null ? _acikYazi : _uyari,
+                    renk: _servisHata == null ? ftAcikYazi : ftUyari,
                   ),
                 ],
               ),
@@ -505,96 +502,3 @@ class _FtTestScreenState extends State<FtTestScreen>
       ),
     );
   }
-}
-
-class _Kart extends StatelessWidget {
-  const _Kart({required this.baslik, required this.children});
-
-  final String baslik;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0x14FFFFFF),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            baslik,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _Satir extends StatelessWidget {
-  const _Satir({
-    required this.etiket,
-    required this.deger,
-    this.renk = const Color(0xFFC9C2E8),
-  });
-
-  final String etiket;
-  final String deger;
-  final Color renk;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Text(
-              etiket,
-              style: const TextStyle(fontSize: 14, color: Colors.white),
-            ),
-          ),
-          Expanded(
-            flex: 6,
-            child: Text(
-              deger,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: renk,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LinkDugme extends StatelessWidget {
-  const _LinkDugme({required this.yazi, required this.onPressed});
-
-  final String yazi;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(foregroundColor: const Color(0xFFC9BDF7)),
-      child: Text(yazi),
-    );
-  }
-}
