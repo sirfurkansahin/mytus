@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/features/ft_time/ft_ayarlari.dart';
 import 'package:app/features/ft_time/ft_timer.dart';
-import 'package:app/features/ft_time/odak_kaydi.dart';
 
 // Eski içe aktarmalar bozulmasın diye ayrılan sınıflar buradan da görünür.
 export 'package:app/features/ft_time/ft_ayarlari.dart';
