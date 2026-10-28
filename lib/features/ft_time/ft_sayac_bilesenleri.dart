@@ -35,7 +35,7 @@ class FtPilUyarisi extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 4, 6),
       decoration: BoxDecoration(
-        color: const ftUyariZemin,
+        color: ftUyariZemin,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
