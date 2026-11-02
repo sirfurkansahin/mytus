@@ -45,66 +45,61 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
       (toplam, d) => toplam + depo.calisilanSayisi(d.id),
     );
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Dersler',
-                        style: tema.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        'Bu grupta $grupToplamKonu konu · $grupCalisilanKonu çalışıldı',
-                        style: tema.textTheme.bodySmall?.copyWith(
-                          color: tema.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                FilledButton(
-                  onPressed: () => _dersEkle(depo),
-                  child: const Text('+ Ders ekle'),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: _GrupSecici(
-              secili: _grup,
-              degisti: (g) => setState(() => _grup = g),
-            ),
-          ),
-          Expanded(
-            child: liste.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(
-                      'Bu grupta henüz ders yok. Sağ üstten "+ Ders ekle" ile '
-                      'ekleyebilirsin.',
-                      textAlign: TextAlign.center,
-                      style: tema.textTheme.bodyMedium?.copyWith(
-                        color: tema.colorScheme.onSurfaceVariant,
-                      ),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Dersler',
+                    style: tema.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    itemCount: liste.length,
-                    separatorBuilder: (context, sira) => const SizedBox(height: 8),
-                    itemBuilder: (_, sira) => _DersKarti(ders: liste[sira]),
                   ),
+                  Text(
+                    'Bu grupta $grupToplamKonu konu · $grupCalisilanKonu çalışıldı',
+                    style: tema.textTheme.bodySmall?.copyWith(
+                      color: tema.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              FilledButton(
+                onPressed: () => _dersEkle(depo),
+                child: const Text('+ Ders ekle'),
+              ),
+            ],
           ),
+          const SizedBox(height: 12),
+          _GrupSecici(
+            secili: _grup,
+            degisti: (g) => setState(() => _grup = g),
+          ),
+          const SizedBox(height: 12),
+          if (liste.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                'Bu grupta henüz ders yok. Sağ üstten "+ Ders ekle" ile '
+                'ekleyebilirsin.',
+                textAlign: TextAlign.center,
+                style: tema.textTheme.bodyMedium?.copyWith(
+                  color: tema.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else
+            for (var sira = 0; sira < liste.length; sira++) ...[
+              if (sira > 0) const SizedBox(height: 8),
+              _DersKarti(ders: liste[sira]),
+            ],
         ],
       ),
     );

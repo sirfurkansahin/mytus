@@ -286,6 +286,9 @@ void ftTestleri() {
 void ilerlemeTestleri() {
   testWidgets('İlerleme: Bugün ekranından açılır, hafta özeti ve gezinme çalışır',
       (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     final anatomi = depo.dersler(DersGrubu.temel).first;
     final konu = depo.konuEkle(anatomi.id, 'Alt ekstremite')!;
