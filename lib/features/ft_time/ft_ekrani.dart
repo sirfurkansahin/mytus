@@ -70,8 +70,8 @@ class _FtHazirlikState extends State<FtHazirlik> {
     final bugunBekleyenIdler = <int>{
       for (final c in depo.calismalarGun(bugunBas))
         if (!c.tamam) c.konuId,
-      for (final t in depo.tekrarlarGun(bugunBas))
-        if (!t.tamam) t.konuId,
+      for (final t in depo.tekrarlar(bugunBas))
+        if (!t.yapildi && ayniGun(t.tarih, bugunBas)) t.konuId,
     };
     final bugunKonulari = <Konu>[
       for (final id in bugunBekleyenIdler)
