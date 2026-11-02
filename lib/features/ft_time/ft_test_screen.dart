@@ -4,6 +4,7 @@ import 'package:app/core/renkler.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/ft_time/ft_test_bilesenleri.dart';
 import 'package:app/features/ft_time/ft_timer.dart';
+import 'package:app/features/ft_time/pil_rehberi.dart';
 import 'package:flutter/material.dart';
 
 /// F.T. time sayaç PROTOTİPİ. Amaç: sayacın ekran kapalıyken ve uygulama
@@ -20,9 +21,7 @@ class FtTestScreen extends StatefulWidget {
 
 class _FtTestScreenState extends State<FtTestScreen>
     with WidgetsBindingObserver {
-
   static const String _durumAnahtari = 'timer_state';
-  static const String _rehberAnahtari = 'guide_seen';
   static const int _dakikaMs = 60 * 1000;
   static const List<int> _sureSecenekleri = [1, 5, 25];
 
@@ -70,11 +69,7 @@ class _FtTestScreenState extends State<FtTestScreen>
     }
     await _yenile();
     if (!mounted || !kullanilabilir) return;
-    final goruldu = await widget.native.kayitOku(_rehberAnahtari);
-    if (!mounted) return;
-    if (goruldu == null) {
-      _rehberiGoster();
-    }
+    await pilRehberiniBirKezGoster(context, widget.native);
   }
 
   /// Durumu saatten yeniden hesaplar ve ekrandaki bilgileri tazeler.
@@ -225,128 +220,6 @@ class _FtTestScreenState extends State<FtTestScreen>
     }
   }
 
-  Future<void> _rehberiGoster() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: acikZemin,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Sayacın arka planda çalışması için',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1D1A2B),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Bazı telefonlarda sistem, kapalı görünen uygulamaları pil '
-                'tasarrufu için durdurur. Süre bitince seni uyarabilmem için '
-                'şunları yap:',
-                style: TextStyle(fontSize: 15, color: Color(0xFF5F5A74)),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                '1. Bildirim iznini ver.\n'
-                '2. "Pil ayarlarını aç" düğmesine bas ve MY TUS için '
-                'kısıtlama olmamasını (optimize etme) seç.\n'
-                '3. "Uygulama ayarlarını aç" düğmesine bas; pil kullanımı '
-                'bölümünde "arka planda çalışmaya izin ver" ve varsa '
-                '"otomatik başlatma" seçeneğini aç.',
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.4,
-                  color: Color(0xFF1D1A2B),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Menü adları telefon markasına ve sürümüne göre biraz '
-                'değişebilir. Bu ayarlar sonradan da bu ekrandan açılabilir.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF5F5A74)),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: widget.native.pilAyarlariniAc,
-                child: const Text('Pil ayarlarını aç'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: widget.native.uygulamaAyarlariniAc,
-                child: const Text('Uygulama ayarlarını aç'),
-              ),
-              const SizedBox(height: 8),
-              FilledButton(
-                onPressed: () => Navigator.of(sheetContext).pop(),
-                child: const Text('Anladım'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    await widget.native.kayitYaz(_rehberAnahtari, '1');
-  }
-
-  List<Widget> _tanilamaSatirlari() {
-    final durum = _state;
-    final bitis = durum.endAtMs;
-    if (durum.phase == FtPhase.bitti && bitis != null) {
-      final tetik = _sonTetik;
-      return [
-        FtSatir(etiket: 'Beklenen bitiş', deger: saatYaz(bitis)),
-        if (tetik != null && _sonBeklenen == bitis)
-          FtSatir(
-            etiket: 'Alarm tetiklendi',
-            deger:
-                '${saatYaz(tetik)} (${((tetik - bitis) / 1000).toStringAsFixed(1)} sn gecikme)',
-            renk: ftIyi,
-          )
-        else
-          const FtSatir(
-            etiket: 'Alarm kaydı',
-            deger: 'Yok. Alarm çalışmamış olabilir.',
-            renk: ftUyari,
-          ),
-      ];
-    }
-    if (durum.phase == FtPhase.calisiyor && bitis != null) {
-      return [
-        FtSatir(etiket: 'Beklenen bitiş', deger: saatYaz(bitis)),
-        const FtSatir(
-          etiket: 'Test',
-          deger: 'Ekranı kapat veya başka uygulamaya geç; süre bitince bildirim gelmeli.',
-        ),
-      ];
-    }
-    return const [
-      FtSatir(
-        etiket: 'Nasıl test edilir',
-        deger: 'Başlat, ekranı kapat, süre bitince bildirimi bekle.',
-      ),
-    ];
-  }
-
-  String _izinYazisi(bool? deger, String acik, String kapali) {
-    if (deger == null) return 'Bilinmiyor';
-    return deger ? acik : kapali;
-  }
-
-  Color _izinRengi(bool? deger) {
-    if (deger == null) return ftAcikYazi;
-    return deger ? ftIyi : ftUyari;
-  }
-
   @override
   Widget build(BuildContext context) {
     final kalan = _state.kalanMs(_simdi());
@@ -436,65 +309,25 @@ class _FtTestScreenState extends State<FtTestScreen>
                 ],
               ),
               const SizedBox(height: 24),
-              FtKart(
-                baslik: 'Arka plan durumu',
-                children: [
-                  FtSatir(
-                    etiket: 'Bildirim izni',
-                    deger: _izinYazisi(_bildirimAcik, 'Açık', 'Kapalı'),
-                    renk: _izinRengi(_bildirimAcik),
-                  ),
-                  FtSatir(
-                    etiket: 'Pil kısıtlaması',
-                    deger: _izinYazisi(
-                      _pilKisitsiz,
-                      'Yok (iyi)',
-                      'Olabilir (sorun çıkarabilir)',
-                    ),
-                    renk: _izinRengi(_pilKisitsiz),
-                  ),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 4,
-                    children: [
-                      FtLinkDugme(
-                        yazi: 'Pil ayarlarını aç',
-                        onPressed: widget.native.pilAyarlariniAc,
-                      ),
-                      FtLinkDugme(
-                        yazi: 'Uygulama ayarlarını aç',
-                        onPressed: widget.native.uygulamaAyarlariniAc,
-                      ),
-                      FtLinkDugme(
-                        yazi: 'Rehberi göster',
-                        onPressed: _rehberiGoster,
-                      ),
-                    ],
-                  ),
-                ],
+              FtTestArkaPlanKarti(
+                bildirimAcik: _bildirimAcik,
+                pilKisitsiz: _pilKisitsiz,
+                onPilAyar: widget.native.pilAyarlariniAc,
+                onUygulamaAyar: widget.native.uygulamaAyarlariniAc,
+                onRehber: () => pilRehberiGoster(context, widget.native),
               ),
               const SizedBox(height: 16),
-              FtKart(baslik: 'Alarm ölçümü', children: _tanilamaSatirlari()),
+              FtTestAlarmKarti(
+                durum: _state,
+                sonTetik: _sonTetik,
+                sonBeklenen: _sonBeklenen,
+              ),
               const SizedBox(height: 16),
-              FtKart(
-                baslik: 'Servis ölçümü',
-                children: [
-                  FtSatir(etiket: 'Derleme no', deger: _derlemeNo ?? '-'),
-                  FtSatir(
-                    etiket: 'Servis başladı',
-                    deger: _servisBasladi == null ? 'Hayır' : saatYaz(_servisBasladi!),
-                    renk: _servisBasladi == null ? ftUyari : ftIyi,
-                  ),
-                  FtSatir(
-                    etiket: 'Servis durdu',
-                    deger: _servisDurdu == null ? 'Hayır' : saatYaz(_servisDurdu!),
-                  ),
-                  FtSatir(
-                    etiket: 'Servis hatası',
-                    deger: _servisHata ?? 'Yok',
-                    renk: _servisHata == null ? ftAcikYazi : ftUyari,
-                  ),
-                ],
+              FtTestServisKarti(
+                derlemeNo: _derlemeNo,
+                servisBasladi: _servisBasladi,
+                servisDurdu: _servisDurdu,
+                servisHata: _servisHata,
               ),
             ],
           ),
