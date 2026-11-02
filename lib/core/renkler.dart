@@ -29,3 +29,11 @@ const Color ftVurgu = Color(0xFF7A63DD);
 const Color ftAcikYazi = Color(0xFFC9C2E8);
 const Color ftIyi = Color(0xFF7EE0C3);
 const Color ftUyari = Color(0xFFFFC46B);
+
+/// Sayaç ekranında ince çizgi ve uyarı kutusu zemini (yarı saydam).
+const Color ftCizgi = Color(0x66FFFFFF);
+const Color ftUyariZemin = Color(0x26FFC46B);
+
+/// Sayaç testi ekranında yarı saydam yüzeyler (kart zemini, seçili olmayan çipler).
+const Color ftYuzeyHafif = Color(0x14FFFFFF);
+const Color ftYuzeyOrta = Color(0x1FFFFFFF);

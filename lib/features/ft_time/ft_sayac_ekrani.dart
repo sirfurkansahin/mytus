@@ -6,6 +6,7 @@ import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
+import 'package:app/features/ft_time/ft_sayac_bilesenleri.dart';
 import 'package:app/features/ft_time/ft_timer.dart';
 import 'package:app/features/ft_time/pil_rehberi.dart';
 import 'package:flutter/material.dart';
@@ -167,16 +168,16 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
 
     final Widget anaDugme;
     if (o.tamamlandi) {
-      anaDugme = _Dugme(yazi: 'Bitir', onPressed: _bitir);
+      anaDugme = FtDugme(yazi: 'Bitir', onPressed: _bitir);
     } else if (o.bolumBitti) {
       final sonraki = calisma
           ? (o.siradakiMolaTuru == FtFaz.uzunMola ? 'Uzun molayı başlat' : 'Molayı başlat')
           : 'Döngü ${o.dongu + 1} başlat';
-      anaDugme = _Dugme(yazi: sonraki, onPressed: kontrol.ilerle);
+      anaDugme = FtDugme(yazi: sonraki, onPressed: kontrol.ilerle);
     } else if (o.sayac.phase == FtPhase.calisiyor) {
-      anaDugme = _Dugme(yazi: 'Duraklat', onPressed: kontrol.duraklat);
+      anaDugme = FtDugme(yazi: 'Duraklat', onPressed: kontrol.duraklat);
     } else {
-      anaDugme = _Dugme(
+      anaDugme = FtDugme(
         yazi: o.sayac.phase == FtPhase.duraklatildi ? 'Devam et' : 'Başlat',
         onPressed: kontrol.devam,
       );
@@ -215,7 +216,7 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                 ),
               if (_pilKisitsiz == false && !_uyariKapali) ...[
                 const SizedBox(height: 16),
-                _PilUyarisi(
+                FtPilUyarisi(
                   onAyar: widget.kontrol.native.pilAyarlariniAc,
                   onKapat: () => setState(() => _uyariKapali = true),
                 ),
@@ -267,7 +268,7 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                       onPressed: _bitir,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0x66FFFFFF)),
+                        side: const BorderSide(color: ftCizgi),
                         minimumSize: const Size(96, 52),
                       ),
                       child: const Text('Bitir'),
@@ -291,71 +292,6 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Dugme extends StatelessWidget {
-  const _Dugme({required this.yazi, required this.onPressed});
-
-  final String yazi;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: ftVurgu,
-        foregroundColor: Colors.white,
-        minimumSize: const Size.fromHeight(52),
-      ),
-      child: Text(yazi),
-    );
-  }
-}
-
-/// Pil tasarrufu uygulamayı kısıtlıyorsa süre bitince uyarının gecikebileceğini söyler.
-class _PilUyarisi extends StatelessWidget {
-  const _PilUyarisi({required this.onAyar, required this.onKapat});
-
-  final VoidCallback onAyar;
-  final VoidCallback onKapat;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 10, 4, 6),
-      decoration: BoxDecoration(
-        color: const Color(0x26FFC46B),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Telefonun pil tasarrufu MY TUS\'u kısıtlıyor olabilir; süre '
-                  'bitince uyarı gecikebilir.',
-                  style: TextStyle(fontSize: 13, color: ftUyari),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Uyarıyı kapat',
-                onPressed: onKapat,
-                icon: const Icon(Icons.close, size: 18, color: ftUyari),
-              ),
-            ],
-          ),
-          TextButton(
-            onPressed: onAyar,
-            style: TextButton.styleFrom(foregroundColor: Colors.white),
-            child: const Text('Pil ayarlarını aç'),
-          ),
-        ],
       ),
     );
   }
