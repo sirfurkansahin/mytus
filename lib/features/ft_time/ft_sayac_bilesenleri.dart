@@ -23,6 +23,48 @@ class FtDugme extends StatelessWidget {
   }
 }
 
+/// Onaylı tasarımdaki görsel döngü noktaları (● ○ ○ ○).
+class FtDonguNoktalari extends StatelessWidget {
+  const FtDonguNoktalari({
+    super.key,
+    required this.toplamDongu,
+    required this.tamamlananDongu,
+    required this.aktifDongu,
+  });
+
+  final int toplamDongu;
+  final int tamamlananDongu;
+  final int aktifDongu;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 6,
+      children: [
+        for (var i = 1; i <= toplamDongu; i++)
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: i <= tamamlananDongu
+                  ? ftIyi
+                  : (i == aktifDongu ? Colors.white : Colors.transparent),
+              border: Border.all(
+                color: i <= tamamlananDongu
+                    ? ftIyi
+                    : (i == aktifDongu ? Colors.white : ftCizgi),
+                width: 1.8,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 /// Pil tasarrufu uygulamayı kısıtlıyorsa süre bitince uyarının gecikebileceğini söyler.
 class FtPilUyarisi extends StatelessWidget {
   const FtPilUyarisi({super.key, required this.onAyar, required this.onKapat});

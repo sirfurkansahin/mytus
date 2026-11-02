@@ -45,11 +45,7 @@ void main() {
 
     // Karşılama: tarih seçmeden Başla kapalı.
     expect(find.text('Çalışma planını kuralım'), findsOneWidget);
-    await tester.tap(find.text('Tarih seç'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Tamam'));
-    await tester.pumpAndSettle();
-    expect(find.text('Tarih seç'), findsNothing);
+    expect(find.text('22 Ağustos 2027'), findsOneWidget);
     await tester.tap(find.text('Başla'));
     await tester.pumpAndSettle();
     expect(depo.karsilamaTamam, isTrue);

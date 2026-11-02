@@ -1,4 +1,6 @@
+import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
+import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
@@ -56,8 +58,26 @@ class _FtHazirlikState extends State<FtHazirlik> {
     final soluk = tema.colorScheme.onSurfaceVariant;
     final ayar = depo.ftAyar;
     final bugun = DateTime.now();
+    final bugunBas = gunBasi(bugun);
     final konu = _konuId == null ? null : depo.konuBul(_konuId!);
     final ders = konu == null ? null : depo.dersBul(konu.dersId);
+
+    // Bugünkü tamamlanan odak döngüsü sayısı.
+    final bugunDongu =
+        depo.odaklar.where((o) => ayniGun(o.tarih, bugunBas)).length;
+
+    // Bugünün planındaki bekleyen konular (hızlı seçim çipleri için).
+    final bugunBekleyenIdler = <int>{
+      for (final c in depo.calismalarGun(bugunBas))
+        if (!c.tamam) c.konuId,
+      for (final t in depo.tekrarlarGun(bugunBas))
+        if (!t.tamam) t.konuId,
+    };
+    final bugunKonulari = <Konu>[
+      for (final id in bugunBekleyenIdler)
+        if (depo.konuBul(id) case final k?) k,
+    ];
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
@@ -80,24 +100,36 @@ class _FtHazirlikState extends State<FtHazirlik> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: _PuanKutusu(
-                      etiket: 'Bugün',
-                      puan: depo.puanGun(bugun),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _PuanKutusu(
+                          etiket: 'Bugün',
+                          puan: depo.puanGun(bugun),
+                        ),
+                      ),
+                      Expanded(
+                        child: _PuanKutusu(
+                          etiket: 'Bu hafta',
+                          puan: depo.puanHafta(bugun),
+                        ),
+                      ),
+                      Expanded(
+                        child: _PuanKutusu(
+                          etiket: 'Toplam',
+                          puan: depo.toplamPuan,
+                        ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: _PuanKutusu(
-                      etiket: 'Bu hafta',
-                      puan: depo.puanHafta(bugun),
-                    ),
-                  ),
-                  Expanded(
-                    child: _PuanKutusu(
-                      etiket: 'Toplam',
-                      puan: depo.toplamPuan,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Bugün $bugunDongu döngü tamamlandı',
+                    style: tema.textTheme.labelMedium?.copyWith(
+                      color: tema.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -131,6 +163,30 @@ class _FtHazirlikState extends State<FtHazirlik> {
               onTap: _konuSec,
             ),
           ),
+          if (bugunKonulari.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Bugünün planından hızlı seç:',
+              style: tema.textTheme.labelMedium?.copyWith(
+                color: soluk,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final k in bugunKonulari)
+                  ChoiceChip(
+                    label: Text(k.ad, overflow: TextOverflow.ellipsis),
+                    selected: _konuId == k.id,
+                    onSelected: (secili) =>
+                        setState(() => _konuId = secili ? k.id : null),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: 20),
           Row(
             children: [
@@ -149,6 +205,20 @@ class _FtHazirlikState extends State<FtHazirlik> {
                 enCok: FtAyarlari.donguEnCok,
                 onChanged: (v) => depo.ftAyarBelirle(ayar.kopya(donguSayisi: v)),
               ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final hizli in const [2, 4, 6])
+                ChoiceChip(
+                  label: Text('$hizli döngü'),
+                  selected: ayar.donguSayisi == hizli,
+                  onSelected: (_) =>
+                      depo.ftAyarBelirle(ayar.kopya(donguSayisi: hizli)),
+                ),
             ],
           ),
           const SizedBox(height: 4),

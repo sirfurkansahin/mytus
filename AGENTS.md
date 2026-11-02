@@ -22,7 +22,7 @@ Bu dosyayi her oturumun basinda oku. Sonra `HANDOFF.md` (durum, siradaki adim) v
 ## Derleme ortami (ONEMLI)
 - Bulut gelistirme ortaminda Flutter/pub.dev/Android araclarina erisim engellidir. Kod orada DERLENEMEZ ve calistirilamaz.
 - Derleme ve test GitHub Actions'ta yapilir: `.github/workflows/build-apk.yml` (analiz + test + APK).
-- Hatalari Actions gunluklerinden (log) oku. Her degisiklikte once kucuk tut, derleme sonucunu bekle.
+- Hatalari Actions gunluklerinden (log) oku. Her adimdan sonra GitHub'a gonderip APK derlemesi baslatma; ara adimlarda yerelde kal, yalnizca is bittiginde veya kullanici istediginde gonder/derle.
 - Ilk kurulumda `android/` klasoru `bootstrap-android.yml` akisiyla uretilir.
 
 ## Kod kurallari

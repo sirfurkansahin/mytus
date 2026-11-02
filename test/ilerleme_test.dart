@@ -63,6 +63,8 @@ void main() {
     final o = haftaOzetiHesapla(h.depo, hafta);
     expect(o.bos, isTrue);
     expect(o.odakDakika, 0);
+    expect(o.bitenTekrar, 0);
+    expect(o.aktifGun, 0);
     expect(o.gunlukDakika, List<int>.filled(7, 0));
     expect(o.dersler, isEmpty);
   });
@@ -80,6 +82,7 @@ void main() {
     expect(o.bitenDongu, 4);
     expect(o.odakDakika, 25 + 50 + 25 + 25);
     expect(o.puan, o.odakDakika);
+    expect(o.aktifGun, 3);
     expect(o.gunlukDakika, [25, 0, 75, 0, 0, 0, 25]);
     expect(o.dersler.map((d) => d.ad), ['Fizyoloji', 'Biyokimya']);
     expect(o.dersler.first.dakika, 75);
@@ -92,20 +95,29 @@ void main() {
     expect(onceki.gunlukDakika[6], 25);
   });
 
-  test('çalışılan konu: o hafta Çalıştım denen farklı konular', () async {
+  test('çalışılan konu, tekrar ve genel ilerleme / seri hesabı', () async {
     final h = await hazirla();
     final a = h.depo.calismaEkle(h.kalp, DateTime(2026, 10, 13))!;
     final b = h.depo.calismaEkle(h.kalp, DateTime(2026, 10, 15))!; // aynı konu, 2. tur
     final c = h.depo.calismaEkle(h.enzim, DateTime(2026, 10, 16))!;
     final d = h.depo.calismaEkle(h.ritim, DateTime(2026, 10, 20))!; // sonraki hafta
     h.depo.calistim(a.id, DateTime(2026, 10, 13));
+    h.depo.tekrarYapildi(a.id, 1, DateTime(2026, 10, 14));
     h.depo.calistim(b.id, DateTime(2026, 10, 15));
     h.depo.calistim(c.id, DateTime(2026, 10, 16));
     // d işaretlenmedi, planlı kaldı.
     expect(h.depo.calismaBul(d.id)!.tamam, isFalse);
     final o = haftaOzetiHesapla(h.depo, hafta);
     expect(o.calisilanKonu, 2);
+    expect(o.bitenTekrar, 1);
+    expect(o.aktifGun, 4); // 13, 14, 15, 16 Ekim
     expect(haftaOzetiHesapla(h.depo, DateTime(2026, 10, 20)).calisilanKonu, 0);
+
+    final genel = genelIlerlemeHesapla(h.depo, DateTime(2026, 10, 16));
+    expect(genel.toplamKonu, 3);
+    expect(genel.calisilanKonu, 2);
+    expect(genel.toplamTekrar, 1);
+    expect(genel.seriGun, 4);
   });
 
   test('silinen konunun odağı derse yazılmaz ama toplama girer', () async {

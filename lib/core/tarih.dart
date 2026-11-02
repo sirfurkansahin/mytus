@@ -92,3 +92,6 @@ int gunFarki(DateTime sonra, DateTime once) {
 
 /// Günün ait olduğu haftanın Pazartesi'si.
 DateTime haftaBasi(DateTime t) => gunEkle(gunBasi(t), -(t.weekday - 1));
+
+/// Resmi TUS sınav tarihi: 22 Ağustos 2027.
+final DateTime resmiSinavTarihi = DateTime(2027, 8, 22);

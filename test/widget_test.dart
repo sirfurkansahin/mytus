@@ -20,7 +20,10 @@ void main() {
 
     expect(find.text('Çalışma planını kuralım'), findsOneWidget);
     expect(find.text('Anatomi'), findsOneWidget);
+    expect(find.text('22 Ağustos 2027'), findsOneWidget);
     expect(find.text('Dahiliye'), findsOneWidget);
+    await tester.tap(find.text('Tümünü kaldır'));
+    await tester.pumpAndSettle();
     final basla = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Başla'),
     );

@@ -22,18 +22,82 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
     final soluk = tema.colorScheme.onSurfaceVariant;
-    final buHafta = haftaBasi(DateTime.now());
+    final bugun = gunBasi(DateTime.now());
+    final buHafta = haftaBasi(bugun);
     final ozet = haftaOzetiHesapla(depo, _hafta);
+    final genel = genelIlerlemeHesapla(depo, bugun);
     final suAnki = ayniGun(_hafta, buHafta);
     final enCok = ozet.gunlukDakika.fold<int>(0, (a, b) => a > b ? a : b);
-    final bugun = gunBasi(DateTime.now());
     final enUstDers = ozet.dersler.isEmpty ? 0 : ozet.dersler.first.dakika;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('İlerleme')),
+      appBar: AppBar(
+        title: const Text('İlerleme'),
+        actions: [
+          if (!suAnki)
+            TextButton(
+              onPressed: () => setState(() => _hafta = buHafta),
+              child: const Text('Bu haftaya dön'),
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
         children: [
+          Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: tema.colorScheme.outlineVariant),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Genel konu ilerlemesi',
+                        style: tema.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (genel.seriGun > 0)
+                        Text(
+                          '${genel.seriGun} gün seri',
+                          style: tema.textTheme.labelMedium?.copyWith(
+                            color: tema.colorScheme.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${genel.calisilanKonu} / ${genel.toplamKonu} konu (%${genel.yuzde})'
+                    ' · ${genel.toplamTekrar} tekrar tamamlandı',
+                    style: tema.textTheme.bodySmall?.copyWith(color: soluk),
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: LinearProgressIndicator(
+                      value: genel.oran,
+                      minHeight: 7,
+                      backgroundColor: tema.colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               IconButton(
@@ -92,6 +156,12 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
               color: tema.colorScheme.primary,
               fontWeight: FontWeight.w700,
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Bu hafta ${ozet.bitenTekrar} tekrar bitti · ${ozet.aktifGun} aktif gün',
+            textAlign: TextAlign.center,
+            style: tema.textTheme.bodySmall?.copyWith(color: soluk),
           ),
           const SizedBox(height: 24),
           Text(

@@ -1,6 +1,6 @@
 import 'package:app/core/renkler.dart';
-import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/ders_detay_ekrani.dart';
+import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +36,14 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
     final liste = depo.dersler(_grup);
+    final grupToplamKonu = liste.fold<int>(
+      0,
+      (toplam, d) => toplam + depo.konuSayisi(d.id),
+    );
+    final grupCalisilanKonu = liste.fold<int>(
+      0,
+      (toplam, d) => toplam + depo.calisilanSayisi(d.id),
+    );
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,11 +53,22 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Dersler',
-                    style: tema.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dersler',
+                        style: tema.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        'Bu grupta $grupToplamKonu konu · $grupCalisilanKonu çalışıldı',
+                        style: tema.textTheme.bodySmall?.copyWith(
+                          color: tema.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 FilledButton(

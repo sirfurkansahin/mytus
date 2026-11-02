@@ -3,8 +3,9 @@ import 'package:app/features/dersler/konu_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
-/// Bir dersin konu listesi ve hızlı konu ekleme kutusu.
-/// (Onaylı tasarımda ayrı bir ders detayı ekranı yoktu; aynı görsel dille eklendi.)
+enum _KonuFiltre { tumu, bekleyen, calisilan }
+
+/// Bir dersin konu listesi, filtreleme çipleri ve hızlı konu ekleme kutusu.
 class DersDetayEkrani extends StatefulWidget {
   const DersDetayEkrani({super.key, required this.dersId});
 
@@ -17,6 +18,7 @@ class DersDetayEkrani extends StatefulWidget {
 class _DersDetayEkraniState extends State<DersDetayEkrani> {
   final TextEditingController _yeniKonu = TextEditingController();
   final FocusNode _odak = FocusNode();
+  _KonuFiltre _filtre = _KonuFiltre.tumu;
 
   @override
   void dispose() {
@@ -81,7 +83,17 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
       // Ders silindi (sayfa kapanırken kısa süre görünür).
       return Scaffold(appBar: AppBar());
     }
-    final konular = depo.konular(ders.id);
+    final tumKonular = depo.konular(ders.id);
+    final calisilanSayisi =
+        tumKonular.where((k) => depo.konuCalisildi(k.id)).length;
+    final bekleyenSayisi = tumKonular.length - calisilanSayisi;
+    final konular = [
+      for (final k in tumKonular)
+        if (_filtre == _KonuFiltre.tumu ||
+            (_filtre == _KonuFiltre.calisilan && depo.konuCalisildi(k.id)) ||
+            (_filtre == _KonuFiltre.bekleyen && !depo.konuCalisildi(k.id)))
+          k,
+    ];
     return Scaffold(
       appBar: AppBar(
         title: Text(ders.ad),
@@ -96,9 +108,10 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
             child: Row(
               children: [
                 Expanded(
@@ -125,12 +138,41 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
               ],
             ),
           ),
+          if (tumKonular.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  ChoiceChip(
+                    label: Text('Tümü (${tumKonular.length})'),
+                    selected: _filtre == _KonuFiltre.tumu,
+                    onSelected: (_) => setState(() => _filtre = _KonuFiltre.tumu),
+                  ),
+                  ChoiceChip(
+                    label: Text('Bekleyen ($bekleyenSayisi)'),
+                    selected: _filtre == _KonuFiltre.bekleyen,
+                    onSelected: (_) =>
+                        setState(() => _filtre = _KonuFiltre.bekleyen),
+                  ),
+                  ChoiceChip(
+                    label: Text('Çalışılan ($calisilanSayisi)'),
+                    selected: _filtre == _KonuFiltre.calisilan,
+                    onSelected: (_) =>
+                        setState(() => _filtre = _KonuFiltre.calisilan),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: konular.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
-                      'Henüz konu yok. Yukarıdaki kutuya konu adını yazıp ekle.',
+                      tumKonular.isEmpty
+                          ? 'Henüz konu yok. Yukarıdaki kutuya konu adını yazıp ekle.'
+                          : 'Bu filtrede konu yok.',
                       textAlign: TextAlign.center,
                       style: tema.textTheme.bodyMedium?.copyWith(
                         color: tema.colorScheme.onSurfaceVariant,
@@ -143,6 +185,15 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
                     separatorBuilder: (context, sira) => const SizedBox(height: 8),
                     itemBuilder: (_, sira) {
                       final konu = konular[sira];
+                      final calisildi = depo.konuCalisildi(konu.id);
+                      final turSayisi = depo.calismalarKonu(konu.id).length;
+                      final altParcalar = <String>[
+                        if (calisildi)
+                          'Çalışıldı · $turSayisi tur'
+                        else if (turSayisi > 0)
+                          'Planlı · $turSayisi tur',
+                        if (konu.not.isNotEmpty) 'Notu var',
+                      ];
                       return Card(
                         elevation: 0,
                         margin: EdgeInsets.zero,
@@ -156,11 +207,24 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
+                          leading: Icon(
+                            calisildi
+                                ? Icons.check_circle
+                                : (turSayisi > 0
+                                    ? Icons.schedule
+                                    : Icons.radio_button_unchecked),
+                            color: calisildi
+                                ? tema.colorScheme.primary
+                                : tema.colorScheme.outline,
+                            size: 22,
+                          ),
                           title: Text(
                             konu.ad,
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          subtitle: konu.not.isEmpty ? null : const Text('Notu var'),
+                          subtitle: altParcalar.isEmpty
+                              ? null
+                              : Text(altParcalar.join(' · ')),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute<void>(

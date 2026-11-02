@@ -195,7 +195,14 @@ class FtSureAyarlari extends StatelessWidget {
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
     final a = depo.ftAyar;
+    const varsayilan = FtAyarlari();
+    final surelerDegismis = a.calismaDk != varsayilan.calismaDk ||
+        a.kisaMolaDk != varsayilan.kisaMolaDk ||
+        a.uzunMolaDk != varsayilan.uzunMolaDk ||
+        a.uzunMolaAraligi != varsayilan.uzunMolaAraligi;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AyarSatiri(
           baslik: 'Çalışma süresi',
@@ -253,6 +260,16 @@ class FtSureAyarlari extends StatelessWidget {
             }
           },
         ),
+        if (surelerDegismis)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => depo.ftAyarBelirle(
+                varsayilan.kopya(donguSayisi: a.donguSayisi),
+              ),
+              child: const Text('Varsayılan sürelere dön (25/5/15)'),
+            ),
+          ),
       ],
     );
   }

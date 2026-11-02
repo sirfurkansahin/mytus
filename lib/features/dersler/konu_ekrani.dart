@@ -8,7 +8,7 @@ import 'package:app/features/takvim/takvim_eylemleri.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:flutter/material.dart';
 
-/// Konu detayı: ad, durum ve özel not alanı (onaylı tasarım: Konu).
+/// Konu detayı: ad, durum, tek tıkla "Bugün çalıştım" ve özel not alanı (onaylı tasarım: Konu).
 /// Her yerleştirme (tur) için kendi tekrar planı gösterilir.
 class KonuEkrani extends StatefulWidget {
   const KonuEkrani({super.key, required this.konuId});
@@ -86,6 +86,19 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
       ..showSnackBar(
         SnackBar(content: Text('${tarihKisa(gun)} gününe yerleştirildi.')),
       );
+  }
+
+  void _bugunCalistim() {
+    final bugun = gunBasi(DateTime.now());
+    if (_depo.konuCalistimIsaretle(widget.konuId, bugun)) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Güzel! Tekrarların bugünden itibaren planlandı.'),
+          ),
+        );
+    }
   }
 
   Widget _kart(BuildContext context, {required Widget child}) {
@@ -253,6 +266,8 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
         '${ilk == null ? 'Henüz çalışılmadı' : 'İlk çalışma ${tarihYaz(ilk)}'}';
     final calismalar = depo.calismalarKonu(konu.id);
     final tekrarlar = depo.tekrarlar(bugun);
+    final bugunTamamVar =
+        calismalar.any((c) => c.tamam && ayniGun(c.tarih, bugun));
     return Scaffold(
       appBar: AppBar(
         title: Text(ders?.ad ?? ''),
@@ -313,8 +328,8 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Konuyu takvime yerleştirince ve "Çalıştım" deyince '
-                    'tekrar günleri burada görünür.',
+                    'Konuyu takvime yerleştirince veya "Bugün çalıştım" '
+                    'deyince tekrar günleri burada görünür.',
                     style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                   ),
                 ],
@@ -325,12 +340,24 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
             const SizedBox(height: 10),
           ],
           const SizedBox(height: 4),
-          OutlinedButton.icon(
-            onPressed: _takvimeEkle,
-            icon: const Icon(Icons.event_available_outlined),
-            label: Text(
-              calismalar.isEmpty ? 'Takvime ekle' : 'Başka bir güne daha ekle',
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (!bugunTamamVar)
+                FilledButton.tonalIcon(
+                  onPressed: _bugunCalistim,
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Bugün çalıştım'),
+                ),
+              OutlinedButton.icon(
+                onPressed: _takvimeEkle,
+                icon: const Icon(Icons.event_available_outlined),
+                label: Text(
+                  calismalar.isEmpty ? 'Takvime ekle' : 'Başka bir güne daha ekle',
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Row(

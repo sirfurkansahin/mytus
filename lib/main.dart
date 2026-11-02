@@ -43,36 +43,52 @@ class _MyTusAppState extends State<MyTusApp> {
     super.dispose();
   }
 
+  ThemeMode _temaModu(TemaSecimi secim) {
+    switch (secim) {
+      case TemaSecimi.sistem:
+        return ThemeMode.system;
+      case TemaSecimi.acik:
+        return ThemeMode.light;
+      case TemaSecimi.koyu:
+        return ThemeMode.dark;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MY TUS',
-      debugShowCheckedModeBanner: false,
-      // Ana renk mor (onaylı tasarım). Tema telefonun ayarını izler.
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: morAna).copyWith(
-          primary: morAna,
-          onPrimary: Colors.white,
-        ),
-        scaffoldBackgroundColor: acikZemin,
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: morAna,
-          brightness: Brightness.dark,
-        ),
-      ),
-      themeMode: ThemeMode.system,
-      locale: const Locale('tr', 'TR'),
-      supportedLocales: const [Locale('tr', 'TR')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      builder: (context, child) => DepoKapsami(
-        deposu: _deposu,
-        child: child ?? const SizedBox.shrink(),
-      ),
-      home: _AcilisKapisi(ftNative: widget.ftNative),
+    return ListenableBuilder(
+      listenable: _deposu,
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'MY TUS',
+          debugShowCheckedModeBanner: false,
+          // Ana renk mor (onaylı tasarım). Tema kullanıcı tercihini veya telefonun ayarını izler.
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(seedColor: morAna).copyWith(
+              primary: morAna,
+              onPrimary: Colors.white,
+            ),
+            scaffoldBackgroundColor: acikZemin,
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: morAna,
+              brightness: Brightness.dark,
+            ),
+          ),
+          themeMode: _temaModu(_deposu.temaSecimi),
+          locale: const Locale('tr', 'TR'),
+          supportedLocales: const [Locale('tr', 'TR')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          builder: (context, child) => DepoKapsami(
+            deposu: _deposu,
+            child: child ?? const SizedBox.shrink(),
+          ),
+          home: _AcilisKapisi(ftNative: widget.ftNative),
+        );
+      },
     );
   }
 }

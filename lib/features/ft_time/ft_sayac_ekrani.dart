@@ -246,6 +246,12 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 15, color: ftAcikYazi),
               ),
+              const SizedBox(height: 10),
+              FtDonguNoktalari(
+                toplamDongu: o.toplamDongu,
+                tamamlananDongu: o.tamamlananDongu,
+                aktifDongu: o.dongu,
+              ),
               if (bilgi != null) ...[
                 const SizedBox(height: 12),
                 Text(
