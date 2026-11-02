@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 
 enum YuklemeDurumu { yukleniyor, hazir, hata }
 
+/// Kullanıcının görünüm teması tercihi.
+enum TemaSecimi { sistem, acik, koyu }
+
 /// Kullanıcının planı: sınav tarihi, dersler, konular ve notlar.
 /// Bellekte tutulur, her değişiklikte telefona (VeriKaydi) yazılır.
 /// Not yazarken her tuşta dosya yazmamak için kayıt kısa bir gecikmeyle yapılır.
@@ -32,6 +35,7 @@ class PlanDeposu extends ChangeNotifier {
 
   DateTime? sinavTarihi;
   bool karsilamaTamam = false;
+  TemaSecimi temaSecimi = TemaSecimi.sistem;
 
   int _sonId = 0;
   final List<Ders> _dersler = [];
@@ -127,6 +131,11 @@ class PlanDeposu extends ChangeNotifier {
       final tarih = veri['sinavTarihi'];
       sinavTarihi = tarih is String ? tarihCoz(tarih) : null;
       karsilamaTamam = veri['karsilamaTamam'] == true;
+      final temaAdi = veri['temaSecimi'];
+      temaSecimi = TemaSecimi.values.firstWhere(
+        (t) => t.name == temaAdi,
+        orElse: () => TemaSecimi.sistem,
+      );
       _sonId = math.max(kayitliSon is int ? kayitliSon : 0, enBuyuk);
       _dersler
         ..clear()
@@ -179,6 +188,7 @@ class PlanDeposu extends ChangeNotifier {
         'sonId': _sonId,
         'karsilamaTamam': karsilamaTamam,
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
+        'temaSecimi': temaSecimi.name,
         'dersler': [for (final d in _dersler) d.toJson()],
         'konular': [for (final k in _konular) k.toJson()],
         'calismalar': [for (final c in _calismalar) c.toJson()],
@@ -435,6 +445,21 @@ class PlanDeposu extends ChangeNotifier {
     return true;
   }
 
+  /// Gecikmiş (bugünden önceki, tamamlanmamış) tüm çalışmaları bugüne taşır.
+  int gecikenleriBuguneAl(DateTime bugun) {
+    final hedef = gunBasi(bugun);
+    var tasinan = 0;
+    for (var i = 0; i < _calismalar.length; i++) {
+      final c = _calismalar[i];
+      if (!c.tamam && c.tarih.isBefore(hedef)) {
+        _calismalar[i] = c.kopya(tarih: hedef);
+        tasinan++;
+      }
+    }
+    if (tasinan > 0) _degisti();
+    return tasinan;
+  }
+
   /// "Çalıştım": çalışma bugün yapıldı sayılır ve tekrarlar bugünden başlar.
   bool calistim(int id, DateTime bugun) {
     final i = _calismalar.indexWhere((c) => c.id == id);
@@ -497,6 +522,36 @@ class PlanDeposu extends ChangeNotifier {
   void ftAyarBelirle(FtAyarlari ayar) {
     ftAyar = ayar;
     _degisti();
+  }
+
+  void temaBelirle(TemaSecimi yeni) {
+    if (temaSecimi == yeni) return;
+    temaSecimi = yeni;
+    _degisti();
+  }
+
+  /// Yedek metnini (JSON) doğrular ve tüm veriyi yedekten geri yükler.
+  bool yedektenYukle(String jsonMetni) {
+    final tamam = _jsonYukle(jsonMetni);
+    if (tamam) _degisti();
+    return tamam;
+  }
+
+  /// Tüm ders, konu, çalışma ve odak kayıtlarını sıfırlayıp karşılama ekranına döndürür.
+  Future<void> tumVerileriSifirla() async {
+    _sonId = 0;
+    _dersler.clear();
+    _konular.clear();
+    _calismalar.clear();
+    _odaklar.clear();
+    _oturum = null;
+    sinavTarihi = resmiSinavTarihi;
+    karsilamaTamam = false;
+    turSayisi = 2;
+    gunlukTekrarSiniri = 10;
+    ftAyar = const FtAyarlari();
+    _degisti();
+    await hemenKaydet();
   }
 
   // ------------------------------------------------------ F.T. time oturumu

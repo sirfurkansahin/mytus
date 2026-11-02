@@ -20,7 +20,10 @@ void main() {
 
     expect(find.text('Çalışma planını kuralım'), findsOneWidget);
     expect(find.text('Anatomi'), findsOneWidget);
+    expect(find.text('22 Ağustos 2027'), findsOneWidget);
     expect(find.text('Dahiliye'), findsOneWidget);
+    await tester.tap(find.text('Tümünü kaldır'));
+    await tester.pumpAndSettle();
     final basla = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Başla'),
     );
@@ -283,6 +286,9 @@ void ftTestleri() {
 void ilerlemeTestleri() {
   testWidgets('İlerleme: Bugün ekranından açılır, hafta özeti ve gezinme çalışır',
       (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     final anatomi = depo.dersler(DersGrubu.temel).first;
     final konu = depo.konuEkle(anatomi.id, 'Alt ekstremite')!;

@@ -63,6 +63,10 @@ Future<void> calismaEylemleri(
   final depo = DepoKapsami.oku(context);
   final konu = depo.konuBul(calisma.konuId);
   if (konu == null) return;
+  final yarin = gunEkle(bugun, 1);
+  final son = yerlestirmeSonGunu(depo, bugun);
+  final yarinaErtelenebilir =
+      !calisma.tamam && !ayniGun(calisma.tarih, yarin) && !yarin.isAfter(son);
   final secim = await showModalBottomSheet<String>(
     context: context,
     showDragHandle: true,
@@ -103,6 +107,13 @@ Future<void> calismaEylemleri(
               'Bugüne al',
               'bugune',
             ),
+          if (yarinaErtelenebilir)
+            _eylemSatiri(
+              sheetContext,
+              Icons.next_plan_outlined,
+              'Yarına ertele',
+              'yarina',
+            ),
           if (!calisma.tamam)
             _eylemSatiri(
               sheetContext,
@@ -131,6 +142,9 @@ Future<void> calismaEylemleri(
     case 'bugune':
       depo.calismaGunuDegistir(calisma.id, bugun);
       _mesaj(context, 'Bugüne alındı. Tekrarlar yeni güne göre hesaplandı.');
+    case 'yarina':
+      depo.calismaGunuDegistir(calisma.id, yarin);
+      _mesaj(context, 'Yarına ertelendi.');
     case 'gun':
       final yeni = await yerlestirmeGunuSec(
         context,

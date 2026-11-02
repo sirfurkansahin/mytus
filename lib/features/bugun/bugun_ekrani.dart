@@ -2,12 +2,26 @@ import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
+import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
 
-/// "Bugün" ekranı: geciken işler, bugünün planı, bugünkü tekrarlar ve sınav sayacı.
+/// "Bugün" ekranı: sınav sayacı, günlük görev ilerlemesi, geciken işler,
+/// bugünün planı, bugünkü tekrarlar ve yarının özeti.
 class BugunEkrani extends StatelessWidget {
   const BugunEkrani({super.key});
+
+  Future<void> _buguneKonuYerlestir(
+    BuildContext context,
+    PlanDeposu depo,
+    DateTime bugun,
+  ) async {
+    final konuId = await Navigator.of(context).push<int>(
+      MaterialPageRoute<int>(builder: (_) => const KonuSecEkrani()),
+    );
+    if (konuId == null || !context.mounted) return;
+    depo.calismaEkle(konuId, bugun);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +29,9 @@ class BugunEkrani extends StatelessWidget {
     final tema = Theme.of(context);
     final soluk = tema.colorScheme.onSurfaceVariant;
     final bugun = gunBasi(DateTime.now());
-    final sinav = depo.sinavTarihi;
-    final kalan = sinav == null ? null : gunFarki(sinav, bugun);
+    final yarin = gunEkle(bugun, 1);
+    final sinav = depo.sinavTarihi ?? resmiSinavTarihi;
+    final kalan = gunFarki(sinav, bugun);
 
     final tumCalismalar = depo.tumCalismalar();
     final tumTekrarlar = depo.tekrarlar(bugun);
@@ -37,6 +52,15 @@ class BugunEkrani extends StatelessWidget {
       for (final t in tumTekrarlar)
         if (ayniGun(t.tarih, bugun)) t,
     ];
+    final yarinCalismaSayisi = [
+      for (final c in tumCalismalar)
+        if (!c.tamam && ayniGun(c.tarih, yarin)) c,
+    ].length;
+    final yarinTekrarSayisi = [
+      for (final t in tumTekrarlar)
+        if (!t.yapildi && ayniGun(t.tarih, yarin)) t,
+    ].length;
+
     final haftaSonu = gunEkle(bugun, 6);
     final haftaKonuSayisi = {
       for (final c in tumCalismalar)
@@ -46,6 +70,8 @@ class BugunEkrani extends StatelessWidget {
 
     final yapilanCalisma = bugunCalismalari.where((c) => c.tamam).length;
     final yapilanTekrar = bugunTekrarlari.where((t) => t.yapildi).length;
+    final toplamGorev = bugunCalismalari.length + bugunTekrarlari.length;
+    final yapilanGorev = yapilanCalisma + yapilanTekrar;
     final geciken = gecikenCalismalar.length + gecikenTekrarlar.length;
     final bosGun = geciken == 0 &&
         bugunCalismalari.isEmpty &&
@@ -99,45 +125,85 @@ class BugunEkrani extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    kalan == null
-                        ? 'Sınav tarihi seçilmedi'
-                        : kalan > 0
-                            ? 'Sınava $kalan gün kaldı'
-                            : kalan == 0
-                                ? 'Sınav bugün'
-                                : 'Sınav tarihi geçti',
+                    kalan > 0
+                        ? 'Sınava $kalan gün kaldı'
+                        : kalan == 0
+                            ? 'Sınav bugün'
+                            : 'Sınav tarihi geçti',
                     style: tema.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: tema.colorScheme.onPrimaryContainer,
                     ),
                   ),
-                  if (sinav != null) ...[
-                    const SizedBox(height: 4),
+                  const SizedBox(height: 4),
+                  Text(
+                    tarihYaz(sinav),
+                    style: tema.textTheme.bodyMedium?.copyWith(
+                      color: tema.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  if (toplamGorev > 0) ...[
+                    const SizedBox(height: 12),
                     Text(
-                      tarihYaz(sinav),
-                      style: tema.textTheme.bodyMedium?.copyWith(
+                      'Bugünkü ilerleme: $yapilanGorev / $toplamGorev görev',
+                      style: tema.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
                         color: tema.colorScheme.onPrimaryContainer,
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: yapilanGorev / toplamGorev,
+                        minHeight: 6,
+                        backgroundColor: tema.colorScheme.onPrimaryContainer
+                            .withValues(alpha: 0.18),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          tema.colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
                   ],
-                  const SizedBox(height: 4),
-                  TextButton(
-                    onPressed: () => sinavTarihiSec(context, depo),
-                    child: const Text('Sınav tarihini değiştir'),
-                  ),
                 ],
               ),
             ),
           ),
-          if (haftaKonuSayisi > 0) ...[
-            const SizedBox(height: 10),
-            Text(
-              'Bu hafta $haftaKonuSayisi konu planlı',
-              style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
-            ),
-          ],
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (haftaKonuSayisi > 0)
+                Text(
+                  'Bu hafta $haftaKonuSayisi konu planlı',
+                  style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
+                )
+              else
+                const SizedBox.shrink(),
+              TextButton.icon(
+                onPressed: () => _buguneKonuYerlestir(context, depo, bugun),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('+ Bugüne konu yerleştir'),
+              ),
+            ],
+          ),
           if (geciken > 0) ...[
-            BolumBasligi(baslik: 'Geciken', bilgi: '$geciken iş'),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              children: [
+                BolumBasligi(baslik: 'Geciken', bilgi: '$geciken iş'),
+                if (gecikenCalismalar.isNotEmpty)
+                  TextButton(
+                    onPressed: () => depo.gecikenleriBuguneAl(bugun),
+                    child: const Text('Tümünü bugüne al'),
+                  ),
+              ],
+            ),
             for (final c in gecikenCalismalar) ...[
               CalismaSatiri(calisma: c, bugun: bugun, planliGunuGoster: true),
               const SizedBox(height: 8),
@@ -169,16 +235,47 @@ class BugunEkrani extends StatelessWidget {
           ],
           if (bosGun)
             Padding(
-              padding: const EdgeInsets.only(top: 28),
+              padding: const EdgeInsets.only(top: 20, bottom: 8),
               child: Text(
                 depo.tumCalismalar().isEmpty
-                    ? 'Henüz plan yok. Takvim sekmesinden bir konuyu bir güne '
-                        'yerleştir; tekrarlar otomatik oluşur.'
+                    ? 'Henüz plan yok. "+ Bugüne konu yerleştir" düğmesiyle '
+                        'veya Takvim sekmesinden bir konu ekle; tekrarlar otomatik oluşur.'
                     : 'Bugün için planlanmış bir iş yok.',
                 textAlign: TextAlign.center,
                 style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
               ),
             ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: tema.colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                Text(
+                  'Yarının planı',
+                  style: tema.textTheme.labelLarge?.copyWith(
+                    color: soluk,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  yarinCalismaSayisi == 0 && yarinTekrarSayisi == 0
+                      ? 'Planlanmış iş yok'
+                      : '$yarinCalismaSayisi konu · $yarinTekrarSayisi tekrar',
+                  style: tema.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

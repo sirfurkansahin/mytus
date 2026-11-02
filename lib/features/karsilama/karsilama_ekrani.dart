@@ -6,7 +6,7 @@ import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
-/// İlk açılış: sınav tarihi ve çalışılacak dersler (onaylı tasarım: Karşılama).
+/// İlk açılış: resmi sınav tarihi (22 Ağustos 2027) ve çalışılacak dersler (onaylı tasarım: Karşılama).
 class KarsilamaEkrani extends StatefulWidget {
   const KarsilamaEkrani({super.key});
 
@@ -15,23 +15,19 @@ class KarsilamaEkrani extends StatefulWidget {
 }
 
 class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
-  DateTime? _tarih;
+  final DateTime _tarih = resmiSinavTarihi;
   late final List<HazirDers> _liste = [...hazirDersler];
   late final Set<HazirDers> _secili = {...hazirDersler};
   bool _kaydediliyor = false;
 
-  Future<void> _tarihSec() async {
-    final bugun = DateTime.now();
-    final ilk = DateTime(bugun.year, bugun.month, bugun.day);
-    final secilen = await showDatePicker(
-      context: context,
-      initialDate: _tarih ?? ilk.add(const Duration(days: 90)),
-      firstDate: ilk,
-      lastDate: DateTime(ilk.year + 3, ilk.month, ilk.day),
-      helpText: 'Sınav tarihi',
-    );
-    if (!mounted || secilen == null) return;
-    setState(() => _tarih = secilen);
+  void _tumunuSecKaldir() {
+    setState(() {
+      if (_secili.length == _liste.length) {
+        _secili.clear();
+      } else {
+        _secili.addAll(_liste);
+      }
+    });
   }
 
   Future<void> _kendiDersimiEkle() async {
@@ -56,11 +52,10 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
   }
 
   Future<void> _basla(PlanDeposu depo) async {
-    final tarih = _tarih;
-    if (tarih == null || _kaydediliyor) return;
+    if (_secili.isEmpty || _kaydediliyor) return;
     setState(() => _kaydediliyor = true);
     await depo.karsilamayiTamamla(
-      sinavTarihi: tarih,
+      sinavTarihi: _tarih,
       secilenDersler: [
         for (final h in _liste)
           if (_secili.contains(h)) h,
@@ -107,6 +102,8 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
     final soluk = tema.colorScheme.onSurfaceVariant;
+    final kalanGun = gunFarki(_tarih, gunBasi(DateTime.now()));
+    final hepsiSecili = _secili.length == _liste.length;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -144,8 +141,8 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'İki şey yeterli: sınav tarihin ve çalışacağın dersler. '
-                      'Hepsini sonra değiştirebilirsin.',
+                      'Sınav tarihin hazır. Çalışacağın dersleri seç, '
+                      'hepsini sonra değiştirebilirsin.',
                       style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
                     ),
                     const SizedBox(height: 24),
@@ -156,33 +153,54 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    OutlinedButton(
-                      onPressed: _tarihSec,
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        alignment: Alignment.centerLeft,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: tema.colorScheme.outlineVariant,
                         ),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: Text(
-                        _tarih == null ? 'Tarih seç' : tarihYaz(_tarih!),
-                        style: const TextStyle(fontSize: 16),
+                        tarihYaz(_tarih),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Tekrar günleri bu tarihe göre hesaplanır.',
+                      kalanGun > 0
+                          ? 'Sınava $kalanGun gün var · Tekrar günleri bu tarihe göre hesaplanır.'
+                          : 'Tekrar günleri bu tarihe göre hesaplanır.',
                       style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'Dersler',
-                      style: tema.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      children: [
+                        Text(
+                          'Dersler (${_secili.length} seçili)',
+                          style: tema.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _tumunuSecKaldir,
+                          child: Text(
+                            hepsiSecili ? 'Tümünü kaldır' : 'Tümünü seç',
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       'TEMEL',
                       style: tema.textTheme.labelMedium?.copyWith(
@@ -222,17 +240,17 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_tarih == null)
+                  if (_secili.isEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
-                        'Başlamak için önce sınav tarihini seç.',
+                        'Başlamak için en az bir ders seç.',
                         textAlign: TextAlign.center,
                         style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                       ),
                     ),
                   FilledButton(
-                    onPressed: _tarih == null || _kaydediliyor
+                    onPressed: _secili.isEmpty || _kaydediliyor
                         ? null
                         : () => _basla(depo),
                     style: FilledButton.styleFrom(

@@ -1,39 +1,29 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 2 Kasim 2026 (Gemini), PR #7 main'e birlesti; F.T. time kalan kod temizligi tamamlandi (dal: model2/ft-time-temizlik); arka plan bildirimi sorunu hala acik
+Son guncelleme: 2 Kasim 2026 (Gemini), Surum 1 modulleri (1-7) bastan sona gelistirildi (`model2/moduller-gelistirme`), Actions dogrulamasi ve birlestirme asamasinda
 
 ## Durum
 - Faz 2 (kurulum) TAMAMLANDI (16 Ekim 2026): GitHub deposu + Actions derlemesi calisiyor, Firebase projesi (mytus, Spark, com.mytus.app) kuruldu, bos uygulama Firebase App Distribution ile kullanicinin realme GT 2 telefonuna kuruldu ve acildi.
 - Faz 3 (UX/UI tasarim) TAMAMLANDI ve onaylandi; taslaklar `docs/tasarim/` altinda.
-- Siradaki faz: Faz 4a (Surum 1 gelistirme). Basla: imza anahtari + otomatik dagitim, sonra ozellikler (sira kullanici onayiyla).
-- Depoda (main dalinda): bos Flutter uygulamasi (`lib/main.dart`, `test/widget_test.dart`), `android/` klasoru (bootstrap akisiyla uretildi), `pubspec.lock`, GitHub Actions akislari, bu belgeler.
-- Dogrulandi: paket adi `com.mytus.app` (namespace, applicationId, MainActivity). Ilk "APK derle" akisi (analiz + test + release APK) basarili, APK yaklasik 20 MB.
-- Uygulama etiketi "MY TUS" olarak ayarlandi (`AndroidManifest.xml`).
+- PR #7 (`claude/ft-time-sadelestirme`) ve PR #8 (`model2/ft-time-temizlik`) `main` dalina BIRLESTI (2 Kasim 2026).
+- Dal `model2/moduller-gelistirme`: Surum 1'in tum 7 modulu kullanici onayiyla gelistirildi:
+  1. **Karsilama:** Resmi TUS sinav tarihi `22 Agustos 2027` (`resmiSinavTarihi`) sabitlendi, kalan gun sayisi, secili ders sayisi (`Dersler (X secili)`), `Tumunu kaldir / Tumunu sec` ve en az 1 ders kontrolu eklendi.
+  2. **Bugun:** Puan gosterimi kaldirildi, sinav tarihi sabitlendi, gunluk gorev ilerleme cubugu (`X / Y gorev`), `+ Bugune konu yerlestir`, gecikenler icin `Tumunu bugune al` ve alt kisimda `Yarinin plani` ozeti eklendi.
+  3. **Dersler / Konu / Not:** Dersler ekraninda grup bazli `Bu grupta X konu · Y calisildi` alt basligi, Ders Detay ekraninda `Tumu / Bekleyen / Calisilan` filtre cipleri ve durum simgeleri, Konu ekraninda tek dokunusla `Bugun calistim` dugmesi eklendi.
+  4. **Takvim ve Tekrar:** Konu secme ekraninda anlik arama cubugu, takvimde aylik ozet (`Bu ay: X konu · Y tekrar`), tamamlanan/bekleyen gunler icin halka/dolu nokta ayrimi, `22 Agustos 2027` TUS sinav gunu vurgusu, bolum basliklarinda `X/Y` sayaclari ve calisma menusune `Yarina ertele` eklendi.
+  5. **F.T. time:** Hazirlik ekraninda bugunun bekleyen konularindan hizli secim cipleri, `Bugun X dongu tamamlandi` ozeti, `2 / 4 / 6 dongu` hizli secim cipleri ve sayac ekraninda (`FtSayacEkrani`) gorsel dongu noktalari (`FtDonguNoktalari`) eklendi.
+  6. **Ilerleme:** Genel TUS mufredat ilerleme karti (`X / Y konu (%Z) · N tekrar tamamlandi`), kesintisiz calisma serisi (`X gun seri`), haftalik biten tekrar ve aktif gun sayisi ile gecmis haftalarda `Bu haftaya don` dugmesi eklendi.
+  7. **Ayarlar:** Sinav tarihi `22 Agustos 2027` ve kalan gun gosterimi, calisan Tema secici (`Telefonun ayari / Acik / Koyu`), F.T. time surelerini varsayilana (`25/5/15`) dondurme dugmesi ve Veri/Yedek yonetimi (`Yedegi panoya kopyala`, `Yedekten geri yukle`, `Tum verileri sifirla`) eklendi.
 
 ## Siradaki adim
-1. Parca 1-4b main'e BIRLESTIRILDI (4b: PR #4, kullanici izniyle).
-2. Dal `claude/on-plan-servisi` PR #5 ile main'e BIRLESTI (17 Ekim 2026; PR #6 uctan uca testler de birlesti). Icerik: Flutter surumunu 3.47.7'ye sabitleme, on plan servisi (`TimerService`), sayac ekraninda pil uyarisi, olcum paneli (Ayarlar > Sayac testi > "Servis olcumu") ve Ayarlar altinda "derleme no". Actions yesil, Firebase derleme no 37.
+1. `model2/moduller-gelistirme` dalinin GitHub Actions'ta (analiz + test + APK) dogrulanip `main` dalina birlestirilmesi.
+2. **Modul 8 (Surum 2):** Google girisi, KVKK aydinlatma/onay ekranlari, bulut esitleme, davet kodlu arkadas grubu, haftalik puan tablosu ve istege bagli konu paylasimi.
 3. ACIK SORUN (kullanici karariyla NOTA ALINDI, simdilik cozulmeyecek): arka planda/ekran kilitliyken sure bitince bildirim GELMIYOR (realme GT 2, pil ayari varsayilanda). Sayac dogru calisiyor (uygulamaya donunce sure bitmis gorunur ve puan yazilir). Detay "Bilinen sorunlar" altinda.
-4. Sonraki: kullanici "kaldigimiz yerden" dedi: Surum 1 kapanis (arkadaslara dagitim hazirligi). Kullaniciyla sira konusulacak.
-5. Surum 2: Google girisi, bulut, grup, puan tablosu, paylasim. Analytics paketi ve google-services.json konusu orada ele alinacak.
-
-## F.T. time kod sadelestirme (28 Ekim - 2 Kasim 2026)
-Davranis degismedi, yalnizca dosya bolme/temizlik. Her adim Actions'ta (analiz + test + APK) yesil.
-- PR #7 (`claude/ft-time-sadelestirme`) kullanici onayiyla `main` dalina BIRLESTI (2 Kasim 2026).
-- `ft_oturum.dart` bolundu: `ft_ayarlari.dart` (FtAyarlari), `odak_kaydi.dart` (OdakKaydi). `ft_oturum.dart` ikisini yeniden disa aktarir (eski import'lar bozulmasin).
-- `ft_sayac_ekrani.dart`: FtDugme ve FtPilUyarisi `ft_sayac_bilesenleri.dart` dosyasina tasindi.
-- `ft_test_screen.dart` (600 -> 504 -> 337 satir): FtKart, FtSatir, FtLinkDugme ve olcum kartlari (`FtTestArkaPlanKarti`, `FtTestAlarmKarti`, `FtTestServisKarti`) `ft_test_bilesenleri.dart` dosyasina tasindi. Kopya pil rehberi kaldirilip ortak `pil_rehberi.dart` kullanildi. Sayac testi ekrani SILINMEDI (bildirim sorunu olcumu icin lazim).
-- Sabit renkler `core/renkler.dart` icine tasindi (ftCizgi, ftUyariZemin, ftYuzeyHafif, ftYuzeyOrta); test ekranindaki kalan sabit renkler de ortak pil rehberine gecilerek temizlendi.
-- Test ekraninin sayaci gercek puan/plan verisini (`PlanDeposu`) etkilememesi icin `FtKontrol` ile birlestirilmeyip izole tutuldu (ortak `FtTimerState` kullanir).
-- Sirada: `model2/ft-time-temizlik` dalinin Actions kontrolu ve kullanici onayiyla `main`'e birlestirilmesi, ardindan bildirim sorununun olcumu veya Surum 1 kapanis.
 
 ## Bilinen sorunlar / riskler
-- **ARKA PLAN BILDIRIMI GELMIYOR (17 Ekim 2026, kullanici testi):** F.T. time suresi bitince, telefon kilitliyken ve MY TUS icin pil ayari VARSAYILANDAYKEN bildirim gelmiyor. Pil ayari "kisitlama yok" yapildiginda ilk prototip testleri (A/B/C) gecmisti (~0,1 sn). Ek on plan servisi eklendi, bildirim yine gelmedi. Uygulamada sayac dogru (sure bitmis gorunuyor, puan yaziliyor, bildirim izni acik). Olasiliklar: (1) realme/ColorOS "otomatik baslatma" veya arka plan kisitlamasi alarm yayinini engelliyor, (2) alarm silindi/tetiklenmedi, (3) bildirim kanali/Rahatsiz etme. AYIRT ETMEK ICIN: Ayarlar > Sayac testi: 1 dk baslat, kilitle, 2 dk bekle; "Alarm olcumu" ve "Servis olcumu" kartlarini oku (bu olcum HENUZ YAPILMADI, kullanici sorunu simdilik not etmeyi secti). Gecici cozum: kullaniciya "pil kisitlamasi yok" ayarini yaptirmak (Ayarlar > Arka plan > Pil ayarlarini ac) ve uygulamayi acik tutmak.
-- Flutter surumu sabitlenmedi (`channel: stable`). Son derlemede kullanilan surum: Flutter 3.47.7 (Actions "Flutter surumu" bildiriminden). Sabitleme: `build-apk.yml` icinde `flutter-version: 3.47.7` ekle (kullanici onayiyla / Parca 2 oncesi).
-- Prototipte on plan servisi (foreground service) yok; alarm `setAlarmClock` ile kuruluyor. Telefon yeniden baslarsa alarm silinir.
-- APK imzalama: kalici anahtar GitHub Secrets'ta (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD); anahtarin tek yedegi kullanicida. Sirlar yoksa derleme debug anahtariyla imzalanir (kurulu uygulamanin uzerine kurulmaz). Imza sertifikasi akis icinde dogrulama bildirimi olarak yazdirilamadi; gunluk (log) indirilemedigi icin kalici anahtarla imzalandigi dolayli olarak (sirlar var, 'Imza anahtarini hazirla' adimi calisti) kabul ediliyor.
+- **ARKA PLAN BILDIRIMI GELMIYOR (17 Ekim 2026, kullanici testi):** F.T. time suresi bitince, telefon kilitliyken ve MY TUS icin pil ayari VARSAYILANDAYKEN bildirim gelmiyor. Pil ayari "kisitlama yok" yapildiginda ilk prototip testleri (A/B/C) gecmisti (~0,1 sn). Ek on plan servisi eklendi, bildirim yine gelmedi. Uygulamada sayac dogru (sure bitmis gorunuyor, puan yaziliyor, bildirim izni acik).
+- APK imzalama: kalici anahtar GitHub Secrets'ta (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD); anahtarin tek yedegi kullanicida.
 - Kod yerelde derlenemez; sonuclar yalnizca Actions'tan gelir.
-- `analysis_options.yaml` dosyasina diskte `analyzer.exclude` (build/**, android/**) eklenmis; degisikligi kimin yaptigi bilinmiyor, zararsiz gorundugu icin korundu.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.
