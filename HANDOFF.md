@@ -1,10 +1,10 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 3 Kasim 2026 (Gemini), Çift Müfredat desteği tamamlandı (`model2/cift-mufredat`).
+Son guncelleme: 3 Kasim 2026 (Gemini), Çift Müfredat desteği tamamlandı ve `main` dalına birleştirildi (PR #11).
 
 ## Durum
 - Faz 2 (kurulum) ve Faz 3 (UX/UI tasarim) TAMAMLANDI.
-- `model2/cift-mufredat` dalında geliştirilenler:
+- `model2/cift-mufredat` (PR #11) başarıyla `main` dalına birleştirildi:
   1. **Çift Müfredat Mimarisi:**
      - `MufredatTuru` enum (`klasik`, `speetus`) eklendi.
      - Hazır müfredatlar:
@@ -19,16 +19,13 @@ Son guncelleme: 3 Kasim 2026 (Gemini), Çift Müfredat desteği tamamlandı (`mo
      - `KonuEkrani`: Klinik rozeti ve mor vurgusu yalnızca klasik müfredatta gösteriliyor.
   4. **Ayarlar Ekranı (`ayarlar_ekrani.dart`):**
      - "Müfredat tarzı" ayar satırı eklendi. Kullanıcı istediği zaman Klasik ile SpeeTUS arasında geçiş yapabiliyor veya müfredatı sıfırlayabiliyor.
-  5. **Testler:**
-     - `test/plan_deposu_test.dart` ve `test/widget_test.dart` güncellendi, çift müfredat geçişleri ve arayüz etkileşimleri test edildi.
-  6. **Canlı Önizleme:**
-     - `mytus_canli_onizleme.html` prototipi güncellendi; karşılama ve dersler ekranında çift müfredat deneyimi simüle edildi.
+  5. **CI / Dağıtım Durumu:**
+     - `main` dalı üzerinde GitHub Actions çalıştı; analiz ve testler geçti.
+     - İmzalı Release APK derlendi ve **Firebase App Distribution** üzerinden test grubuna dağıtıldı.
+     - Canlı Web PWA sürümü **GitHub Pages** (`https://sirfurkansahin.github.io/mytus/`) üzerinde güncellendi.
 
 ## Siradaki adim
-1. `model2/cift-mufredat` dalındaki değişikliklerin GitHub'a gönderilmesi (push).
-2. GitHub Actions üzerinde analiz, test ve derlemenin (APK + Web) doğrulanması.
-3. PR açılarak kullanıcının onayıyla `main` dalına birleştirilmesi.
-4. **Modul 8 (Surum 2):** Google girisi, KVKK aydinlatma/onay ekranlari, bulut esitleme, davet kodlu arkadas grubu, haftalik puan tablosu ve istege bagli konu paylasimi.
+1. **Modul 8 (Surum 2):** Google girisi, KVKK aydinlatma/onay ekranlari, bulut esitleme, davet kodlu arkadas grubu, haftalik puan tablosu ve istege bagli konu paylasimi.
 
 ## Bilinen sorunlar / riskler
 - Web ortaminda telefon kilitliyken sistem alarm servisi (`AlarmManager`) bulunmaz; sayaç tarayici acikken kusursuz calisir.
