@@ -1,49 +1,40 @@
-import 'package:app/core/renkler.dart';
 import 'package:app/features/dersler/ders_detay_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
-/// Dersler sekmesi: Temel / Klinik grupları ve ders kartları (onaylı tasarım: Dersler).
-class DerslerEkrani extends StatefulWidget {
+/// Dersler sekmesi: SpeeTUS sarmal eğitim paketleri ve ders kartları (tek liste).
+class DerslerEkrani extends StatelessWidget {
   const DerslerEkrani({super.key});
 
-  @override
-  State<DerslerEkrani> createState() => _DerslerEkraniState();
-}
-
-class _DerslerEkraniState extends State<DerslerEkrani> {
-  DersGrubu _grup = DersGrubu.temel;
-
-  Future<void> _dersEkle(PlanDeposu depo) async {
-    final sonuc = await dersEkleDialogu(context, baslangicGrubu: _grup);
-    if (!mounted || sonuc == null) return;
-    final ders = depo.dersEkle(sonuc.ad, sonuc.grup);
-    if (ders == null) {
+  Future<void> _dersEkle(BuildContext context, PlanDeposu depo) async {
+    final sonuc = await dersEkleDialogu(context);
+    if (sonuc == null) return;
+    final ders = depo.dersEkle(sonuc.ad);
+    if (ders == null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Ders adı boş olamaz ve aynı grupta tekrar edemez.'),
+          content: Text('Ders adı boş olamaz ve listede tekrar edemez.'),
         ),
       );
-      return;
     }
-    setState(() => _grup = sonuc.grup);
   }
 
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
-    final liste = depo.dersler(_grup);
-    final grupToplamKonu = liste.fold<int>(
+    final liste = depo.tumDersler;
+    final toplamKonu = liste.fold<int>(
       0,
       (toplam, d) => toplam + depo.konuSayisi(d.id),
     );
-    final grupCalisilanKonu = liste.fold<int>(
+    final calisilanKonu = liste.fold<int>(
       0,
       (toplam, d) => toplam + depo.calisilanSayisi(d.id),
     );
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
@@ -64,7 +55,7 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
                     ),
                   ),
                   Text(
-                    'Bu grupta $grupToplamKonu konu · $grupCalisilanKonu çalışıldı',
+                    'Toplam $toplamKonu konu · $calisilanKonu çalışıldı',
                     style: tema.textTheme.bodySmall?.copyWith(
                       color: tema.colorScheme.onSurfaceVariant,
                     ),
@@ -72,23 +63,17 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
                 ],
               ),
               FilledButton(
-                onPressed: () => _dersEkle(depo),
+                onPressed: () => _dersEkle(context, depo),
                 child: const Text('+ Ders ekle'),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _GrupSecici(
-            secili: _grup,
-            degisti: (g) => setState(() => _grup = g),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           if (liste.isEmpty)
             Padding(
               padding: const EdgeInsets.all(32),
               child: Text(
-                'Bu grupta henüz ders yok. Sağ üstten "+ Ders ekle" ile '
-                'ekleyebilirsin.',
+                'Henüz ders yok. Sağ üstten "+ Ders ekle" ile ekleyebilirsin.',
                 textAlign: TextAlign.center,
                 style: tema.textTheme.bodyMedium?.copyWith(
                   color: tema.colorScheme.onSurfaceVariant,
@@ -106,60 +91,6 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
   }
 }
 
-class _GrupSecici extends StatelessWidget {
-  const _GrupSecici({required this.secili, required this.degisti});
-
-  final DersGrubu secili;
-  final ValueChanged<DersGrubu> degisti;
-
-  @override
-  Widget build(BuildContext context) {
-    final renkler = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: renkler.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          for (final grup in DersGrubu.values)
-            Expanded(
-              child: Semantics(
-                button: true,
-                selected: secili == grup,
-                child: Material(
-                  color: secili == grup ? renkler.surface : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: () => degisti(grup),
-                    child: SizedBox(
-                      height: 44,
-                      child: Center(
-                        child: Text(
-                          grup.ad,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight:
-                                secili == grup ? FontWeight.w700 : FontWeight.w600,
-                            color: secili == grup
-                                ? renkler.primary
-                                : renkler.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DersKarti extends StatelessWidget {
   const _DersKarti({required this.ders});
 
@@ -171,7 +102,6 @@ class _DersKarti extends StatelessWidget {
     final tema = Theme.of(context);
     final toplam = depo.konuSayisi(ders.id);
     final calisilan = depo.calisilanSayisi(ders.id);
-    final klinik = ders.grup == DersGrubu.klinik;
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -191,7 +121,6 @@ class _DersKarti extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Dar ekranda veya büyük yazıda "N konu · M çalışıldı" alt satıra iner.
               Wrap(
                 alignment: WrapAlignment.spaceBetween,
                 crossAxisAlignment: WrapCrossAlignment.end,
@@ -217,9 +146,8 @@ class _DersKarti extends StatelessWidget {
                 value: toplam == 0 ? 0 : calisilan / toplam,
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(3),
-                color: klinik ? klinikYazi(context) : tema.colorScheme.primary,
-                backgroundColor:
-                    klinik ? klinikZemin(context) : tema.colorScheme.primaryContainer,
+                color: tema.colorScheme.primary,
+                backgroundColor: tema.colorScheme.primaryContainer,
               ),
             ],
           ),

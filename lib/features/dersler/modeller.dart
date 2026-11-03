@@ -7,10 +7,11 @@ extension DersGrubuAdi on DersGrubu {
 
 /// Hazır ders listesindeki bir satır (henüz kayıtlı ders değil).
 class HazirDers {
-  const HazirDers(this.ad, this.grup);
+  const HazirDers(this.ad, this.grup, [this.konular = const []]);
 
   final String ad;
   final DersGrubu grup;
+  final List<String> konular;
 }
 
 class Ders {

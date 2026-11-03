@@ -42,8 +42,8 @@ class PlanDeposu extends ChangeNotifier {
   final List<Konu> _konular = [];
   final List<Calisma> _calismalar = [];
 
-  /// Her konu kaç tur çalışılacak (varsayılan 2). Ayarlar ekranından değişir.
-  int turSayisi = 2;
+  /// Her konu kaç tur çalışılacak (varsayılan 3, Rapor Bölüm 6: 3 faz, 3 tur).
+  int turSayisi = 3;
 
   /// Bir güne düşebilecek en çok tekrar sayısı (varsayılan 10).
   int gunlukTekrarSiniri = 10;
@@ -147,7 +147,7 @@ class PlanDeposu extends ChangeNotifier {
         ..clear()
         ..addAll(calismalar);
       final tur = veri['turSayisi'];
-      turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 2;
+      turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 3;
       final sinir = veri['gunlukTekrarSiniri'];
       gunlukTekrarSiniri = sinir is int && sinir >= 0 ? sinir : 10;
       ftAyar = FtAyarlari.fromJson(veri['ftAyar']);
@@ -201,8 +201,11 @@ class PlanDeposu extends ChangeNotifier {
 
   // ---------------------------------------------------------------- okuma
 
-  List<Ders> dersler(DersGrubu grup) =>
-      _dersler.where((d) => d.grup == grup).toList(growable: false);
+  List<Ders> get tumDersler => List.unmodifiable(_dersler);
+
+  List<Ders> dersler([DersGrubu? grup]) => grup == null
+      ? List.unmodifiable(_dersler)
+      : _dersler.where((d) => d.grup == grup).toList(growable: false);
 
   Ders? dersBul(int id) {
     for (final d in _dersler) {
@@ -238,14 +241,19 @@ class PlanDeposu extends ChangeNotifier {
 
   int _yeniId() => ++_sonId;
 
-  /// Karşılama ekranı bitti: sınav tarihini ve seçilen dersleri kaydeder.
+  /// Karşılama ekranı bitti: sınav tarihini, seçilen dersleri ve hazır alt konuları kaydeder.
   Future<void> karsilamayiTamamla({
     required DateTime sinavTarihi,
     required List<HazirDers> secilenDersler,
   }) async {
     this.sinavTarihi = DateTime(sinavTarihi.year, sinavTarihi.month, sinavTarihi.day);
     for (final h in secilenDersler) {
-      _dersEkleIc(h.ad, h.grup);
+      final ders = _dersEkleIc(h.ad, h.grup);
+      if (ders != null) {
+        for (final k in h.konular) {
+          _konuEkleIc(ders.id, k);
+        }
+      }
     }
     karsilamaTamam = true;
     _degisti();
@@ -257,21 +265,19 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
-  Ders? _dersEkleIc(String ham, DersGrubu grup) {
+  Ders? _dersEkleIc(String ham, [DersGrubu grup = DersGrubu.temel]) {
     final ad = adTemizle(ham);
     if (ad == null) return null;
     final kucuk = ad.toLowerCase();
-    final varMi = _dersler.any(
-      (d) => d.grup == grup && d.ad.toLowerCase() == kucuk,
-    );
+    final varMi = _dersler.any((d) => d.ad.toLowerCase() == kucuk);
     if (varMi) return null;
     final ders = Ders(id: _yeniId(), ad: ad, grup: grup);
     _dersler.add(ders);
     return ders;
   }
 
-  /// Ders ekler. Ad boşsa veya aynı grupta aynı adlı ders varsa null döner.
-  Ders? dersEkle(String ad, DersGrubu grup) {
+  /// Ders ekler. Ad boşsa veya aynı adlı ders varsa null döner.
+  Ders? dersEkle(String ad, [DersGrubu grup = DersGrubu.temel]) {
     final ders = _dersEkleIc(ad, grup);
     if (ders != null) _degisti();
     return ders;
@@ -284,7 +290,7 @@ class PlanDeposu extends ChangeNotifier {
     final ders = _dersler[indeks];
     final kucuk = ad.toLowerCase();
     final baskasiVar = _dersler.any(
-      (d) => d.id != id && d.grup == ders.grup && d.ad.toLowerCase() == kucuk,
+      (d) => d.id != id && d.ad.toLowerCase() == kucuk,
     );
     if (baskasiVar) return false;
     _dersler[indeks] = ders.kopya(ad: ad);
@@ -303,8 +309,7 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
-  /// Konu ekler. Ad boşsa, ders yoksa veya aynı derste aynı adlı konu varsa null döner.
-  Konu? konuEkle(int dersId, String ham) {
+  Konu? _konuEkleIc(int dersId, String ham) {
     final ad = adTemizle(ham);
     if (ad == null || dersBul(dersId) == null) return null;
     final kucuk = ad.toLowerCase();
@@ -314,7 +319,13 @@ class PlanDeposu extends ChangeNotifier {
     if (varMi) return null;
     final konu = Konu(id: _yeniId(), dersId: dersId, ad: ad);
     _konular.add(konu);
-    _degisti();
+    return konu;
+  }
+
+  /// Konu ekler. Ad boşsa, ders yoksa veya aynı derste aynı adlı konu varsa null döner.
+  Konu? konuEkle(int dersId, String ham) {
+    final konu = _konuEkleIc(dersId, ham);
+    if (konu != null) _degisti();
     return konu;
   }
 
@@ -547,7 +558,7 @@ class PlanDeposu extends ChangeNotifier {
     _oturum = null;
     sinavTarihi = resmiSinavTarihi;
     karsilamaTamam = false;
-    turSayisi = 2;
+    turSayisi = 3;
     gunlukTekrarSiniri = 10;
     ftAyar = const FtAyarlari();
     _degisti();

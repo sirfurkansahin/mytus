@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
-import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
@@ -52,10 +51,12 @@ void main() {
     expect(depo.sinavTarihi, isNotNull);
     expect(find.textContaining('Sınava'), findsOneWidget);
 
+    final ilkDers = depo.tumDersler.first;
+
     // Dersler: konu ekle, not yaz.
     await tester.tap(find.text('Dersler'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Fizyoloji'));
+    await tester.tap(find.text(ilkDers.ad));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Kalp döngüsü');
     await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -70,8 +71,6 @@ void main() {
     await tester.pump();
 
     // Uygulama kapanıp yeniden açılır: depodaki veri aynen yeni depoya yüklenir.
-    // (Disk yazma zinciri ayrıca birim testlerde sınanıyor; widget testinde sahte
-    // zaman yüzünden zincir tamamlanmıyor.)
     final yeniKayit = BellekKaydi(icerik: jsonEncode(depo.toJson()));
     depo = await bosDepo(tester, yeniKayit);
     expect(depo.karsilamaTamam, isTrue);
@@ -80,12 +79,15 @@ void main() {
     expect(find.text('Çalışma planını kuralım'), findsNothing);
     await tester.tap(find.text('Dersler'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Fizyoloji'));
+    await tester.tap(find.text(ilkDers.ad));
     await tester.pumpAndSettle();
     expect(find.text('Kalp döngüsü'), findsOneWidget);
     expect(find.text('Notu var'), findsOneWidget);
-    final fizyoloji = depo.dersler(DersGrubu.temel).firstWhere((d) => d.ad == 'Fizyoloji');
-    expect(depo.konular(fizyoloji.id).single.not, 'Sistol ve diyastol');
+    final dersKaydi = depo.tumDersler.firstWhere((d) => d.id == ilkDers.id);
+    expect(
+      depo.konular(dersKaydi.id).firstWhere((k) => k.ad == 'Kalp döngüsü').not,
+      'Sistol ve diyastol',
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -93,7 +95,7 @@ void main() {
   testWidgets('Takvim, Bugün ve tekrar zinciri', (tester) async {
     ekranAyarla(tester);
     final depo = await doluDepo(tester);
-    final ders = depo.dersler(DersGrubu.temel).first;
+    final ders = depo.tumDersler.first;
     final konu = depo.konuEkle(ders.id, 'Üst ekstremite')!;
     await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
@@ -218,14 +220,14 @@ void main() {
         koyu: kosul.koyu,
       );
       final depo = await doluDepo(tester);
-      final ders = depo.dersler(DersGrubu.temel).first;
-      final konu = depo.konuEkle(ders.id, 'Üst ekstremitenin arteriyel dolaşımı')!;
+      final ders = depo.tumDersler.first;
+      final konu = depo.konular(ders.id).first;
       final bugun = gunBasi(DateTime.now());
       final c = depo.calismaEkle(konu.id, bugun)!;
       depo.calistim(c.id, bugun);
       depo.calismaEkle(konu.id, gunEkle(bugun, 3));
-      depo.konuEkle(ders.id, 'Brachial plexus');
-      depo.calismaEkle(depo.konular(ders.id).last.id, gunEkle(bugun, -2));
+      final digerKonu = depo.konular(ders.id)[1];
+      depo.calismaEkle(digerKonu.id, gunEkle(bugun, -2));
       await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
       await tester.pumpAndSettle();
 
@@ -251,10 +253,14 @@ void main() {
 
       Future<void> dokun(String adim, Finder f) async {
         if (f.evaluate().isEmpty) {
+          final scrollables = find.byType(Scrollable);
+          final scrollTarget = scrollables.evaluate().length > 1
+              ? scrollables.last
+              : scrollables.first;
           await tester.scrollUntilVisible(
             f,
             300,
-            scrollable: find.byType(Scrollable).first,
+            scrollable: scrollTarget,
           );
         }
         expect(f, findsWidgets, reason: '[$adim] bulunamadi');
@@ -274,10 +280,8 @@ void main() {
       }
 
       await dokun('sekme Dersler', find.text('Dersler'));
-      await dokun('Klinik', find.text('Klinik'));
-      await dokun('Temel', find.text('Temel'));
       await dokun('ders ekrani', find.text(ders.ad));
-      await dokun('konu ekrani', find.text('Üst ekstremitenin arteriyel dolaşımı'));
+      await dokun('konu ekrani', find.text(konu.ad));
       await geri('konudan geri');
       await geri('dersten geri');
 

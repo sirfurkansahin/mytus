@@ -1,6 +1,6 @@
 # DECISIONS.md: Kararlar
 
-Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degistirmeden once kullaniciya sor.
+Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degistirmeden once kullaniciya sor.
 
 | Konu | Karar |
 |---|---|
@@ -13,8 +13,8 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Veri (Surum 2) | Takma ad + e-posta + calisma verisi. Notlar ozel, asla paylasilmaz. |
 | Puan tablosu | Haftalik sifirlanir |
 | Paylasim | Istege bagli (opt-in), yalnizca konu adlari |
-| Plan olusturma | Her yeni planda sinav tarihi sorulur |
-| Hazir icerik | Hazir DERS ADI listesi. Temel: Anatomi, Histoloji ve Embriyoloji, Fizyoloji, Biyokimya, Mikrobiyoloji, Patoloji, Farmakoloji. Klinik: Dahiliye, Pediatri, Genel Cerrahi, Kadin Hastaliklari ve Dogum. Dersler Temel/Klinik gruplarinda durur, kullanici iki gruba da kendi dersini ekleyebilir. Liste guncel OSYM kilavuzuyla dogrulanmadi. |
+| Plan olusturma | Resmi TUS sinav tarihi `22 Agustos 2027` olarak sabitlendi (2 Kasim 2026 kullanici karari). |
+| Hazir icerik ve Mufredat | SpeeTUS Sarmal Egitim mufredatina gore 19 Sistem Paketi ve hazir alt konulari (3 Kasim 2026 kullanici karari - Secenek 1). Temel / Klinik ayrimi tamamen KALDIRILDI (3 Kasim 2026 kullanici karari): Tum paketler tek bir sirali liste halinde sunulur (1. Tibbin Temelleri ... 19. Siniflandirilmayan Konular). Her paketin altindaki tum videolar hazir konu olarak karsilama ekraninda secilen derslerle birlikte otomatik yuklenir. |
 | Dagitim | Firebase App Distribution |
 | KVKK | Hafif uyum: aydinlatma metni, ilk giriste onay, hesap/veri silme, minimum veri |
 | Gelir | Yok |
@@ -23,7 +23,7 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Tasarim | Faz 3 ekran taslaklari ONAYLANDI (16 Ekim 2026). Kopya: `docs/tasarim/`. Ana renk mor, tema telefona uyar, alt menu Bugun/Dersler/Takvim/F.T. time. |
 | Takvime yerlestirme | Iki yol da olacak: konu detayinda "Takvime ekle" (gun secilir) ve takvimde gune dokunup "+ Konu yerlestir". |
 | Puan kurali | Tamamlanan odak suresi kadar puan (ornek: 1 dakika = 1 puan). Sure ayarindan bagimsiz. Yalnizca TAMAMLANAN donguler puan kazandirir (yarim birakilan puan getirmez), kullanici karari 16 Ekim 2026. |
-| F.T. time varsayilan sureler | 25 dk calisma, 5 dk kisa mola, 15 dk uzun mola, her 4 dongude bir uzun mola. Kullanici degistirebilir. |
+| F.T. time varsayilan sureler | 25 dk calisma, 5 dk kisa mola, 15 dk uzun mola, her 4 dongude bir uzun mola. Ayrica rapora uygun tek dokunusla **"Derin blok (50/10/20 dk)"** ve **"Klasik (25/5/15 dk)"** hazir secim cipleri eklendi (3 Kasim 2026). Kullanici degistirebilir. |
 | Firebase projesi | Ad: mytus, Spark plani, Google hesabi: kullanicinin kendi hesabi. Google Analytics ACIK (kullanici karari, 16 Ekim 2026). |
 | Analytics sonucu | Analytics, cihaz/kullanim verisi toplar. Uygulamaya eklendiginde aydinlatma metnine yazilmali ve ilk giriste onay alinmali. KARAR (16 Ekim 2026): Analytics SDK'si Surum 2'de, Google girisi ve KVKK ekranlariyla birlikte eklenecek. Surum 1 hicbir veriyi cihazdan cikarmaz. |
 
@@ -42,91 +42,32 @@ Son guncelleme: 16 Ekim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Flutter surumu | `build-apk.yml` icinde 3.47.7'ye SABITLENDI (17 Ekim 2026). Neden: kod yerelde derlenemiyor, "stable" kaydiginda otomatik surum atlarsa gecen gun yesil olan derleme bozulabilir. Surum yukseltme bilincli yapilir ve once Actions'ta denenir. |
 | On plan servisi (17 Ekim 2026) | KULLANICI TESTI 6: pil ayari YAPILMADAN sure bitince bildirim GELMEDI (uygulamada sayac dogru bitmis gorunuyordu, bildirim izni aciktı). Karar (kullanici 3-a): sayac calisirken `TimerService` (on plan servisi, tur: specialUse) calisir ve "calisan sayac" bildirimini tutar; boylece sistem uygulama surecini oldurup alarmi silemez. Sure takibi yine `setAlarmClock` ile; sure bitince alici servisi durdurur ve "Sure bitti" bildirimini gosterir. Servis baslatilamazsa duz bildirime donulur. Sayac ekraninda pil kisitlamasi varsa kapatilabilir uyari + "Pil ayarlarini ac" dugmesi. SONUC (17 Ekim 2026): servisle de bildirim GELMEDI; neden olculmedi, sorun kullanici karariyla NOTA ALINDI (HANDOFF.md > Bilinen sorunlar). Servis dalda duruyor, ama calistigi kanitlanmadi. |
 | Ek Flutter paketi | Yalnizca `flutter_localizations` (Flutter'in kendi paketi): tarih secici ve sistem yazilari Turkce. |
-| Karsilama (Parca 2) | Sinav tarihi ZORUNLU (secilmeden "Basla" kapali; kullanici karari: her planda tarih sorulur). Hazir dersler baslangicta secili; istemedigi kaldirilir; "+ Kendi dersimi ekle" ile Temel/Klinik'e ders eklenir. |
-| Konu ekleme (Parca 2) | Tek tek, ders detayinda hizli ekleme kutusu (kullanici karari 3-a). Toplu yapistirma yok. |
+| Karsilama (Parca 2) | Sinav tarihi `22 Agustos 2027` sabit. Hazir dersler tek liste olarak baslangicta secili; istenmeyenin cipi kaldirilir; "+ Kendi dersimi ekle" ile ders eklenir. Temel/Klinik ayrimi yoktur. |
+| Konu ekleme (Parca 2) | Hazir dersler kendi iclerindeki zengin alt konularla birlikte otomatik gelir; ayrica ders detayinda hizli ekleme kutusuyla kullanici kendi konusunu da ekleyebilir. |
 | Not bicimi (Parca 2) | Duz yazi, konu basina tek not alani (kullanici karari 4-a). |
-| Ders/konu kurallari | Ad bosluklari temizlenir, bos olamaz, en fazla 80 karakter. Ayni grupta ayni adli ders, ayni derste ayni adli konu eklenemez (buyuk/kucuk harf ayirt edilmez). Ders silinince konulari ve notlari da silinir (onay sorulur). Ders ve konu adi degistirilebilir. |
+| Ders/konu kurallari | Ad bosluklari temizlenir, bos olamaz, en fazla 80 karakter. Ayni adli ders tekrar eklenemez (buyuk/kucuk harf ayirt edilmez, tum liste tekildir). Ayni derste ayni adli konu eklenemez. Ders silinince konulari ve notlari da silinir (onay sorulur). Ders ve konu adi degistirilebilir. |
 | Ders detayi ekrani | Onayli tasarimda yoktu; Dersler -> konu listesi icin ayni gorsel dille EKLENDI. |
 | "Calisildi" sayisi | Bir konuda en az bir yerlestirme "Calistim" ile isaretlenince konu "calisildi" sayilir (Parca 3'te baglandi). |
-| Bugun ekrani (gecici) | Parca 2'de yalnizca "sinava N gun kaldi" ve sinav tarihini degistirme. Gunun plani Parca 3-4'te. |
 
-## Takvim ve tekrar motoru (Parca 3, 16 Ekim 2026)
-Kullanici onayli (1-a 2-a 3-a 4-b) kurallar ve BENIM YORUMLARIM ayri belirtilmistir.
+## Takvim ve tekrar motoru (Parca 3, 16 Ekim 2026 & Rapor guncellemesi 3 Kasim 2026)
+Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Raporu guncellemeleri:
 
 | Konu | Karar |
 |---|---|
-| Her yerlestirme kendi serisi | Bir konu birden fazla gune yerlestirilebilir; her yerlestirme ("Calisma") kendi tekrar serisine sahiptir ("Tur 1/2, Tur 2/2"). Tur numarasi = ayni konunun yerlestirmeleri arasinda tarih sirasi. (ONAYLI) |
+| Her yerlestirme kendi serisi | Bir konu birden fazla gune yerlestirilebilir; her yerlestirme ("Calisma") kendi tekrar serisine sahiptir ("Tur 1/3, Tur 2/3, Tur 3/3"). Tur numarasi = ayni konunun yerlestirmeleri arasinda tarih sirasi. (ONAYLI) |
 | "Calistim" | Yerlestirmenin gunu bugune cekilir ve tekrar zinciri BUGUNDEN baslar. Geri alinabilir (yapilan tekrar kayitlari da silinir). (ONAYLI) |
-| Tekrar gunleri | Yukaridaki tablo; sinava kalan gun, ilk calismanin gununden hesaplanir. Tablodaki satirlar arasi degerlerde en yakin ALT satir kullanilir; 7 gunden azda 7 gunluk satir. (BENIM YORUMUM) |
+| R0 (Aksam tekrari) | Bugun en az 1 konu "Calistim" olarak isaretlendiginde Bugun ekraninda **"R0 · Aksam uyku oncesi beyaz sayfa tekrari"** hatirlatma karti gosterilir (uyku sirasinda hipokampal-neokortikal pekistirme oncesi 15-20 dk). (ONAYLI - 3 Kasim 2026) |
+| Tekrar gunleri (R1–R4) | Asagidaki R1–R4 tablosu; sinava kalan gun, ilk calismanin gununden hesaplanir. Tablodaki satirlar arasi degerlerde en yakin ALT satir kullanilir; 7 gunden azda 7 gunluk satir. (ONAYLI - 3 Kasim 2026) |
 | Gecikme kaymasi | Bir tekrar gec yapilirsa sonrakiler ayni gun sayisi kadar kayar (ornek: 1. tekrar 2 gun gec yapilirsa sonrakiler de 2 gun gecikir). Tekrarlar saklanmaz, taban tarih + birikmis gecikmeden TURETILIR. (ONAYLI) |
 | Sinav siniri | Hicbir tekrar sinavdan sonraya kalmaz; en gec sinavdan 1 gun once. (ONAYLI) |
-| Gunluk sinir | Varsayilan 10 tekrar/gun; fazlasi ertesi gune kayar. Yapilan ve geciken tekrarlar sinira sayilmaz. Ayarlardan degistirme Parca 4'te. (sayi BENIM YORUMUM) |
-| Siralama | Tekrar yalnizca konu "Calistim" yapildiktan sonra ve yalnizca SIRADAKI tekrar yapilabilir; sonrakiler gorunur ama kapali. (BENIM YORUMUM) |
+| Gunluk sinir | Varsayilan 10 tekrar/gun; fazlasi ertesi gune kayar. Yapilan ve geciken tekrarlar sinira sayilmaz. |
+| Siralama | Tekrar yalnizca konu "Calistim" yapildiktan sonra ve yalnizca SIRADAKI tekrar yapilabilir; sonrakiler gorunur ama kapali. |
 | Gecikenler | Bugun ekraninda "Geciken": gunu gecmis ama yapilmamis yerlestirmeler + gunu gecmis, sirasi gelmis tekrarlar. |
 | Yerlestirme sinirlari | Gecmis gune ve sinav gunu/sonrasina yerlestirilemez. Sinav tarihi yoksa 1 yila kadar. |
-| Tur sayisi | Varsayilan 2 (Ayarlardan degistirme Parca 4). |
+| Tur sayisi | Varsayilan **3** (Rapor Bolum 6: "3 faz, 3 tur, R0–R4"; 3 Kasim 2026 kullanici onayi). Ayarlardan 1-5 arasi degistirilebilir. |
 | Kod yeri | `lib/features/takvim/` (motor saf fonksiyon: `tekrar_motoru.dart`, birim testli). Tum veri hala tek JSON dosyasinda (`calismalar` anahtari). |
 
 ## Ayarlar, F.T. time ve puan (Parca 4a, 16 Ekim 2026)
-Kullanici cevaplari: bolme 1-a, konu secimi 2-a (istege bagli), 3-c (odak bitince "Calistim mi?" diye sor), puan gorunumu 4-a (F.T. time + Ilerleme). BENIM YORUMLARIM ayri belirtilmistir.
-
 | Konu | Karar |
 |---|---|
-| Kapsam | 4a: Ayarlar + gercek F.T. time (hazirlik, sayac, mola, puan). 4b: Ilerleme ekrani (sonra). |
-| Oturum akisi | Calisma 1, mola, calisma 2, ... calisma N. Son calismadan sonra mola yok. Uzun mola her `uzunMolaAraligi` (4) donguden sonra. Varsayilan 25/5/15 dk, 4 dongu. Toplam sure tasarim ornegiyle uyumlu (4 dongu = 1 sa 55 dk). |
-| Bolum gecisi | Bolum bitince sonraki bolume kullanici dugmeyle gecer ("Molayi baslat", "Dongu N baslat"); OTOMATIK baslamaz. Neden: arka planda alarm bildirimi zaten uyarir; kullanici hazir degilken sayac kosmaz. (BENIM YORUMUM) |
-| Molayi atla | Molada "Molayi atla" ile sonraki calismaya hemen gecilir. (BENIM YORUMUM) |
-| Puan | Calisma bolumu BITINCE o dongunun suresi kadar puan (1 dk = 1 puan). Yarim birakilan dongu ve mola puan getirmez. Ayni dongu iki kez puanlanmaz ("oturumNo:donguNo" anahtari). Uygulama kapaliyken biten bolum, uygulama acilinca bitis saatiyle puanlanir. |
-| Sure kilidi | Oturum baslarken sureler ayarlardan alinip oturuma yazilir; sonradan ayar degisse de oturum etkilenmez. (BENIM YORUMUM) |
-| Konu | Istege bagli ("Konusuz calis" olabilir). Konu silinirse puanlar kalir, kayit konusuz olur. |
-| Calistim sorusu | Oturum biterken konu secilmisse ve en az 1 dongu bittiyse "Konuyu calistim olarak isaretleyeyim mi?" diye sorulur. Evet: konunun bekleyen en erken yerlestirmesi bugune alinip "Calistim" yapilir; bekleyen yoksa bugune yeni yerlestirme acilir. Hayir: hicbir sey degismez. (soru: kullanici karari; "en erken bekleyen yerlestirme" secimi BENIM YORUMUM) |
-| Ayarlar | Bugun ekraninin sag ustundeki disli simgesinden acilir. Sinav tarihi, tur sayisi (1-5), gunluk tekrar siniri (3-30), F.T. sureleri, arka plan/pil durumu, sayac testi (gelismis). Sinirlar BENIM YORUMUM. "Dersleri duzenle" satiri eklenmedi (Dersler sekmesi var). |
-| Veri | Oturum, odak kayitlari ve F.T. ayarlari ayni JSON dosyasinda (`oturum`, `odaklar`, `ftAyar`); puan ve oturum birlikte atomik yazilir. |
-| Pil rehberi | Ilk oturum acildiginda bir kez gosterilir; Ayarlar'dan tekrar acilir. |
-| Prototip | Sayac prototipi (`ft_test_screen.dart`) Ayarlar > Sayac testi altinda kaldi (alarm olcumu icin; 6. test hala yapilmadi). Calisan oturum varken acilmaz. |
-| Bildirim metni | "Sure bitti / Uygulamayi acip devam edebilirsin" (calisma ve mola icin ortak). |
-
-## Ilerleme ekrani (Parca 4b, 17 Ekim 2026)
-Kullanici cevaplari: 1-a (hafta oklari), 2-a ("Calistim" denen konular), 3-a (odak suresine gore ders sirasi), 4-a (ders ilerlemesi bolumu YOK, tasarimdaki gibi sade).
-
-| Konu | Karar |
-|---|---|
-| Erisim | Bugun ekraninin sag ustunde grafik simgesi (disli simgesinin yaninda). |
-| Hafta | Pazartesi-Pazar. Oklarla gecmis haftalara bakilir; gelecege gidilmez (bu haftada sonraki ok kapali). |
-| Calisilan konu | O hafta "Calistim" isaretlenen FARKLI konu sayisi (ayni konu iki tur isaretlenirse 1). |
-| Biten dongu / odak suresi | O haftaki odak kayitlari. 1 dk = 1 puan; hafta puani da gosterilir. |
-| Gunluk grafik | 7 cubuk (dakika), cubuk yuksekligi haftanin en yuksek gunune gore olceklenir; bugun vurgulu. Ek paket yok. |
-| En cok calisilan dersler | Konuya bagli odaklardan derse gore toplam sure, coktan aza, en cok 5 ders. Konusuz odak toplama girer ama ders listesine girmez. Konusu silinmis odak da yalnizca toplama girer. |
-| Sure yazimi | 60 dk altinda "45 dk", ustunde "5,8 sa" (virgullu). |
-| Ek bolum | "Ders ilerlemesi (x/y konu)" EKLENMEDI (kullanici karari). Istenirse Surum 1 sonrasi eklenir. |
-
-## Uctan uca otomatik test (17 Ekim 2026)
-- `test/uctan_uca_test.dart`: karsilamadan basla, ders/konu/not, yeniden acilis, takvim -> Bugun -> tekrar zinciri, F.T. time dongu/mola/puan; ayrica 3 durumda (320x568 kucuk telefon, 1.6x buyuk yazi, koyu tema) tum ekranlarin tasmadan acildigi sinanir.
-- Bulunan ve duzeltilen hatalar: Dersler ders karti, Takvim gun basligi + "+ Konu yerlestir", Takvim aciklama satiri ve gun hucresi dar ekran/buyuk yazida tasiyordu (Row -> Wrap, sabit yukseklik -> en az yukseklik).
-- Sinirlar: gercek telefon, bildirim, pil ayarlari ve disk yazma bu testlerle sinanmaz (bildirim sorunu "Bilinen sorunlar"da).
-- CI artik testleri dosya dosya, 240 sn zaman asimiyla calistirir; basarisiz dosyanin ozeti ayri bildirim olarak yazilir.
-
-## Tekrar sistemi
-- Konu basina en fazla 4 kisa tekrar (10-15 dk, notlara bakmadan hatirlama + kontrol).
-- Sinava kalan gune gore tekrar gunleri (ilk calismadan sonra gun sayisi):
-
-| Sinava kalan gun | Tekrar gunleri |
-|---|---|
-| 7 | 1, 3, 4 |
-| 14 | 1, 4, 7, 9 |
-| 30 | 1, 7, 12, 16 |
-| 60 | 1, 8, 17, 25 |
-| 120 | 1, 8, 21, 33 |
-| 180 | 1, 8, 26, 43 |
-| 300 | 1, 8, 29, 53 |
-
-- Kullanici tur sayisini secer (varsayilan 2). Gunluk tekrar yuku siniri vardir, fazlasi ertesi gune kayar. Tekrarlar takvimde otomatik "Tekrar" olarak gorunur (bildirim yok).
-- Dayanak: Cepeda 2008, Kerfoot ve ark. TUS'a ozgu akademik veri yok. Oranlar ara degerleme, kanitlanmis kesin deger degil.
-
-## Acik / dogrulanmamis noktalar
-- Firebase yurt disi aktarimi icin KVKK m.9 yolu kesinlesmedi (hukukcu sorusu).
-- Android gelistirici dogrulamasi 2027'de kuresel olabilir; "sinirli dagitim hesabi" (en fazla 20 cihaz) not edildi, acilis durumu dogrulanmadi.
-- Firebase App Distribution tester limiti ve GitHub Actions ucretsiz kotasi dogrulanmadi.
-- Ileride arkadas disina acilma karari yok; guvenlik kurallari bastan cok kullanicili yazilacak.
-- APK imzalama: Kalici anahtar (alias `mytus`) uretildi; kullanici yedekledi ve GitHub Secrets'a koydu (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD). Anahtar ASLA depoya girmez. Sirlar yoksa derleme debug anahtariyla imzalanir ve o APK ile kalici anahtarli APK birbirinin uzerine kurulamaz (once silmek gerekir).
-- Dagitim otomasyonu: sirlar FIREBASE_APP_ID, FIREBASE_SERVICE_ACCOUNT, FIREBASE_TESTERS. main dalina gonderimde veya elle `dagit` secilince APK Firebase App Distribution'a yuklenir. Build numarasi her derlemede `github.run_number` ile artar.
+| F.T. time blok presetleri | Rapordaki 50/10/20 dk "Derin blok" ve 25/5/15 dk "Klasik Pomodoro" ayarlardan veya sayactan tek dokunusla secilebilir (3 Kasim 2026). |

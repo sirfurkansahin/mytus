@@ -164,7 +164,7 @@ void main() {
         sinavTarihi: DateTime(2027, 4, 1),
         secilenDersler: const [HazirDers('Fizyoloji', DersGrubu.temel)],
       );
-      final ders = depo.dersler(DersGrubu.temel).single;
+      final ders = depo.tumDersler.single;
       return (depo: depo, kayit: kayit, konuId: depo.konuEkle(ders.id, 'Kalp')!.id);
     }
 

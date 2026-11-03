@@ -109,8 +109,12 @@ class TekrarSatiri extends StatelessWidget {
     final vurgu = tekrarRengi(context);
     final etiket = 'Tekrar ${tekrar.no}/${tekrar.toplam}';
     final altYazi = [
+      tekrar.rKodu,
       if (ders != null) ders.ad,
-      if (tarihiGoster) tarihKisa(tekrar.tarih) else 'notlara bakmadan hatırla',
+      if (tarihiGoster)
+        tarihKisa(tekrar.tarih)
+      else
+        'notlara bakmadan geri çağır',
     ].join(' · ');
     return _kart(
       context,

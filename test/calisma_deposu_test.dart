@@ -14,7 +14,7 @@ Future<({PlanDeposu depo, BellekKaydi kayit, int konuId, int dersId})>
     sinavTarihi: DateTime(2027, 4, 1),
     secilenDersler: const [HazirDers('Fizyoloji', DersGrubu.temel)],
   );
-  final ders = depo.dersler(DersGrubu.temel).single;
+  final ders = depo.tumDersler.single;
   final konu = depo.konuEkle(ders.id, 'Kalp döngüsü')!;
   return (depo: depo, kayit: kayit, konuId: konu.id, dersId: ders.id);
 }
@@ -73,7 +73,7 @@ void main() {
     h.depo.calistim(c.id, bugun);
     h.depo.tekrarYapildi(c.id, 1, DateTime(2026, 10, 19)); // 2 gün geç
     final liste = h.depo.tekrarlar(DateTime(2026, 10, 19));
-    expect(liste.firstWhere((o) => o.no == 2).tarih, DateTime(2026, 10, 26));
+    expect(liste.firstWhere((o) => o.no == 2).tarih, DateTime(2026, 10, 25));
   });
 
   test('tekrarı geri almak ondan sonrakileri de siler', () async {
@@ -81,7 +81,7 @@ void main() {
     final c = h.depo.calismaEkle(h.konuId, bugun)!;
     h.depo.calistim(c.id, bugun);
     h.depo.tekrarYapildi(c.id, 1, DateTime(2026, 10, 17));
-    h.depo.tekrarYapildi(c.id, 2, DateTime(2026, 10, 24));
+    h.depo.tekrarYapildi(c.id, 2, DateTime(2026, 10, 23));
     expect(h.depo.tekrarGeriAl(c.id, 1), isTrue);
     expect(h.depo.calismaBul(c.id)!.tekrarlar, isEmpty);
     expect(h.depo.tekrarGeriAl(c.id, 1), isFalse);
@@ -123,7 +123,7 @@ void main() {
     expect(k.tamam, isTrue);
     expect(k.tarih, bugun);
     expect(k.tekrarKaydi(1)!.tarih, DateTime(2026, 10, 18));
-    expect(yeni.turSayisi, 2);
+    expect(yeni.turSayisi, 3);
     expect(yeni.gunlukTekrarSiniri, 10);
     // Yeni kayıtlar eski numaralarla çakışmaz.
     final c2 = yeni.calismaEkle(h.konuId, bugun)!;
