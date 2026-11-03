@@ -1,5 +1,7 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/denemeler/denemeler_ekrani.dart';
+import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/ilerleme/ilerleme_hesabi.dart';
 import 'package:flutter/material.dart';
 
@@ -96,6 +98,11 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
                 ],
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          _DenemelerIlerlemeKarti(
+            denemeSayisi: depo.denemeler.length,
+            sonDeneme: depo.denemeler.isNotEmpty ? depo.denemeler.first : null,
           ),
           const SizedBox(height: 16),
           Row(
@@ -357,6 +364,75 @@ class _DersSatiri extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+class _DenemelerIlerlemeKarti extends StatelessWidget {
+  const _DenemelerIlerlemeKarti({
+    required this.denemeSayisi,
+    this.sonDeneme,
+  });
+
+  final int denemeSayisi;
+  final DenemeSinavi? sonDeneme;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final soluk = tema.colorScheme.onSurfaceVariant;
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: tema.colorScheme.outlineVariant),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const DenemelerEkrani()),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: tema.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.assignment_outlined, color: tema.colorScheme.primary),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Deneme Sınavları & Net Analizi',
+                      style: tema.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      sonDeneme != null
+                          ? 'Son:  ( net · ~ Puan)'
+                          : 'Henüz deneme girilmedi. Eklemek için dokun.',
+                      style: tema.textTheme.bodySmall?.copyWith(color: soluk),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
       ),
     );
   }

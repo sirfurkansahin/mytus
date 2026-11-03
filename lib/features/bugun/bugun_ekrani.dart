@@ -1,5 +1,6 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
+import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
@@ -94,6 +95,13 @@ class BugunEkrani extends StatelessWidget {
                   style: tema.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Denemeler & Analiz',
+                icon: const Icon(Icons.assignment_outlined),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const DenemelerEkrani()),
                 ),
               ),
               IconButton(

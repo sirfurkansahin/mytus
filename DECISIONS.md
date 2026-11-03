@@ -71,3 +71,13 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 | Konu | Karar |
 |---|---|
 | F.T. time blok presetleri | Rapordaki 50/10/20 dk "Derin blok" ve 25/5/15 dk "Klasik Pomodoro" ayarlardan veya sayactan tek dokunusla secilebilir (3 Kasim 2026). |
+
+## Deneme Sınavı & Bilişsel Hata Analizi (Modül 1, 3 Kasım 2026)
+| Konu | Karar ve Neden |
+|---|---|
+| Soru ve Süre Formatı | 200 soru (100 Temel TTBT + 100 Klinik KTBT; oturum başına 135 dk). Net hesabı: Doğru - Yanlış/4. |
+| Ağırlıklı Puanlar | Klinik Ağırlıklı K = 0.4 TTBT + 0.6 KTBT; Temel Ağırlıklı T = 0.6 TTBT + 0.4 KTBT. |
+| ÖSYM 85 EBAP Puanlama | Sınav Puanı = 55 + 30 * [7(AP - X) - S] / [7(EBAP - X) - S] formülü ile 85 tavanına göre ölçeklenir. |
+| A–F Hata Sınıfları | A: Bilgi kusuru, B: Yanlış biliyordum (Emin + Yanlış), C: Okuma/kurgu, D: Mantık/halka, E: Süre/yorgunluk, F: Form/dikkat. |
+| Hiperdüzeltme Alarmı | "Emin + Yanlış" hücresindeki hatalar yanlış inanç olduğundan AYNI GÜN düzeltilmelidir uyarısı verilir. |
+| Kalibrasyon Farkı | Ortalama Güven - Doğruluk (hedef mutlak değer <= %5). +%8 üzeri aşırı güven alarmı üretir. |
