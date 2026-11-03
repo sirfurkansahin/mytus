@@ -3,6 +3,7 @@ import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/ilerleme/ilerleme_hesabi.dart';
+import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:flutter/material.dart';
 
 /// İlerleme: haftalık özet, günlük odak grafiği ve en çok çalışılan dersler
@@ -46,6 +47,57 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
         children: [
+          Card(
+            elevation: 0,
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: tema.colorScheme.primary.withValues(alpha: 0.4),
+              ),
+            ),
+            color: tema.colorScheme.primary.withValues(alpha: 0.08),
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+              ),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.dashboard_customize_outlined,
+                      color: tema.colorScheme.primary,
+                      size: 26,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Master Yönetim Kokpiti',
+                            style: tema.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: tema.colorScheme.primary,
+                            ),
+                          ),
+                          Text(
+                            '8 Bilişsel Gösterge & "Eğer–O Zaman" Kararları',
+                            style: tema.textTheme.bodySmall?.copyWith(
+                              color: soluk,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: tema.colorScheme.primary),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Card(
             elevation: 0,
             margin: EdgeInsets.zero,

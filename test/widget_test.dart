@@ -135,6 +135,7 @@ void main() {
   defterlerTestleri();
   bilisselTestleri();
   provaTestleri();
+  kokpitTestleri();
 }
 
 void takvimTestleri() {
@@ -516,6 +517,47 @@ void provaTestleri() {
     expect(find.text('KALAN SÜRE'), findsOneWidget);
     expect(find.textContaining('Soru: 1 / 100'), findsOneWidget);
     expect(find.text('Provayı Bitir'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void kokpitTestleri() {
+  testWidgets('Bugün ekranından Master Kokpit açılır ve 8+4 göstergeler görünür',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    // Bugün ekranındaki Master Kokpit butonuna dokun
+    await tester.tap(find.byTooltip('Master Kokpit'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Master Yönetim Kokpiti'), findsOneWidget);
+    expect(find.text('BİLİŞSEL SAĞLIK & KOKPİT SKORU'), findsOneWidget);
+    expect(find.text('Otomatik "Eğer–O Zaman" Kararları'), findsOneWidget);
+    expect(find.text('8 Bilişsel Gösterge (Haftalık Teşhis)'), findsOneWidget);
+    expect(find.text('4 Sınav & Net Göstergesi'), findsOneWidget);
+
+    // 8 Göstergenin başlıkları
+    expect(find.text('Kalibrasyon Farkı'), findsOneWidget);
+    expect(find.text('Uyku Düzeni & Sapma'), findsOneWidget);
+    expect(find.text('Prefrontal Korteks (PFC)'), findsOneWidget);
+    expect(find.text('Test Kaygısı'), findsOneWidget);
+    expect(find.text('R1 Tekrar Geçişi'), findsOneWidget);
+    expect(find.text('R3 Tekrar Geçişi'), findsOneWidget);
+    expect(find.text('Odak & Bilişsel Tavan'), findsOneWidget);
+
+    // Hızlı araç: Beklenen Değer kartını aç
+    await tester.tap(find.text('Beklenen Değer (EV)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cevap Değiştirme ve Beklenen Değer (EV)'), findsOneWidget);
+    await tester.tap(find.text('Kapat'));
+    await tester.pumpAndSettle();
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
