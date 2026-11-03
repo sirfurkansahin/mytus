@@ -1,3 +1,16 @@
+/// Çalışma müfredatı tarzı: Klasik Branşlar (11 branş) veya SpeeTUS (19 sistem paketi).
+enum MufredatTuru {
+  klasik,
+  speetus;
+
+  String get baslik =>
+      this == MufredatTuru.klasik ? 'Klasik Branşlar' : 'SpeeTUS Sarmal';
+
+  String get kisaAciklama => this == MufredatTuru.klasik
+      ? '11 branş · Temel ve Klinik ayrımı'
+      : '19 sistem paketi · Sarmal video takibi';
+}
+
 /// Dersler iki gruba ayrılır (onaylı karar): Temel ve Klinik.
 enum DersGrubu { temel, klinik }
 

@@ -16,9 +16,20 @@ class KarsilamaEkrani extends StatefulWidget {
 
 class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
   final DateTime _tarih = resmiSinavTarihi;
-  late final List<HazirDers> _liste = [...hazirDersler];
-  late final Set<HazirDers> _secili = {...hazirDersler};
+  MufredatTuru _seciliMufredat = MufredatTuru.speetus;
+  late List<HazirDers> _liste = [...mufredatDersleri(_seciliMufredat)];
+  late Set<HazirDers> _secili = {...mufredatDersleri(_seciliMufredat)};
   bool _kaydediliyor = false;
+
+  void _mufredatSec(MufredatTuru yeni) {
+    if (_seciliMufredat == yeni) return;
+    setState(() {
+      _seciliMufredat = yeni;
+      final kaynak = mufredatDersleri(yeni);
+      _liste = [...kaynak];
+      _secili = {...kaynak};
+    });
+  }
 
   void _tumunuSecKaldir() {
     setState(() {
@@ -31,7 +42,10 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
   }
 
   Future<void> _kendiDersimiEkle() async {
-    final sonuc = await dersEkleDialogu(context);
+    final sonuc = await dersEkleDialogu(
+      context,
+      grupSecimiGoster: _seciliMufredat == MufredatTuru.klasik,
+    );
     if (!mounted || sonuc == null) return;
     final ad = PlanDeposu.adTemizle(sonuc.ad);
     if (ad == null) return;
@@ -44,7 +58,7 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
       );
       return;
     }
-    final yeni = HazirDers(ad, DersGrubu.temel);
+    final yeni = HazirDers(ad, sonuc.grup);
     setState(() {
       _liste.add(yeni);
       _secili.add(yeni);
@@ -60,33 +74,76 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
         for (final h in _liste)
           if (_secili.contains(h)) h,
       ],
+      mufredatTuru: _seciliMufredat,
     );
     // Kayıt bitince depo "karşılama tamam" olur ve ana iskelet kendiliğinden açılır.
   }
 
+  Widget _cip(HazirDers h) {
+    final klinik = h.grup == DersGrubu.klinik && _seciliMufredat == MufredatTuru.klasik;
+    return FilterChip(
+      label: Text(h.ad),
+      selected: _secili.contains(h),
+      showCheckmark: true,
+      selectedColor: klinik
+          ? klinikZemin(context)
+          : Theme.of(context).colorScheme.primaryContainer,
+      labelStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: klinik
+            ? klinikYazi(context)
+            : Theme.of(context).colorScheme.onPrimaryContainer,
+      ),
+      onSelected: (acik) => setState(() {
+        if (acik) {
+          _secili.add(h);
+        } else {
+          _secili.remove(h);
+        }
+      }),
+    );
+  }
+
   Widget _tumDersCipleri() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    if (_seciliMufredat == MufredatTuru.speetus) {
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [for (final h in _liste) _cip(h)],
+      );
+    }
+    final temel = _liste.where((h) => h.grup == DersGrubu.temel);
+    final klinik = _liste.where((h) => h.grup == DersGrubu.klinik);
+    final tema = Theme.of(context);
+    final soluk = tema.colorScheme.onSurfaceVariant;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final h in _liste)
-          FilterChip(
-            label: Text(h.ad),
-            selected: _secili.contains(h),
-            showCheckmark: true,
-            selectedColor: Theme.of(context).colorScheme.primaryContainer,
-            labelStyle: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+        if (temel.isNotEmpty) ...[
+          Text(
+            'TEMEL',
+            style: tema.textTheme.labelSmall?.copyWith(
+              color: soluk,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
             ),
-            onSelected: (acik) => setState(() {
-              if (acik) {
-                _secili.add(h);
-              } else {
-                _secili.remove(h);
-              }
-            }),
           ),
+          const SizedBox(height: 6),
+          Wrap(spacing: 8, runSpacing: 8, children: [for (final h in temel) _cip(h)]),
+          const SizedBox(height: 12),
+        ],
+        if (klinik.isNotEmpty) ...[
+          Text(
+            'KLİNİK',
+            style: tema.textTheme.labelSmall?.copyWith(
+              color: soluk,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(spacing: 8, runSpacing: 8, children: [for (final h in klinik) _cip(h)]),
+        ],
       ],
     );
   }
@@ -174,7 +231,36 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                           : 'Tekrar günleri bu tarihe göre hesaplanır.',
                       style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Çalışma tarzı / Müfredat',
+                      style: tema.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SegmentedButton<MufredatTuru>(
+                      segments: const [
+                        ButtonSegment(
+                          value: MufredatTuru.klasik,
+                          label: Text('Klasik Branşlar'),
+                          icon: Icon(Icons.menu_book_outlined),
+                        ),
+                        ButtonSegment(
+                          value: MufredatTuru.speetus,
+                          label: Text('SpeeTUS Sarmal'),
+                          icon: Icon(Icons.view_timeline_outlined),
+                        ),
+                      ],
+                      selected: {_seciliMufredat},
+                      onSelectionChanged: (yeni) => _mufredatSec(yeni.first),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _seciliMufredat.kisaAciklama,
+                      style: tema.textTheme.bodySmall?.copyWith(color: soluk),
+                    ),
+                    const SizedBox(height: 20),
                     Wrap(
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,

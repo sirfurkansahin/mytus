@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
 import 'package:app/features/dersler/dialoglar.dart';
+import 'package:app/features/dersler/hazir_dersler.dart';
+import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/ft_time/ft_test_screen.dart';
@@ -114,6 +116,33 @@ class AyarlarEkrani extends StatelessWidget {
       );
   }
 
+  Future<void> _mufredatDegistir(BuildContext context, PlanDeposu depo) async {
+    final hedef = depo.mufredatTuru == MufredatTuru.klasik
+        ? MufredatTuru.speetus
+        : MufredatTuru.klasik;
+    final onay = await onayDialogu(
+      context,
+      baslik: 'Müfredat tarzını değiştir?',
+      metin: 'Mevcut tarzın "${depo.mufredatTuru.baslik}". "${hedef.baslik}" tarzına '
+          'geçmek ders ve konu listeni yeni sisteme göre baştan kurar. '
+          'Mevcut çalışma ve not kayıtların sıfırlanır. Devam edilsin mi?',
+      eylem: 'Değiştir',
+    );
+    if (!onay || !context.mounted) return;
+    final yeniDersler = mufredatDersleri(hedef);
+    await depo.mufredatSifirlaVeDegistir(
+      yeniTur: hedef,
+      yeniDersler: yeniDersler,
+    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Müfredat "${hedef.baslik}" olarak değiştirildi.'),
+        ),
+      );
+    }
+  }
+
   Future<void> _sifirla(BuildContext context, PlanDeposu depo) async {
     final onay = await onayDialogu(
       context,
@@ -180,6 +209,12 @@ class AyarlarEkrani extends StatelessWidget {
               );
               if (v != null) depo.gunlukSinirBelirle(v);
             },
+          ),
+          AyarSatiri(
+            baslik: 'Müfredat tarzı',
+            altYazi: depo.mufredatTuru.kisaAciklama,
+            deger: depo.mufredatTuru.baslik,
+            onTap: () => _mufredatDegistir(context, depo),
           ),
           _baslik(context, 'F.T. TIME'),
           const FtSureAyarlari(),

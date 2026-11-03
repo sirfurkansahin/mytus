@@ -14,6 +14,8 @@ class FtNative {
       return null;
     } on PlatformException {
       return null;
+    } catch (_) {
+      return null;
     }
   }
 

@@ -1,17 +1,30 @@
+import 'package:app/core/renkler.dart';
 import 'package:app/features/dersler/ders_detay_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
-/// Dersler sekmesi: SpeeTUS sarmal eğitim paketleri ve ders kartları (tek liste).
-class DerslerEkrani extends StatelessWidget {
+/// Dersler sekmesi: Müfredat türüne göre (Klasik'te Temel/Klinik sekmeli, SpeeTUS'ta tek liste).
+class DerslerEkrani extends StatefulWidget {
   const DerslerEkrani({super.key});
 
+  @override
+  State<DerslerEkrani> createState() => _DerslerEkraniState();
+}
+
+class _DerslerEkraniState extends State<DerslerEkrani> {
+  DersGrubu _grup = DersGrubu.temel;
+
   Future<void> _dersEkle(BuildContext context, PlanDeposu depo) async {
-    final sonuc = await dersEkleDialogu(context);
+    final klasikMi = depo.mufredatTuru == MufredatTuru.klasik;
+    final sonuc = await dersEkleDialogu(
+      context,
+      baslangicGrubu: _grup,
+      grupSecimiGoster: klasikMi,
+    );
     if (sonuc == null) return;
-    final ders = depo.dersEkle(sonuc.ad);
+    final ders = depo.dersEkle(sonuc.ad, sonuc.grup);
     if (ders == null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -25,7 +38,8 @@ class DerslerEkrani extends StatelessWidget {
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
-    final liste = depo.tumDersler;
+    final klasikMi = depo.mufredatTuru == MufredatTuru.klasik;
+    final liste = klasikMi ? depo.dersler(_grup) : depo.tumDersler;
     final toplamKonu = liste.fold<int>(
       0,
       (toplam, d) => toplam + depo.konuSayisi(d.id),
@@ -34,6 +48,10 @@ class DerslerEkrani extends StatelessWidget {
       0,
       (toplam, d) => toplam + depo.calisilanSayisi(d.id),
     );
+
+    final durumMetni = klasikMi
+        ? 'Bu grupta $toplamKonu konu · $calisilanKonu çalışıldı'
+        : 'Toplam $toplamKonu konu · $calisilanKonu çalışıldı';
 
     return SafeArea(
       child: ListView(
@@ -55,7 +73,7 @@ class DerslerEkrani extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Toplam $toplamKonu konu · $calisilanKonu çalışıldı',
+                    durumMetni,
                     style: tema.textTheme.bodySmall?.copyWith(
                       color: tema.colorScheme.onSurfaceVariant,
                     ),
@@ -68,6 +86,13 @@ class DerslerEkrani extends StatelessWidget {
               ),
             ],
           ),
+          if (klasikMi) ...[
+            const SizedBox(height: 16),
+            _GrupSecici(
+              secili: _grup,
+              onSecildi: (g) => setState(() => _grup = g),
+            ),
+          ],
           const SizedBox(height: 16),
           if (liste.isEmpty)
             Padding(
@@ -83,7 +108,10 @@ class DerslerEkrani extends StatelessWidget {
           else
             for (var sira = 0; sira < liste.length; sira++) ...[
               if (sira > 0) const SizedBox(height: 8),
-              _DersKarti(ders: liste[sira]),
+              _DersKarti(
+                ders: liste[sira],
+                klasikMi: klasikMi,
+              ),
             ],
         ],
       ),
@@ -91,15 +119,36 @@ class DerslerEkrani extends StatelessWidget {
   }
 }
 
+class _GrupSecici extends StatelessWidget {
+  const _GrupSecici({required this.secili, required this.onSecildi});
+
+  final DersGrubu secili;
+  final ValueChanged<DersGrubu> onSecildi;
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<DersGrubu>(
+      segments: const [
+        ButtonSegment(value: DersGrubu.temel, label: Text('Temel')),
+        ButtonSegment(value: DersGrubu.klinik, label: Text('Klinik')),
+      ],
+      selected: {secili},
+      onSelectionChanged: (yeni) => onSecildi(yeni.first),
+    );
+  }
+}
+
 class _DersKarti extends StatelessWidget {
-  const _DersKarti({required this.ders});
+  const _DersKarti({required this.ders, required this.klasikMi});
 
   final Ders ders;
+  final bool klasikMi;
 
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
+    final klinik = klasikMi && ders.grup == DersGrubu.klinik;
     final toplam = depo.konuSayisi(ders.id);
     final calisilan = depo.calisilanSayisi(ders.id);
     return Card(
@@ -146,8 +195,10 @@ class _DersKarti extends StatelessWidget {
                 value: toplam == 0 ? 0 : calisilan / toplam,
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(3),
-                color: tema.colorScheme.primary,
-                backgroundColor: tema.colorScheme.primaryContainer,
+                color: klinik ? klinikYazi(context) : tema.colorScheme.primary,
+                backgroundColor: klinik
+                    ? klinikZemin(context)
+                    : tema.colorScheme.primaryContainer,
               ),
             ],
           ),

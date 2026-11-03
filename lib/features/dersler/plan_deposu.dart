@@ -35,6 +35,7 @@ class PlanDeposu extends ChangeNotifier {
 
   DateTime? sinavTarihi;
   bool karsilamaTamam = false;
+  MufredatTuru mufredatTuru = MufredatTuru.speetus;
   TemaSecimi temaSecimi = TemaSecimi.sistem;
 
   int _sonId = 0;
@@ -136,6 +137,13 @@ class PlanDeposu extends ChangeNotifier {
         (t) => t.name == temaAdi,
         orElse: () => TemaSecimi.sistem,
       );
+      final mufredatAdi = veri['mufredatTuru'];
+      mufredatTuru = MufredatTuru.values.firstWhere(
+        (m) => m.name == mufredatAdi,
+        orElse: () => _dersler.any((d) => d.grup == DersGrubu.klinik)
+            ? MufredatTuru.klasik
+            : MufredatTuru.speetus,
+      );
       _sonId = math.max(kayitliSon is int ? kayitliSon : 0, enBuyuk);
       _dersler
         ..clear()
@@ -189,6 +197,7 @@ class PlanDeposu extends ChangeNotifier {
         'karsilamaTamam': karsilamaTamam,
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
         'temaSecimi': temaSecimi.name,
+        'mufredatTuru': mufredatTuru.name,
         'dersler': [for (final d in _dersler) d.toJson()],
         'konular': [for (final k in _konular) k.toJson()],
         'calismalar': [for (final c in _calismalar) c.toJson()],
@@ -245,8 +254,10 @@ class PlanDeposu extends ChangeNotifier {
   Future<void> karsilamayiTamamla({
     required DateTime sinavTarihi,
     required List<HazirDers> secilenDersler,
+    MufredatTuru mufredatTuru = MufredatTuru.speetus,
   }) async {
     this.sinavTarihi = DateTime(sinavTarihi.year, sinavTarihi.month, sinavTarihi.day);
+    this.mufredatTuru = mufredatTuru;
     for (final h in secilenDersler) {
       final ders = _dersEkleIc(h.ad, h.grup);
       if (ders != null) {
@@ -260,6 +271,30 @@ class PlanDeposu extends ChangeNotifier {
     await hemenKaydet();
   }
 
+
+  /// Müfredat tarzını değiştirir ve yeni dersleri yükler.
+  Future<void> mufredatSifirlaVeDegistir({
+    required MufredatTuru yeniTur,
+    required List<HazirDers> yeniDersler,
+  }) async {
+    _dersler.clear();
+    _konular.clear();
+    _calismalar.clear();
+    _odaklar.clear();
+    _oturum = null;
+    mufredatTuru = yeniTur;
+    for (final h in yeniDersler) {
+      final ders = _dersEkleIc(h.ad, h.grup);
+      if (ders != null) {
+        for (final k in h.konular) {
+          _konuEkleIc(ders.id, k);
+        }
+      }
+    }
+    _degisti();
+    await hemenKaydet();
+    notifyListeners();
+  }
   void sinavTarihiBelirle(DateTime tarih) {
     sinavTarihi = DateTime(tarih.year, tarih.month, tarih.day);
     _degisti();

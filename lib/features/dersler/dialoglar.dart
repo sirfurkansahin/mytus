@@ -105,15 +105,25 @@ typedef DersTaslagi = ({String ad, DersGrubu grup});
 Future<DersTaslagi?> dersEkleDialogu(
   BuildContext context, {
   DersGrubu baslangicGrubu = DersGrubu.temel,
+  bool grupSecimiGoster = false,
 }) {
   return showDialog<DersTaslagi>(
     context: context,
-    builder: (_) => const _DersEkleDialogu(),
+    builder: (_) => _DersEkleDialogu(
+      baslangicGrubu: baslangicGrubu,
+      grupSecimiGoster: grupSecimiGoster,
+    ),
   );
 }
 
 class _DersEkleDialogu extends StatefulWidget {
-  const _DersEkleDialogu();
+  const _DersEkleDialogu({
+    this.baslangicGrubu = DersGrubu.temel,
+    this.grupSecimiGoster = false,
+  });
+
+  final DersGrubu baslangicGrubu;
+  final bool grupSecimiGoster;
 
   @override
   State<_DersEkleDialogu> createState() => _DersEkleDialoguState();
@@ -121,6 +131,7 @@ class _DersEkleDialogu extends StatefulWidget {
 
 class _DersEkleDialoguState extends State<_DersEkleDialogu> {
   final TextEditingController _denetci = TextEditingController();
+  late DersGrubu _grup = widget.baslangicGrubu;
 
   @override
   void dispose() {
@@ -128,18 +139,35 @@ class _DersEkleDialoguState extends State<_DersEkleDialogu> {
     super.dispose();
   }
 
-  void _tamam() => Navigator.of(context).pop((ad: _denetci.text, grup: DersGrubu.temel));
+  void _tamam() => Navigator.of(context).pop((ad: _denetci.text, grup: _grup));
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Ders ekle'),
-      content: TextField(
-        controller: _denetci,
-        autofocus: true,
-        textCapitalization: TextCapitalization.words,
-        decoration: const InputDecoration(hintText: 'Ders adı'),
-        onSubmitted: (_) => _tamam(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _denetci,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(hintText: 'Ders adı'),
+            onSubmitted: (_) => _tamam(),
+          ),
+          if (widget.grupSecimiGoster) ...[
+            const SizedBox(height: 16),
+            SegmentedButton<DersGrubu>(
+              segments: const [
+                ButtonSegment(value: DersGrubu.temel, label: Text('Temel')),
+                ButtonSegment(value: DersGrubu.klinik, label: Text('Klinik')),
+              ],
+              selected: {_grup},
+              onSelectionChanged: (yeni) => setState(() => _grup = yeni.first),
+            ),
+          ],
+        ],
       ),
       actions: [
         TextButton(

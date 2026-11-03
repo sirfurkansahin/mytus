@@ -269,8 +269,11 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
     final bugun = gunBasi(DateTime.now());
     final ders = depo.dersBul(konu.dersId);
     final ilk = depo.ilkCalisma(konu.id);
-    final durumYazisi =
-        ilk == null ? 'Henüz çalışılmadı' : 'İlk çalışma ${tarihYaz(ilk)}';
+    final klinik =
+        depo.mufredatTuru == MufredatTuru.klasik && ders?.grup == DersGrubu.klinik;
+    final durumYazisi = klinik
+        ? '${ders?.grup.ad ?? ''} · ${ilk == null ? 'Henüz çalışılmadı' : 'İlk çalışma ${tarihYaz(ilk)}'}'
+        : (ilk == null ? 'Henüz çalışılmadı' : 'İlk çalışma ${tarihYaz(ilk)}');
     final calismalar = depo.calismalarKonu(konu.id);
     final tekrarlar = depo.tekrarlar(bugun);
     final bugunTamamVar =
@@ -303,7 +306,9 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: tema.colorScheme.primaryContainer,
+                color: klinik
+                    ? klinikZemin(context)
+                    : tema.colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -311,7 +316,9 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: tema.colorScheme.onPrimaryContainer,
+                  color: klinik
+                      ? klinikYazi(context)
+                      : tema.colorScheme.onPrimaryContainer,
                 ),
               ),
             ),
