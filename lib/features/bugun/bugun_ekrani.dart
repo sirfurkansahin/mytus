@@ -7,7 +7,7 @@ import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
 
 /// "Bugün" ekranı: sınav sayacı, günlük görev ilerlemesi, geciken işler,
-/// bugünün planı, bugünkü tekrarlar ve yarının özeti.
+/// bugünün planı, R0 akşam beyaz sayfa tekrarı, bugünkü tekrarlar ve yarının özeti.
 class BugunEkrani extends StatelessWidget {
   const BugunEkrani({super.key});
 
@@ -47,6 +47,11 @@ class BugunEkrani extends StatelessWidget {
     final bugunCalismalari = [
       for (final c in tumCalismalar)
         if (ayniGun(c.tarih, bugun)) c,
+    ];
+    final bugunTamamKonular = [
+      for (final c in bugunCalismalari)
+        if (c.tamam)
+          if (depo.konuBul(c.konuId) case final k?) k.ad,
     ];
     final bugunTekrarlari = [
       for (final t in tumTekrarlar)
@@ -222,6 +227,35 @@ class BugunEkrani extends StatelessWidget {
               CalismaSatiri(calisma: c, bugun: bugun),
               const SizedBox(height: 8),
             ],
+          ],
+          if (bugunTamamKonular.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: tema.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'R0 · Akşam uyku öncesi beyaz sayfa tekrarı',
+                    style: tema.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: tema.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Uyumadan önce bu konuları nota bakmadan boş kağıda '
+                    'zincir olarak çiz (${bugunTamamKonular.join(', ')}). '
+                    'Yavaş dalga uykusunda kalıcı belleğe geçişi güçlendirir.',
+                    style: tema.textTheme.bodySmall?.copyWith(color: soluk),
+                  ),
+                ],
+              ),
+            ),
           ],
           if (bugunTekrarlari.isNotEmpty) ...[
             BolumBasligi(

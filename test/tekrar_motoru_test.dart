@@ -15,23 +15,23 @@ List<DateTime> gunler(List<TekrarOgesi> l) => [for (final o in l) o.tarih];
 void main() {
   final sinav = DateTime(2027, 4, 1);
 
-  group('tekrarGunleri (onaylı tablo)', () {
+  group('tekrarGunleri (onaylı R1–R4 tablosu)', () {
     test('tablo satırları aynen döner', () {
-      expect(tekrarGunleri(7), [1, 3, 4]);
-      expect(tekrarGunleri(14), [1, 4, 7, 9]);
-      expect(tekrarGunleri(30), [1, 7, 12, 16]);
-      expect(tekrarGunleri(60), [1, 8, 17, 25]);
-      expect(tekrarGunleri(120), [1, 8, 21, 33]);
-      expect(tekrarGunleri(180), [1, 8, 26, 43]);
-      expect(tekrarGunleri(300), [1, 8, 29, 53]);
+      expect(tekrarGunleri(7), [1, 3, 6]);
+      expect(tekrarGunleri(14), [1, 4, 7, 12]);
+      expect(tekrarGunleri(30), [1, 7, 15, 25]);
+      expect(tekrarGunleri(60), [1, 7, 21, 45]);
+      expect(tekrarGunleri(120), [1, 7, 30, 60]);
+      expect(tekrarGunleri(180), [1, 7, 30, 75]);
+      expect(tekrarGunleri(300), [1, 7, 30, 90]);
     });
 
     test('ara değerlerde kalan günden büyük olmayan en yakın satır', () {
-      expect(tekrarGunleri(13), [1, 3, 4]);
-      expect(tekrarGunleri(29), [1, 4, 7, 9]);
-      expect(tekrarGunleri(45), [1, 7, 12, 16]);
-      expect(tekrarGunleri(167), [1, 8, 21, 33]);
-      expect(tekrarGunleri(1000), [1, 8, 29, 53]);
+      expect(tekrarGunleri(13), [1, 3, 6]);
+      expect(tekrarGunleri(29), [1, 4, 7, 12]);
+      expect(tekrarGunleri(45), [1, 7, 15, 25]);
+      expect(tekrarGunleri(167), [1, 7, 30, 60]);
+      expect(tekrarGunleri(1000), [1, 7, 30, 90]);
     });
 
     test('çok kısa sürede tekrar sığdığı kadar olur, sınav gününe düşmez', () {
@@ -40,7 +40,8 @@ void main() {
       expect(tekrarGunleri(2), [1]);
       expect(tekrarGunleri(3), [1]);
       expect(tekrarGunleri(4), [1, 3]);
-      expect(tekrarGunleri(5), [1, 3, 4]);
+      expect(tekrarGunleri(6), [1, 3]);
+      expect(tekrarGunleri(7), [1, 3, 6]);
       expect(tekrarGunleri(-4), isEmpty);
     });
 
@@ -52,7 +53,7 @@ void main() {
   });
 
   group('tekrarlariHesapla', () {
-    test('tasarımdaki örnek: 16 Ekim çalışması, 120 günlük satır', () {
+    test('tasarımdaki örnek: 16 Ekim çalışması, 120 günlük R1–R4 satırı', () {
       final l = tekrarlariHesapla(
         calismalar: [calisma(1, DateTime(2026, 10, 16))],
         sinavTarihi: sinav,
@@ -61,11 +62,12 @@ void main() {
       );
       expect(gunler(l), [
         DateTime(2026, 10, 17),
-        DateTime(2026, 10, 24),
-        DateTime(2026, 11, 6),
-        DateTime(2026, 11, 18),
+        DateTime(2026, 10, 23),
+        DateTime(2026, 11, 15),
+        DateTime(2026, 12, 15),
       ]);
       expect([for (final o in l) o.no], [1, 2, 3, 4]);
+      expect([for (final o in l) o.rKodu], ['R1', 'R2', 'R3', 'R4']);
       expect(l.every((o) => o.toplam == 4), isTrue);
       expect(l.first.siradaki, isTrue);
       expect(l[1].siradaki, isFalse);
@@ -96,9 +98,9 @@ void main() {
       );
       expect(l.first.yapildi, isTrue);
       expect(l.first.yapilanTarih, DateTime(2026, 10, 19));
-      expect(l[1].tarih, DateTime(2026, 10, 26));
-      expect(l[2].tarih, DateTime(2026, 11, 8));
-      expect(l[3].tarih, DateTime(2026, 11, 20));
+      expect(l[1].tarih, DateTime(2026, 10, 25));
+      expect(l[2].tarih, DateTime(2026, 11, 17));
+      expect(l[3].tarih, DateTime(2026, 12, 17));
       expect(l[1].siradaki, isTrue);
     });
 
@@ -113,7 +115,7 @@ void main() {
         bugun: DateTime(2026, 10, 16),
         gunlukSinir: 10,
       );
-      expect(l[1].tarih, DateTime(2026, 10, 24));
+      expect(l[1].tarih, DateTime(2026, 10, 23));
     });
 
     test('kayma birikir: iki geç tekrar', () {
@@ -121,15 +123,15 @@ void main() {
         calismalar: [
           calisma(1, DateTime(2026, 10, 16), tekrarlar: [
             TekrarKaydi(no: 1, tarih: DateTime(2026, 10, 19)), // 2 gün geç
-            TekrarKaydi(no: 2, tarih: DateTime(2026, 10, 27)), // 26 Ekim'de olmalıydı: 1 gün geç
+            TekrarKaydi(no: 2, tarih: DateTime(2026, 10, 26)), // 25 Ekim'de olmalıydı: 1 gün geç
           ]),
         ],
         sinavTarihi: sinav,
-        bugun: DateTime(2026, 10, 27),
+        bugun: DateTime(2026, 10, 26),
         gunlukSinir: 10,
       );
-      // Tekrar 3 ideal: 16 Ekim + 21 gün + 3 gün kayma = 9 Kasım.
-      expect(l[2].tarih, DateTime(2026, 11, 9));
+      // Tekrar 3 ideal: 16 Ekim + 30 gün + 3 gün kayma = 18 Kasım.
+      expect(l[2].tarih, DateTime(2026, 11, 18));
     });
 
     test('hiçbir tekrar sınavdan bir gün öncesini aşmaz', () {
@@ -218,7 +220,7 @@ void main() {
       expect(l.first.tarih, DateTime(2026, 10, 17));
       expect(l.first.yapildi, isFalse);
       expect(l.first.eylemYapilabilir, isTrue);
-      expect(l[1].tarih, DateTime(2026, 10, 24));
+      expect(l[1].tarih, DateTime(2026, 10, 23));
     });
 
     test('aynı konunun iki çalışması ayrı tekrar dizileri üretir', () {

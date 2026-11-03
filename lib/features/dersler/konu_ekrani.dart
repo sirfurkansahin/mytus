@@ -144,7 +144,7 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
     }
     return Semantics(
       button: true,
-      label: 'Tekrar ${t.no}, ${tarihKisa(t.tarih)}'
+      label: 'Tekrar ${t.no} (${t.rKodu}), ${tarihKisa(t.tarih)}'
           '${t.yapildi ? ', yapıldı' : gecikti ? ', gecikti' : ''}',
       excludeSemantics: true,
       child: InkWell(
@@ -155,6 +155,14 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text(
+                t.rKodu,
+                style: tema.textTheme.labelSmall?.copyWith(
+                  color: vurgu,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 2),
               ikon,
               const SizedBox(height: 4),
               Text(
@@ -329,7 +337,8 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
                   const SizedBox(height: 6),
                   Text(
                     'Konuyu takvime yerleştirince veya "Bugün çalıştım" '
-                    'deyince tekrar günleri burada görünür.',
+                    'deyince tekrar günleri (R1: +1g · R2: +7g · R3: +30g · '
+                    'R4: faz sonu) burada görünür.',
                     style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                   ),
                 ],

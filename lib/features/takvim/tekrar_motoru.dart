@@ -1,17 +1,19 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/takvim/calisma.dart';
 
-/// Onaylı tekrar tablosu: sınava kalan gün sayısı -> ilk çalışmadan kaç gün sonra tekrar.
-/// Her konu için en fazla 4 kısa tekrar. Dayanak: Cepeda 2008, Kerfoot ve ark.
-/// TUS'a özgü akademik veri yoktur; oranlar ara değerleme, kesin değer değildir.
+/// Master Araştırma Raporu (Bölüm 1.2 ve 3.2) tekrar tablosu:
+/// Sınava kalan gün sayısı -> ilk çalışmadan kaç gün sonra tekrar (R1, R2, R3, R4).
+/// - Standart (≥60 gün): R1 = G+1, R2 = G+7, R3 = G+30, R4 = Faz sonu (60 / 75 / 90).
+/// - Sınava <60 gün kaldığında Cepeda (2008) kısaltması ile aralıklar daralır.
+/// - Aynı gün akşam uyku öncesi yapılan R0 (beyaz sayfa zinciri) Bugün ekranında ayrıca gösterilir.
 const Map<int, List<int>> tekrarTablosu = {
-  7: [1, 3, 4],
-  14: [1, 4, 7, 9],
-  30: [1, 7, 12, 16],
-  60: [1, 8, 17, 25],
-  120: [1, 8, 21, 33],
-  180: [1, 8, 26, 43],
-  300: [1, 8, 29, 53],
+  7: [1, 3, 6],
+  14: [1, 4, 7, 12],
+  30: [1, 7, 15, 25],
+  60: [1, 7, 21, 45],
+  120: [1, 7, 30, 60],
+  180: [1, 7, 30, 75],
+  300: [1, 7, 30, 90],
 };
 
 /// [kalanGun]: ilk çalışma gününden sınava kalan gün.
@@ -49,9 +51,12 @@ class TekrarOgesi {
   final int calismaId;
   final int konuId;
 
-  /// Kaçıncı tekrar (1'den başlar) ve bu çalışma için toplam tekrar sayısı.
+  /// Kaçıncı tekrar (1'den başlar: R1..R4) ve bu çalışma için toplam tekrar sayısı.
   final int no;
   final int toplam;
+
+  /// Rapordaki aşama kodu: R1, R2, R3, R4.
+  String get rKodu => 'R$no';
 
   /// Takvimde gösterilen gün (kayma ve günlük sınır uygulanmış).
   final DateTime tarih;
@@ -86,7 +91,7 @@ class _Ham {
 
 /// Tüm çalışmaların tekrarlarını hesaplar. Saf fonksiyon: aynı girdi, aynı sonuç.
 ///
-/// Kurallar (kullanıcı onaylı):
+/// Kurallar (kullanıcı onaylı + Master Araştırma Raporu R1–R4):
 /// - Tekrar günleri, çalışma gününden sınava kalan güne göre [tekrarTablosu]'ndan gelir.
 /// - Bir tekrar geç yapılırsa sonraki tekrarlar aynı gün sayısı kadar kayar (aralıklar korunur).
 /// - Hiçbir tekrar sınavdan bir gün öncesinden sonraya taşmaz.

@@ -42,8 +42,8 @@ class PlanDeposu extends ChangeNotifier {
   final List<Konu> _konular = [];
   final List<Calisma> _calismalar = [];
 
-  /// Her konu kaç tur çalışılacak (varsayılan 2). Ayarlar ekranından değişir.
-  int turSayisi = 2;
+  /// Her konu kaç tur çalışılacak (varsayılan 3, Rapor Bölüm 6: 3 faz, 3 tur).
+  int turSayisi = 3;
 
   /// Bir güne düşebilecek en çok tekrar sayısı (varsayılan 10).
   int gunlukTekrarSiniri = 10;
@@ -147,7 +147,7 @@ class PlanDeposu extends ChangeNotifier {
         ..clear()
         ..addAll(calismalar);
       final tur = veri['turSayisi'];
-      turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 2;
+      turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 3;
       final sinir = veri['gunlukTekrarSiniri'];
       gunlukTekrarSiniri = sinir is int && sinir >= 0 ? sinir : 10;
       ftAyar = FtAyarlari.fromJson(veri['ftAyar']);
@@ -547,7 +547,7 @@ class PlanDeposu extends ChangeNotifier {
     _oturum = null;
     sinavTarihi = resmiSinavTarihi;
     karsilamaTamam = false;
-    turSayisi = 2;
+    turSayisi = 3;
     gunlukTekrarSiniri = 10;
     ftAyar = const FtAyarlari();
     _degisti();

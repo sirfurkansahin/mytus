@@ -200,10 +200,39 @@ class FtSureAyarlari extends StatelessWidget {
         a.kisaMolaDk != varsayilan.kisaMolaDk ||
         a.uzunMolaDk != varsayilan.uzunMolaDk ||
         a.uzunMolaAraligi != varsayilan.uzunMolaAraligi;
+    final klasikSecili = a.calismaDk == 25 &&
+        a.kisaMolaDk == 5 &&
+        a.uzunMolaDk == 15;
+    final raporBlokuSecili = a.calismaDk == 50 &&
+        a.kisaMolaDk == 10 &&
+        a.uzunMolaDk == 20;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              ChoiceChip(
+                label: const Text('Klasik (25/5/15 dk)'),
+                selected: klasikSecili,
+                onSelected: (_) => depo.ftAyarBelirle(
+                  a.kopya(calismaDk: 25, kisaMolaDk: 5, uzunMolaDk: 15),
+                ),
+              ),
+              ChoiceChip(
+                label: const Text('Derin blok (50/10/20 dk)'),
+                selected: raporBlokuSecili,
+                onSelected: (_) => depo.ftAyarBelirle(
+                  a.kopya(calismaDk: 50, kisaMolaDk: 10, uzunMolaDk: 20),
+                ),
+              ),
+            ],
+          ),
+        ),
         AyarSatiri(
           baslik: 'Çalışma süresi',
           deger: '${a.calismaDk} dk',

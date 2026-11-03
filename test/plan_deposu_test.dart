@@ -49,7 +49,7 @@ void main() {
       expect(d.karsilamaTamam, isTrue);
       expect(d.sinavTarihi, DateTime(2027, 4, 1));
       expect(d.dersler(DersGrubu.temel).length, 7);
-      expect(d.dersler(DersGrubu.klinik).length, 4);
+      expect(d.dersler(DersGrubu.klinik).length, 5);
     });
   });
 
