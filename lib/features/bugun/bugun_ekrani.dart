@@ -1,5 +1,6 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
+import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/defterler/defterler_ekrani.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
@@ -88,43 +89,55 @@ class BugunEkrani extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
         children: [
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Expanded(
-                child: Text(
-                  'Bugün',
-                  style: tema.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+              Text(
+                'Bugün',
+                style: tema.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Bilişsel & Uyku',
+                    icon: const Icon(Icons.psychology_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
+                    ),
                   ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Özel Defterler',
-                icon: const Icon(Icons.rule_folder_outlined),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const DefterlerEkrani()),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Denemeler & Analiz',
-                icon: const Icon(Icons.assignment_outlined),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const DenemelerEkrani()),
-                ),
-              ),
-              IconButton(
-                tooltip: 'İlerleme',
-                icon: const Icon(Icons.bar_chart_rounded),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const IlerlemeEkrani()),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Ayarlar',
-                icon: const Icon(Icons.settings_outlined),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const AyarlarEkrani()),
-                ),
+                  IconButton(
+                    tooltip: 'Özel Defterler',
+                    icon: const Icon(Icons.rule_folder_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const DefterlerEkrani()),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Denemeler & Analiz',
+                    icon: const Icon(Icons.assignment_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const DenemelerEkrani()),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'İlerleme',
+                    icon: const Icon(Icons.bar_chart_rounded),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const IlerlemeEkrani()),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Ayarlar',
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const AyarlarEkrani()),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -132,6 +145,65 @@ class BugunEkrani extends StatelessWidget {
             gunAdiIleTarih(bugun),
             style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
           ),
+          if (depo.kurtarmaModuAktif) ...[
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
+              ),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.teal.withValues(alpha: 0.5)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.shield_rounded, color: Colors.teal, size: 22),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '🛡️ %70 Kurtarma Modu Aktif (PFC Dinlendirme)',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.teal),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.teal, size: 20),
+                  ],
+                ),
+              ),
+            ),
+          ] else if (depo.zorBilisselTavanAsildi) ...[
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
+              ),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.block_rounded, color: Colors.red, size: 22),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '⛔ Günlük Zor Bilişsel Tavan (4 saat) Doldu!',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.red, size: 20),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Card(
             elevation: 0,

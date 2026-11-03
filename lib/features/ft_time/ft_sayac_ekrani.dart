@@ -264,6 +264,13 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                   ),
                 ),
               ],
+              if (calisma && o.bolumBitti && !o.tamamlandi) ...[
+                const SizedBox(height: 12),
+                _BlokOdakDegerlendirme(
+                  oturumId: o.id,
+                  dongu: o.dongu,
+                ),
+              ],
               const SizedBox(height: 32),
               Row(
                 children: [
@@ -298,6 +305,95 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BlokOdakDegerlendirme extends StatelessWidget {
+  const _BlokOdakDegerlendirme({
+    required this.oturumId,
+    required this.dongu,
+  });
+
+  final int oturumId;
+  final int dongu;
+
+  @override
+  Widget build(BuildContext context) {
+    final depo = DepoKapsami.of(context);
+    final anahtar = '$oturumId:$dongu';
+    final kayit = depo.odaklar.cast<OdakKaydi?>().firstWhere(
+          (x) => x?.anahtar == anahtar,
+          orElse: () => null,
+        );
+    final puan = kayit?.odakPuani ?? 4;
+    final zor = kayit?.zorBilissel ?? true;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: ftYuzeyOrta,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ftCizgi),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Blok Odak: ',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: ftAcikYazi,
+                ),
+              ),
+              for (var i = 1; i <= 5; i++)
+                InkWell(
+                  onTap: () => depo.sonOdakGuncelle(
+                    anahtar: anahtar,
+                    odakPuani: i,
+                    zorBilissel: zor,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                    child: Icon(
+                      i <= puan ? Icons.star_rounded : Icons.star_border_rounded,
+                      color: i <= puan ? Colors.amber[400] : ftAcikYazi,
+                      size: 22,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          InkWell(
+            onTap: () => depo.sonOdakGuncelle(
+              anahtar: anahtar,
+              odakPuani: puan,
+              zorBilissel: !zor,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  zor ? Icons.check_box : Icons.check_box_outline_blank,
+                  size: 16,
+                  color: zor ? ftIyi : ftAcikYazi,
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  'Ağır Analitik İş (PFC Yükü)',
+                  style: TextStyle(fontSize: 11, color: ftAcikYazi),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

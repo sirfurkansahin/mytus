@@ -133,6 +133,7 @@ void main() {
   takvimTestleri();
   denemeTestleri();
   defterlerTestleri();
+  bilisselTestleri();
 }
 
 void takvimTestleri() {
@@ -441,6 +442,35 @@ void defterlerTestleri() {
     await tester.tap(find.text('3 Dk Vaka Kartı'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Vaka Kartı'), findsWidgets);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void bilisselTestleri() {
+  testWidgets('Bugün ekranından Bilişsel & Uyku Yönetimi açılır ve öğeler listelenir',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Bilişsel & Uyku'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bilişsel & Uyku Yönetimi'), findsOneWidget);
+    expect(find.textContaining('Zor Bilişsel İş Tavanı'), findsOneWidget);
+    expect(find.textContaining('Sirkadiyen Odak'), findsOneWidget);
+    expect(find.textContaining('Uyku & Kafein Disiplini'), findsOneWidget);
+    expect(find.textContaining('Prefrontal Korteks (PFC) & Kurtarma'), findsOneWidget);
+
+    // Kurtarma Modu anahtarına tıkla
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+    expect(depo.kurtarmaModuAktif, isTrue);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

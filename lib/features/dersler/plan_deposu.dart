@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/bilissel/modeller.dart';
 import 'package:app/features/defterler/hazir_skorlar.dart';
 import 'package:app/features/defterler/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
@@ -62,6 +63,10 @@ class PlanDeposu extends ChangeNotifier {
   final List<SkorKarti> _ozelSkorlar = [];
   final List<MekanizmaZinciri> _zincirler = [];
   final List<VakaKarti> _vakaKartlari = [];
+  final List<UykuKaydi> _uykular = [];
+  bool _kurtarmaModuAktif = false;
+  String _hedefYatisSaati = '23:30';
+  String _hedefKalkisSaati = '07:30';
 
   Timer? _zamanlayici;
   bool _kirli = false;
@@ -258,6 +263,22 @@ class PlanDeposu extends ChangeNotifier {
         ..clear()
         ..addAll(vakalar);
 
+      final uykular = <UykuKaydi>[];
+      final uykuListesi = veri['uykular'];
+      if (uykuListesi is List) {
+        for (final e in uykuListesi) {
+          if (e is Map<String, dynamic>) {
+            uykular.add(UykuKaydi.fromJson(e));
+          }
+        }
+      }
+      _uykular
+        ..clear()
+        ..addAll(uykular);
+      _kurtarmaModuAktif = veri['kurtarmaModuAktif'] as bool? ?? false;
+      _hedefYatisSaati = veri['hedefYatisSaati'] as String? ?? '23:30';
+      _hedefKalkisSaati = veri['hedefKalkisSaati'] as String? ?? '07:30';
+
       _sonId = math.max(_sonId, enBuyuk);
       return true;
     } on FormatException {
@@ -285,6 +306,10 @@ class PlanDeposu extends ChangeNotifier {
         'ozelSkorlar': [for (final s in _ozelSkorlar) s.toJson()],
         'zincirler': [for (final z in _zincirler) z.toJson()],
         'vakaKartlari': [for (final v in _vakaKartlari) v.toJson()],
+        'uykular': [for (final u in _uykular) u.toJson()],
+        'kurtarmaModuAktif': _kurtarmaModuAktif,
+        'hedefYatisSaati': _hedefYatisSaati,
+        'hedefKalkisSaati': _hedefKalkisSaati,
       };
 
   // ---------------------------------------------------------------- okuma
@@ -671,6 +696,15 @@ class PlanDeposu extends ChangeNotifier {
     _calismalar.clear();
     _odaklar.clear();
     _oturum = null;
+    _denemeler.clear();
+    _hataDefteri.clear();
+    _ozelSkorlar.clear();
+    _zincirler.clear();
+    _vakaKartlari.clear();
+    _uykular.clear();
+    _kurtarmaModuAktif = false;
+    _hedefYatisSaati = '23:30';
+    _hedefKalkisSaati = '07:30';
     sinavTarihi = resmiSinavTarihi;
     karsilamaTamam = false;
     turSayisi = 3;
@@ -921,6 +955,163 @@ class PlanDeposu extends ChangeNotifier {
     _vakaKartlari.removeWhere((v) => v.id == id);
     _degisti();
     await hemenKaydet();
+  }
+
+  // ------------------------------------------------ Bilişsel & Uyku Yönetimi
+
+  List<UykuKaydi> get uykular => List.unmodifiable(_uykular);
+  bool get kurtarmaModuAktif => _kurtarmaModuAktif;
+  String get hedefYatisSaati => _hedefYatisSaati;
+  String get hedefKalkisSaati => _hedefKalkisSaati;
+
+  Future<void> kurtarmaModuAyarla(bool aktif) async {
+    _kurtarmaModuAktif = aktif;
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> hedefUykuAyarla({
+    required String yatis,
+    required String kalkis,
+  }) async {
+    _hedefYatisSaati = yatis;
+    _hedefKalkisSaati = kalkis;
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> uykuKaydet(UykuKaydi kayit) async {
+    _uykular.removeWhere((u) => u.tarih == kayit.tarih);
+    _uykular.insert(0, kayit);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> uykuSil(String tarih) async {
+    _uykular.removeWhere((u) => u.tarih == tarih);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  UykuKaydi? bugunkuUyku([DateTime? gun]) {
+    final t = tarihAnahtari(gun ?? DateTime.now());
+    for (final u in _uykular) {
+      if (u.tarih == t) return u;
+    }
+    return null;
+  }
+
+  /// Bugünkü zor bilişsel çalışma süresi (dakika).
+  /// Rapor Kuralı: Günde en fazla 3-4 saat (180-240 dk) derin analitik iş yapılmalıdır.
+  int zorBilisselDakikaBugun([DateTime? gun]) {
+    final g = gunBasi(gun ?? DateTime.now());
+    final yarin = gunEkle(g, 1);
+    var toplam = 0;
+    for (final o in _odaklar) {
+      if (!o.tarih.isBefore(g) && o.tarih.isBefore(yarin) && o.zorBilissel) {
+        toplam += o.dakika;
+      }
+    }
+    return toplam;
+  }
+
+  /// Bugünkü tüm odak süresi (dakika).
+  int toplamOdakDakikaBugun([DateTime? gun]) {
+    final g = gunBasi(gun ?? DateTime.now());
+    final yarin = gunEkle(g, 1);
+    var toplam = 0;
+    for (final o in _odaklar) {
+      if (!o.tarih.isBefore(g) && o.tarih.isBefore(yarin)) {
+        toplam += o.dakika;
+      }
+    }
+    return toplam;
+  }
+
+  /// Günlük ortalama odak puanı (1.0 - 5.0).
+  double ortalamaOdakPuani([DateTime? gun]) {
+    final g = gunBasi(gun ?? DateTime.now());
+    final yarin = gunEkle(g, 1);
+    var toplam = 0;
+    var sayi = 0;
+    for (final o in _odaklar) {
+      if (!o.tarih.isBefore(g) && o.tarih.isBefore(yarin)) {
+        toplam += o.odakPuani;
+        sayi++;
+      }
+    }
+    return sayi == 0 ? 0.0 : toplam / sayi;
+  }
+
+  /// 240 dk (4 saat) tavanı aşıldı mı?
+  bool get zorBilisselTavanAsildi => zorBilisselDakikaBugun() >= 240;
+
+  /// 180 dk (3 saat) eşiğine ulaşıldı mı?
+  bool get zorBilisselYaklasti =>
+      zorBilisselDakikaBugun() >= 180 && !zorBilisselTavanAsildi;
+
+  /// Saatlere göre odak ortalaması (Sirkadiyen biyolojik verim dağılımı).
+  Map<int, double> saatlikOdakDagilimi([int sonGun = 14]) {
+    final esik = gunEkle(gunBasi(DateTime.now()), -sonGun);
+    final toplamlar = <int, int>{};
+    final sayilar = <int, int>{};
+    for (final o in _odaklar) {
+      if (o.tarih.isBefore(esik)) continue;
+      final saat = o.tarih.hour;
+      toplamlar[saat] = (toplamlar[saat] ?? 0) + o.odakPuani;
+      sayilar[saat] = (sayilar[saat] ?? 0) + 1;
+    }
+    final sonuc = <int, double>{};
+    for (final saat in toplamlar.keys) {
+      sonuc[saat] = toplamlar[saat]! / sayilar[saat]!;
+    }
+    return sonuc;
+  }
+
+  /// Son denemelerdeki C tipi (Okuma / kurgu / dikkat) hata oranı.
+  double get sonOkumaHatasiOrani {
+    if (_denemeler.isEmpty) return 0.0;
+    final sonDenemeler = _denemeler.take(3);
+    var toplamHata = 0;
+    var cHatasi = 0;
+    for (final d in sonDenemeler) {
+      for (final s in d.soruHatalari) {
+        if (!s.dogruMu) {
+          toplamHata++;
+          if (s.hataSinifi == HataSinifi.c) cHatasi++;
+        }
+      }
+    }
+    if (toplamHata == 0) return 0.0;
+    return cHatasi / toplamHata;
+  }
+
+  /// C tipi hata oranı > %15 ise Prefrontal Korteks Yorgunluğu alarmı.
+  bool get pfcErkenUyariAktif => sonOkumaHatasiOrani > 0.15;
+
+  /// Sınava 7 gün kala Uyku Taper Protokolü aktif mi?
+  bool get uykuTaperAktif {
+    final sinav = sinavTarihi;
+    if (sinav == null) return false;
+    final fark = gunFarki(sinav, gunBasi(DateTime.now()));
+    return fark >= 0 && fark <= 7;
+  }
+
+  /// Döngü tamamlandığında odak puanı ve zor bilişsel iş türünü günceller.
+  Future<void> sonOdakGuncelle({
+    required String anahtar,
+    required int odakPuani,
+    required bool zorBilissel,
+  }) async {
+    final idx = _odaklar.indexWhere((x) => x.anahtar == anahtar);
+    if (idx != -1) {
+      _odaklar[idx] = _odaklar[idx].kopyala(
+        odakPuani: odakPuani,
+        zorBilissel: zorBilissel,
+      );
+      _degisti();
+      await hemenKaydet();
+    }
   }
 
 
