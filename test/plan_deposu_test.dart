@@ -40,7 +40,7 @@ void main() {
   });
 
   group('karşılama', () {
-    test('tarih ve seçilen dersleri kaydeder, hazır liste doğru', () async {
+    test('tarih, seçilen dersler ve hazır konular kaydedilir', () async {
       final d = await hazirDepo();
       await d.karsilamayiTamamla(
         sinavTarihi: DateTime(2027, 4, 1, 15, 30),
@@ -48,8 +48,11 @@ void main() {
       );
       expect(d.karsilamaTamam, isTrue);
       expect(d.sinavTarihi, DateTime(2027, 4, 1));
-      expect(d.dersler(DersGrubu.temel).length, 7);
-      expect(d.dersler(DersGrubu.klinik).length, 5);
+      // 8 Temel sistem + 11 Klinik sistem = 19 SpeeTUS paketi
+      expect(d.dersler(DersGrubu.temel).length, 8);
+      expect(d.dersler(DersGrubu.klinik).length, 11);
+      final ilkDers = d.dersler(DersGrubu.temel).first;
+      expect(d.konular(ilkDers.id), isNotEmpty);
     });
   });
 

@@ -52,10 +52,12 @@ void main() {
     expect(depo.sinavTarihi, isNotNull);
     expect(find.textContaining('Sınava'), findsOneWidget);
 
+    final ilkDers = depo.dersler(DersGrubu.temel).first;
+
     // Dersler: konu ekle, not yaz.
     await tester.tap(find.text('Dersler'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Fizyoloji'));
+    await tester.tap(find.text(ilkDers.ad));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Kalp döngüsü');
     await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -70,8 +72,6 @@ void main() {
     await tester.pump();
 
     // Uygulama kapanıp yeniden açılır: depodaki veri aynen yeni depoya yüklenir.
-    // (Disk yazma zinciri ayrıca birim testlerde sınanıyor; widget testinde sahte
-    // zaman yüzünden zincir tamamlanmıyor.)
     final yeniKayit = BellekKaydi(icerik: jsonEncode(depo.toJson()));
     depo = await bosDepo(tester, yeniKayit);
     expect(depo.karsilamaTamam, isTrue);
@@ -80,12 +80,15 @@ void main() {
     expect(find.text('Çalışma planını kuralım'), findsNothing);
     await tester.tap(find.text('Dersler'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Fizyoloji'));
+    await tester.tap(find.text(ilkDers.ad));
     await tester.pumpAndSettle();
     expect(find.text('Kalp döngüsü'), findsOneWidget);
     expect(find.text('Notu var'), findsOneWidget);
-    final fizyoloji = depo.dersler(DersGrubu.temel).firstWhere((d) => d.ad == 'Fizyoloji');
-    expect(depo.konular(fizyoloji.id).single.not, 'Sistol ve diyastol');
+    final temelDers = depo.dersler(DersGrubu.temel).firstWhere((d) => d.id == ilkDers.id);
+    expect(
+      depo.konular(temelDers.id).firstWhere((k) => k.ad == 'Kalp döngüsü').not,
+      'Sistol ve diyastol',
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

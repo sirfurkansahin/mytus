@@ -238,14 +238,19 @@ class PlanDeposu extends ChangeNotifier {
 
   int _yeniId() => ++_sonId;
 
-  /// Karşılama ekranı bitti: sınav tarihini ve seçilen dersleri kaydeder.
+  /// Karşılama ekranı bitti: sınav tarihini, seçilen dersleri ve hazır alt konuları kaydeder.
   Future<void> karsilamayiTamamla({
     required DateTime sinavTarihi,
     required List<HazirDers> secilenDersler,
   }) async {
     this.sinavTarihi = DateTime(sinavTarihi.year, sinavTarihi.month, sinavTarihi.day);
     for (final h in secilenDersler) {
-      _dersEkleIc(h.ad, h.grup);
+      final ders = _dersEkleIc(h.ad, h.grup);
+      if (ders != null) {
+        for (final k in h.konular) {
+          _konuEkleIc(ders.id, k);
+        }
+      }
     }
     karsilamaTamam = true;
     _degisti();
@@ -303,8 +308,7 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
-  /// Konu ekler. Ad boşsa, ders yoksa veya aynı derste aynı adlı konu varsa null döner.
-  Konu? konuEkle(int dersId, String ham) {
+  Konu? _konuEkleIc(int dersId, String ham) {
     final ad = adTemizle(ham);
     if (ad == null || dersBul(dersId) == null) return null;
     final kucuk = ad.toLowerCase();
@@ -314,7 +318,13 @@ class PlanDeposu extends ChangeNotifier {
     if (varMi) return null;
     final konu = Konu(id: _yeniId(), dersId: dersId, ad: ad);
     _konular.add(konu);
-    _degisti();
+    return konu;
+  }
+
+  /// Konu ekler. Ad boşsa, ders yoksa veya aynı derste aynı adlı konu varsa null döner.
+  Konu? konuEkle(int dersId, String ham) {
+    final konu = _konuEkleIc(dersId, ham);
+    if (konu != null) _degisti();
     return konu;
   }
 

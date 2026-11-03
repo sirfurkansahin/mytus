@@ -14,7 +14,7 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Puan tablosu | Haftalik sifirlanir |
 | Paylasim | Istege bagli (opt-in), yalnizca konu adlari |
 | Plan olusturma | Resmi TUS sinav tarihi `22 Agustos 2027` olarak sabitlendi (2 Kasim 2026 kullanici karari). |
-| Hazir icerik | Hazir DERS ADI listesi. Temel (7): Anatomi, Histoloji ve Embriyoloji, Fizyoloji, Biyokimya, Mikrobiyoloji, Patoloji, Farmakoloji. Klinik (5): Dahiliye, Pediatri, Genel Cerrahi, Kadin Hastaliklari ve Dogum, Kucuk Stajlar (3 Kasim 2026 rapor guncellemesi). Dersler Temel/Klinik gruplarinda durur, kullanici iki gruba da kendi dersini ekleyebilir. |
+| Hazir icerik | SpeeTUS Sarmal Egitim mufredatina gore 19 Sistem Paketi ve hazir alt konulari (3 Kasim 2026 kullanici karari - Secenek 1). Temel Sistemler (8): Tibbin Temelleri, Periferik Sinir Sistemi ve Kas, Merkezi Sinir Sistemi, Duyu Organlari - Dermatoloji, Duyu Organlari - KBB, Duyu Organlari - Goz, Immunoloji ve Alerji, Mikrobiyoloji ve Enfeksiyonlar. Klinik Sistemler (11): Hematoloji ve Onkoloji, Gastrointestinal ve Hepatobiliyer Sistem, Endokrinoloji, Meme Hastaliklari, Uriner Sistem, Genital Sistem, Obstetri ve Yenidogan, Kardiyovaskuler Sistem, Solunum Sistemi, Kas Iskelet Sistemi, Siniflandirilmayan Konular. Her paketin altindaki tum videolar hazir konu olarak karsilama ekraninda secilen derslerle birlikte otomatik yuklenir. |
 | Dagitim | Firebase App Distribution |
 | KVKK | Hafif uyum: aydinlatma metni, ilk giriste onay, hesap/veri silme, minimum veri |
 | Gelir | Yok |
@@ -43,7 +43,7 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | On plan servisi (17 Ekim 2026) | KULLANICI TESTI 6: pil ayari YAPILMADAN sure bitince bildirim GELMEDI (uygulamada sayac dogru bitmis gorunuyordu, bildirim izni aciktı). Karar (kullanici 3-a): sayac calisirken `TimerService` (on plan servisi, tur: specialUse) calisir ve "calisan sayac" bildirimini tutar; boylece sistem uygulama surecini oldurup alarmi silemez. Sure takibi yine `setAlarmClock` ile; sure bitince alici servisi durdurur ve "Sure bitti" bildirimini gosterir. Servis baslatilamazsa duz bildirime donulur. Sayac ekraninda pil kisitlamasi varsa kapatilabilir uyari + "Pil ayarlarini ac" dugmesi. SONUC (17 Ekim 2026): servisle de bildirim GELMEDI; neden olculmedi, sorun kullanici karariyla NOTA ALINDI (HANDOFF.md > Bilinen sorunlar). Servis dalda duruyor, ama calistigi kanitlanmadi. |
 | Ek Flutter paketi | Yalnizca `flutter_localizations` (Flutter'in kendi paketi): tarih secici ve sistem yazilari Turkce. |
 | Karsilama (Parca 2) | Sinav tarihi `22 Agustos 2027` sabit. Hazir dersler baslangicta secili; istemedigi kaldirilir; "+ Kendi dersimi ekle" ile Temel/Klinik'e ders eklenir. |
-| Konu ekleme (Parca 2) | Tek tek, ders detayinda hizli ekleme kutusu (kullanici karari 3-a). Toplu yapistirma yok. |
+| Konu ekleme (Parca 2) | Hazir dersler kendi iclerindeki zengin alt konularla birlikte otomatik gelir; ayrica ders detayinda hizli ekleme kutusuyla kullanici kendi konusunu da ekleyebilir. |
 | Not bicimi (Parca 2) | Duz yazi, konu basina tek not alani (kullanici karari 4-a). |
 | Ders/konu kurallari | Ad bosluklari temizlenir, bos olamaz, en fazla 80 karakter. Ayni grupta ayni adli ders, ayni derste ayni adli konu eklenemez (buyuk/kucuk harf ayirt edilmez). Ders silinince konulari ve notlari da silinir (onay sorulur). Ders ve konu adi degistirilebilir. |
 | Ders detayi ekrani | Onayli tasarimda yoktu; Dersler -> konu listesi icin ayni gorsel dille EKLENDI. |
