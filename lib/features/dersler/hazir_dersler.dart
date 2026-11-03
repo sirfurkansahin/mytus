@@ -2,7 +2,23 @@ import 'package:app/features/dersler/modeller.dart';
 
 /// SpeeTUS Sarmal Eğitim 19 Sistem Paketi ve hazır alt konuları.
 /// Temel / Klinik ayrımı kaldırılmış, tek sıralı müfredat.
-const List<HazirDers> hazirDersler = [
+/// Klasik TUS branşları (6 Temel + 5 Klinik).
+const List<HazirDers> klasikDersler = [
+  HazirDers('Anatomi', DersGrubu.temel),
+  HazirDers('Fizyoloji', DersGrubu.temel),
+  HazirDers('Biyokimya', DersGrubu.temel),
+  HazirDers('Patoloji', DersGrubu.temel),
+  HazirDers('Farmakoloji', DersGrubu.temel),
+  HazirDers('Mikrobiyoloji', DersGrubu.temel),
+  HazirDers('Dahiliye', DersGrubu.klinik),
+  HazirDers('Pediatri', DersGrubu.klinik),
+  HazirDers('Genel Cerrahi', DersGrubu.klinik),
+  HazirDers('Kadın Doğum', DersGrubu.klinik),
+  HazirDers('Küçük Stajlar', DersGrubu.klinik),
+];
+
+/// SpeeTUS Sarmal Eğitim 19 Sistem Paketi ve hazır alt konuları.
+const List<HazirDers> speetusDersler = [
   HazirDers(
     '1. Tıbbın Temelleri',
     DersGrubu.temel,
@@ -249,3 +265,10 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
 ];
+
+/// Varsayılan hazır liste (SpeeTUS sarmal müfredatı).
+const List<HazirDers> hazirDersler = speetusDersler;
+
+/// Müfredat türüne göre hazır ders listesi.
+List<HazirDers> mufredatDersleri(MufredatTuru tur) =>
+    tur == MufredatTuru.klasik ? klasikDersler : speetusDersler;

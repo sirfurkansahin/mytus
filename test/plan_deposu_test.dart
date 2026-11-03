@@ -54,6 +54,36 @@ void main() {
       expect(ilkDers.ad, '1. Tıbbın Temelleri');
       expect(d.konular(ilkDers.id), isNotEmpty);
     });
+
+    test('klasik müfredat seçildiğinde 11 ders ve temel/klinik ayrımı kaydedilir', () async {
+      final d = await hazirDepo();
+      await d.karsilamayiTamamla(
+        sinavTarihi: DateTime(2027, 4, 1),
+        secilenDersler: klasikDersler,
+        mufredatTuru: MufredatTuru.klasik,
+      );
+      expect(d.mufredatTuru, MufredatTuru.klasik);
+      expect(d.tumDersler.length, 11);
+      expect(d.dersler(DersGrubu.temel).length, 6);
+      expect(d.dersler(DersGrubu.klinik).length, 5);
+    });
+
+    test('müfredat sıfırlanıp değiştirilebilir', () async {
+      final d = await hazirDepo();
+      await d.karsilamayiTamamla(
+        sinavTarihi: DateTime(2027, 4, 1),
+        secilenDersler: hazirDersler,
+        mufredatTuru: MufredatTuru.speetus,
+      );
+      expect(d.tumDersler.length, 19);
+
+      await d.mufredatSifirlaVeDegistir(
+        yeniTur: MufredatTuru.klasik,
+        yeniDersler: klasikDersler,
+      );
+      expect(d.mufredatTuru, MufredatTuru.klasik);
+      expect(d.tumDersler.length, 11);
+    });
   });
 
   group('ders', () {

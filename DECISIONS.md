@@ -14,7 +14,7 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Puan tablosu | Haftalik sifirlanir |
 | Paylasim | Istege bagli (opt-in), yalnizca konu adlari |
 | Plan olusturma | Resmi TUS sinav tarihi `22 Agustos 2027` olarak sabitlendi (2 Kasim 2026 kullanici karari). |
-| Hazir icerik ve Mufredat | SpeeTUS Sarmal Egitim mufredatina gore 19 Sistem Paketi ve hazir alt konulari (3 Kasim 2026 kullanici karari - Secenek 1). Temel / Klinik ayrimi tamamen KALDIRILDI (3 Kasim 2026 kullanici karari): Tum paketler tek bir sirali liste halinde sunulur (1. Tibbin Temelleri ... 19. Siniflandirilmayan Konular). Her paketin altindaki tum videolar hazir konu olarak karsilama ekraninda secilen derslerle birlikte otomatik yuklenir. |
+| Hazir icerik ve Mufredat | Çift Müfredat desteği (3 Kasım 2026 kullanıcı kararı): Başlangıç karşılama ekranında iki seçenek sunulur: 1) **Klasik Branşlar** (11 branş: Anatomi, Fizyoloji, Biyokimya, Patoloji, Farmakoloji, Mikrobiyoloji - Temel; Dahiliye, Pediatri, Genel Cerrahi, Kadın Doğum, Küçük Stajlar - Klinik; Dersler ekranında Temel/Klinik sekme ayrımı aktif). 2) **SpeeTUS Sarmal Sistem** (19 Sistem Paketi ve hazır video alt konuları; tek liste, sekmesiz). Kullanıcı ayrıca Ayarlar ekranından dilediği zaman müfredat tarzını değiştirebilir veya sıfırlayabilir. |
 | Dagitim | Android icin Firebase App Distribution (APK); iPhone ve tarayici testi icin GitHub Pages (Web / PWA: `https://sirfurkansahin.github.io/mytus/`) (3 Kasim 2026 kullanici karari - Secenek 1). |
 | KVKK | Hafif uyum: aydinlatma metni, ilk giriste onay, hesap/veri silme, minimum veri |
 | Gelir | Yok |

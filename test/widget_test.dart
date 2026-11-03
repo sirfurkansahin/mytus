@@ -1,4 +1,6 @@
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/dersler/hazir_dersler.dart';
+import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +20,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Çalışma planını kuralım'), findsOneWidget);
+    expect(find.text('Klasik Branşlar'), findsOneWidget);
+    expect(find.text('SpeeTUS Sarmal'), findsOneWidget);
     expect(find.text('1. Tıbbın Temelleri'), findsOneWidget);
     expect(find.text('22 Ağustos 2027'), findsOneWidget);
-    expect(find.text('7. Hematoloji ve Onkoloji'), findsOneWidget);
+
+    await tester.tap(find.text('Klasik Branşlar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Anatomi'), findsOneWidget);
+    expect(find.text('TEMEL'), findsOneWidget);
+    expect(find.text('KLİNİK'), findsOneWidget);
+
+    await tester.tap(find.text('SpeeTUS Sarmal'));
+    await tester.pumpAndSettle();
+    expect(find.text('1. Tıbbın Temelleri'), findsOneWidget);
+
     await tester.tap(find.text('Tümünü kaldır'));
     await tester.pumpAndSettle();
     final basla = tester.widget<FilledButton>(
@@ -67,7 +81,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('Dersler sekmesinde tüm dersler tek liste olarak gösterilir',
+  testWidgets('Dersler sekmesinde SpeeTUS tüm dersleri tek liste olarak gösterir',
       (tester) async {
     final depo = await doluDepo(tester);
     await tester.pumpWidget(MyTusApp(deposu: depo));
@@ -79,6 +93,36 @@ void main() {
     expect(find.text('2. Periferik Sinir Sistemi ve Kas'), findsOneWidget);
     expect(find.text('Klinik'), findsNothing);
     expect(find.text('Temel'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Klasik müfredat seçildiğinde Dersler sekmesinde Temel ve Klinik sekmeleri görünür',
+      (tester) async {
+    final depo = await tester.runAsync(() async {
+      final d = PlanDeposu(kayit: BellekKaydi(), kayitGecikmesi: Duration.zero);
+      await d.yukle();
+      await d.karsilamayiTamamla(
+        sinavTarihi: DateTime(2030, 4, 1),
+        secilenDersler: klasikDersler,
+        mufredatTuru: MufredatTuru.klasik,
+      );
+      return d;
+    });
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Dersler'));
+    await tester.pumpAndSettle();
+    expect(find.text('Temel'), findsOneWidget);
+    expect(find.text('Klinik'), findsOneWidget);
+    expect(find.text('Anatomi'), findsOneWidget);
+    expect(find.text('Dahiliye'), findsNothing);
+
+    await tester.tap(find.text('Klinik'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dahiliye'), findsOneWidget);
+    expect(find.text('Anatomi'), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
