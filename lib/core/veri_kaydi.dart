@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'veri_kaydi_stub.dart'
+    if (dart.library.html) 'veri_kaydi_web.dart';
 
 /// Tüm uygulama verisinin tek bir metin (JSON) olarak saklandığı yer.
 abstract class VeriKaydi {
@@ -9,7 +12,7 @@ abstract class VeriKaydi {
   Future<void> yaz(String icerik);
 }
 
-/// Telefonun uygulama klasöründeki dosyaya yazar (Android tarafı: MainActivity.kt).
+/// Telefondaki dosyaya (Android tarafı: MainActivity.kt) veya tarayıcı yerel hafızasına (Web) yazar.
 /// Dosya, uygulama silinene kadar kalır; yazma önce geçici dosyaya yapılıp yer değiştirilir,
 /// böylece yazarken kapanma durumunda eski veri bozulmaz.
 class DosyaKaydi implements VeriKaydi {
@@ -18,10 +21,19 @@ class DosyaKaydi implements VeriKaydi {
   static const MethodChannel _kanal = MethodChannel('com.mytus.app/storage');
 
   @override
-  Future<String?> oku() => _kanal.invokeMethod<String>('read');
+  Future<String?> oku() async {
+    if (kIsWeb) {
+      return webDepoOku();
+    }
+    return _kanal.invokeMethod<String>('read');
+  }
 
   @override
   Future<void> yaz(String icerik) async {
+    if (kIsWeb) {
+      webDepoYaz(icerik);
+      return;
+    }
     await _kanal.invokeMethod<Object>('write', {'content': icerik});
   }
 }
