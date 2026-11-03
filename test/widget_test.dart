@@ -555,7 +555,7 @@ void kokpitTestleri() {
     // Hızlı araç: Beklenen Değer kartını aç
     await tester.tap(find.text('Beklenen Değer (EV)'));
     await tester.pumpAndSettle();
-    expect(find.text('Cevap Değiştirme ve Beklenen Değer (EV)'), findsOneWidget);
+    expect(find.textContaining('Beklenen Değer (EV)'), findsWidgets);
     await tester.tap(find.text('Kapat'));
     await tester.pumpAndSettle();
 

@@ -100,11 +100,13 @@ class BugunEkrani extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   IconButton(
                     tooltip: 'Master Kokpit',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.dashboard_customize_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
@@ -112,6 +114,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Bilişsel & Uyku',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.psychology_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
@@ -119,6 +122,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Özel Defterler',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.rule_folder_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const DefterlerEkrani()),
@@ -126,6 +130,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Denemeler & Analiz',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.assignment_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const DenemelerEkrani()),
@@ -133,6 +138,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'İlerleme',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.bar_chart_rounded),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const IlerlemeEkrani()),
@@ -140,6 +146,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Ayarlar',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.settings_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const AyarlarEkrani()),
