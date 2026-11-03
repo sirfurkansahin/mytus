@@ -264,8 +264,8 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                   ),
                 ),
               ],
-              if (calisma && o.bolumBitti) ...[
-                const SizedBox(height: 16),
+              if (calisma && o.bolumBitti && !o.tamamlandi) ...[
+                const SizedBox(height: 12),
                 _BlokOdakDegerlendirme(
                   oturumId: o.id,
                   dongu: o.dongu,
@@ -331,26 +331,26 @@ class _BlokOdakDegerlendirme extends StatelessWidget {
     final zor = kayit?.zorBilissel ?? true;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: ftYuzeyOrta,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: ftCizgi),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Bu Bloktaki Odak Seviyeniz (1 - 5):',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: ftAcikYazi,
-            ),
-          ),
-          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Text(
+                'Blok Odak: ',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: ftAcikYazi,
+                ),
+              ),
               for (var i = 1; i <= 5; i++)
                 InkWell(
                   onTap: () => depo.sonOdakGuncelle(
@@ -358,30 +358,19 @@ class _BlokOdakDegerlendirme extends StatelessWidget {
                     odakPuani: i,
                     zorBilissel: zor,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: puan == i ? ftVurgu : Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: puan == i ? ftIyi : ftCizgi,
-                      ),
-                    ),
-                    child: Text(
-                      '★ $i',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: puan == i ? Colors.white : ftAcikYazi,
-                      ),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                    child: Icon(
+                      i <= puan ? Icons.star_rounded : Icons.star_border_rounded,
+                      color: i <= puan ? Colors.amber[400] : ftAcikYazi,
+                      size: 22,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 4),
           InkWell(
             onTap: () => depo.sonOdakGuncelle(
               anahtar: anahtar,
@@ -393,12 +382,12 @@ class _BlokOdakDegerlendirme extends StatelessWidget {
               children: [
                 Icon(
                   zor ? Icons.check_box : Icons.check_box_outline_blank,
-                  size: 18,
+                  size: 16,
                   color: zor ? ftIyi : ftAcikYazi,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 4),
                 const Text(
-                  'Ağır Analitik İş (PFC 3-4 saat tavanına sayılır)',
+                  'Ağır Analitik İş (PFC Yükü)',
                   style: TextStyle(fontSize: 11, color: ftAcikYazi),
                 ),
               ],
