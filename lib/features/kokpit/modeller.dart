@@ -2,6 +2,7 @@ library;
 
 import 'dart:math' as math;
 import 'package:app/core/tarih.dart';
+import 'package:app/features/bilissel/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
@@ -177,12 +178,12 @@ KokpitGostergeleri kokpitGostergeleriHesapla(PlanDeposu depo, [DateTime? referan
 
   if (uykular.isNotEmpty) {
     final sonYedi = uykular.take(7).toList();
-    final toplamSaat = sonYedi.fold<double>(0.0, (t, u) => t + u.sureSaat);
+    final toplamSaat = sonYedi.fold<double>(0.0, (t, u) => t + u.uykuSuresiSaat);
     ortUyku = double.parse((toplamSaat / sonYedi.length).toStringAsFixed(1));
 
     final toplamSapma = sonYedi.fold<int>(
       0,
-      (t, u) => t + u.yatisSapmasiDakika(depo.hedefYatisSaati),
+      (t, u) => t + daireselDakikaFarki(u.yatisSaati, depo.hedefYatisSaati),
     );
     ortSapma = (toplamSapma / sonYedi.length).round();
     uykuDuzenli = (ortUyku >= 7.0 && ortUyku <= 9.0 && ortSapma <= 30);

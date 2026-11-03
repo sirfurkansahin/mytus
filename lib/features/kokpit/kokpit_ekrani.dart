@@ -2,7 +2,6 @@ library;
 
 import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/defterler/defterler_ekrani.dart';
-import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/kokpit/modeller.dart';
 import 'package:app/features/kokpit/strateji_motoru.dart';
@@ -819,7 +818,7 @@ class _DortSinavGostergesiKarti extends StatelessWidget {
                 child: const Row(
                   children: [
                     Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         'Son çeyrek hata oranı ilk çeyreğin 1.5 katı (Karar Yorgunluğu)',

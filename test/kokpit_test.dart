@@ -4,7 +4,6 @@ import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/bilissel/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
-import 'package:app/features/ft_time/odak_kaydi.dart';
 import 'package:app/features/kokpit/modeller.dart';
 import 'package:app/features/kokpit/strateji_motoru.dart';
 import 'package:flutter_test/flutter_test.dart';
