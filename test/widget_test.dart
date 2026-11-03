@@ -32,6 +32,9 @@ void main() {
   });
 
   testWidgets('Dersten konu ekleme ve nota yazma depoya gider', (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     await tester.pumpWidget(MyTusApp(deposu: depo));
     await tester.pumpAndSettle();
@@ -129,7 +132,7 @@ void takvimTestleri() {
   testWidgets('Konu ekranında tekrar planı görünür', (tester) async {
     final depo = await doluDepo(tester);
     final ilkDers = depo.tumDersler.first;
-    final konu = depo.konuEkle(ilkDers.id, 'Alt ekstremite')!;
+    final konu = depo.konular(ilkDers.id).first;
     final c = depo.calismaEkle(konu.id, DateTime.now())!;
     depo.calistim(c.id, DateTime.now());
     await tester.pumpWidget(MyTusApp(deposu: depo));
@@ -139,7 +142,7 @@ void takvimTestleri() {
     await tester.pumpAndSettle();
     await tester.tap(find.text(ilkDers.ad));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Alt ekstremite'));
+    await tester.tap(find.text(konu.ad));
     await tester.pumpAndSettle();
 
     expect(find.text('Tekrar planı'), findsOneWidget);

@@ -221,13 +221,13 @@ void main() {
       );
       final depo = await doluDepo(tester);
       final ders = depo.tumDersler.first;
-      final konu = depo.konuEkle(ders.id, 'Üst ekstremitenin arteriyel dolaşımı')!;
+      final konu = depo.konular(ders.id).first;
       final bugun = gunBasi(DateTime.now());
       final c = depo.calismaEkle(konu.id, bugun)!;
       depo.calistim(c.id, bugun);
       depo.calismaEkle(konu.id, gunEkle(bugun, 3));
-      depo.konuEkle(ders.id, 'Brachial plexus');
-      depo.calismaEkle(depo.konular(ders.id).last.id, gunEkle(bugun, -2));
+      final digerKonu = depo.konular(ders.id)[1];
+      depo.calismaEkle(digerKonu.id, gunEkle(bugun, -2));
       await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
       await tester.pumpAndSettle();
 
@@ -253,10 +253,14 @@ void main() {
 
       Future<void> dokun(String adim, Finder f) async {
         if (f.evaluate().isEmpty) {
+          final scrollables = find.byType(Scrollable);
+          final scrollTarget = scrollables.evaluate().length > 1
+              ? scrollables.last
+              : scrollables.first;
           await tester.scrollUntilVisible(
             f,
             300,
-            scrollable: find.byType(Scrollable).first,
+            scrollable: scrollTarget,
           );
         }
         expect(f, findsWidgets, reason: '[$adim] bulunamadi');
@@ -277,7 +281,7 @@ void main() {
 
       await dokun('sekme Dersler', find.text('Dersler'));
       await dokun('ders ekrani', find.text(ders.ad));
-      await dokun('konu ekrani', find.text('Üst ekstremitenin arteriyel dolaşımı'));
+      await dokun('konu ekrani', find.text(konu.ad));
       await geri('konudan geri');
       await geri('dersten geri');
 
