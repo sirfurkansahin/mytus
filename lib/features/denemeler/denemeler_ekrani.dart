@@ -134,7 +134,7 @@ class _OzetKokpitKarti extends StatelessWidget {
                   child: _MiniMetrik(
                     baslik: 'Son Deneme',
                     deger: sonDeneme.ad,
-                    altYazi: tarihFormatla(sonDeneme.tarih),
+                    altYazi: tarihYaz(sonDeneme.tarih),
                   ),
                 ),
               ],
@@ -240,7 +240,7 @@ class _DenemeKarti extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          tarihFormatla(deneme.tarih),
+                          tarihYaz(deneme.tarih),
                           style: tema.textTheme.bodySmall?.copyWith(
                             color: tema.colorScheme.onSurfaceVariant,
                           ),
@@ -294,7 +294,7 @@ class _DenemeKarti extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.red.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
-                        border: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
+                        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

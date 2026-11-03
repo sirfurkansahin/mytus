@@ -223,7 +223,7 @@ class _PuanNetKarti extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      tarihFormatla(deneme.tarih),
+                      tarihYaz(deneme.tarih),
                       style: tema.textTheme.bodySmall?.copyWith(
                         color: tema.colorScheme.onSurfaceVariant,
                       ),

@@ -171,7 +171,7 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.calendar_today_outlined),
                 ),
-                child: Text(tarihFormatla(_tarih)),
+                child: Text(tarihYaz(_tarih)),
               ),
             ),
             const SizedBox(height: 20),
@@ -363,7 +363,7 @@ class _CanliPuanKarti extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${ebapPuan.toStringAsFixed(1)}',
+                        ebapPuan.toStringAsFixed(1),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
