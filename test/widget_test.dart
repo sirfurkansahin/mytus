@@ -134,6 +134,7 @@ void main() {
   denemeTestleri();
   defterlerTestleri();
   bilisselTestleri();
+  provaTestleri();
 }
 
 void takvimTestleri() {
@@ -471,6 +472,50 @@ void bilisselTestleri() {
     await tester.tap(find.byType(SwitchListTile));
     await tester.pumpAndSettle();
     expect(depo.kurtarmaModuAktif, isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void provaTestleri() {
+  testWidgets('Denemeler ekranından Sınav Provası açılır, başlar ve panik protokolü çalışır',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Denemeler & Analiz'));
+    await tester.pumpAndSettle();
+
+    // Prova butonuna dokun
+    await tester.tap(find.textContaining('Sınav Provası'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gerçek Saat Sınav Provası'), findsOneWidget);
+    expect(find.text('135 Dakika · 100 Soru'), findsOneWidget);
+    expect(find.text('1. Oturum: TTBT (10:15)'), findsOneWidget);
+    expect(find.text('2. Oturum: KTBT (14:45)'), findsOneWidget);
+
+    // Panik protokolü butonuna tıkla
+    await tester.tap(find.byTooltip('90 sn Panik / Nefes'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('90 sn Döngüsel İç Çekme'), findsOneWidget);
+    expect(find.textContaining('Bilişsel Yeniden Değerlendirme'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    // Provayı başlat
+    await tester.tap(find.text('Provayı Başlat (135 Dakika)'));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('KALAN SÜRE'), findsOneWidget);
+    expect(find.textContaining('Soru: 1 / 100'), findsOneWidget);
+    expect(find.text('Provayı Bitir'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

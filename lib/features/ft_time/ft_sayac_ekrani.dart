@@ -9,6 +9,7 @@ import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/ft_time/ft_sayac_bilesenleri.dart';
 import 'package:app/features/ft_time/ft_timer.dart';
 import 'package:app/features/ft_time/pil_rehberi.dart';
+import 'package:app/features/prova/panik_protokolu_dialog.dart';
 import 'package:flutter/material.dart';
 
 /// Çalışan F.T. time oturumunun sayaç ekranı (koyu mor, onaylı tasarım).
@@ -191,14 +192,46 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'F.T. TIME',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                  color: ftAcikYazi,
-                ),
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const Text(
+                    'F.T. TIME',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                      color: ftAcikYazi,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => const PanikProtokoluDialog(),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: ftYuzeyHafif,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: ftCizgi),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.air_rounded, color: ftIyi, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            '90 sn Nefes',
+                            style: TextStyle(fontSize: 11, color: ftAcikYazi, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(

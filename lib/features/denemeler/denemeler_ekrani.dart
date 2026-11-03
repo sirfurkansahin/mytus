@@ -4,6 +4,8 @@ import 'package:app/features/denemeler/deneme_detay_ekrani.dart';
 import 'package:app/features/denemeler/deneme_ekle_ekrani.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/prova/panik_protokolu_dialog.dart';
+import 'package:app/features/prova/prova_ekrani.dart';
 import 'package:flutter/material.dart';
 
 /// Deneme sınavları listesi, net/puan göstergesi ve analiz kokpiti.
@@ -22,6 +24,23 @@ class DenemelerEkrani extends StatelessWidget {
           'Deneme Sınavları & Analiz',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Sınav Provası (135 Dk)',
+            icon: const Icon(Icons.timer_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ProvaEkrani()),
+            ),
+          ),
+          IconButton(
+            tooltip: '90 sn Panik / Nefes',
+            icon: const Icon(Icons.air_rounded, color: Colors.teal),
+            onPressed: () => showDialog<void>(
+              context: context,
+              builder: (_) => const PanikProtokoluDialog(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.add),
@@ -37,6 +56,20 @@ class DenemelerEkrani extends StatelessWidget {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
               children: [
+                Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  color: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  child: ListTile(
+                    leading: const Icon(Icons.timer_outlined, color: Colors.indigo, size: 28),
+                    title: const Text('🎯 Gerçek Saat Sınav Provası (135 dk)', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('10:15 TTBT / 14:45 KTBT resmi prova, çeyrek dilim tempo kontrolü.'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const ProvaEkrani()),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 _OzetKokpitKarti(denemeler: denemeler),
                 const SizedBox(height: 20),
                 Text(
@@ -407,6 +440,14 @@ class _BosDurum extends StatelessWidget {
               onPressed: onEkle,
               icon: const Icon(Icons.add),
               label: const Text('İlk Denemeni Ekle'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const ProvaEkrani()),
+              ),
+              icon: const Icon(Icons.timer_outlined),
+              label: const Text('🎯 Sınav Provası Başlat (135 dk)'),
             ),
           ],
         ),
