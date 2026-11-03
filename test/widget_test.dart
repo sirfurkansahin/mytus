@@ -556,7 +556,7 @@ void kokpitTestleri() {
     await tester.tap(find.text('Beklenen Değer (EV)'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Beklenen Değer (EV)'), findsWidgets);
-    await tester.tap(find.text('Kapat'));
+    await tester.tap(find.text('Anladım'));
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(const SizedBox.shrink());
