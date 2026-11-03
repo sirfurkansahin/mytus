@@ -81,3 +81,11 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 | A–F Hata Sınıfları | A: Bilgi kusuru, B: Yanlış biliyordum (Emin + Yanlış), C: Okuma/kurgu, D: Mantık/halka, E: Süre/yorgunluk, F: Form/dikkat. |
 | Hiperdüzeltme Alarmı | "Emin + Yanlış" hücresindeki hatalar yanlış inanç olduğundan AYNI GÜN düzeltilmelidir uyarısı verilir. |
 | Kalibrasyon Farkı | Ortalama Güven - Doğruluk (hedef mutlak değer <= %5). +%8 üzeri aşırı güven alarmı üretir. |
+
+## Özel Defterler & Akıllı Havuz (Modül 2, 3 Kasım 2026)
+| Konu | Karar ve Neden |
+|---|---|
+| Hata Defteri & Çeldirici Bankası | Denemelerden ve soru çözümlerinden gelen hatalar toplanır. Her yanlış için 3 zorunlu alan: karışan çeldirici, ayıran tek kriter ve adayın kendi kuralı. "Pekiştirildi" takibi vardır. |
+| Sınıflama & Skor Defteri (Tuzak Sınıfı 8) | Mantıkla türetilemeyen ezber skorlar için 10+ hazır TUS skoru (Hinchey, Hodgkin IPS, Child-Pugh, Wells, CURB-65, Ranson vb.) kütüphanesi ve kullanıcının özel skor ekleme imkanı. |
+| Mekanizma Zincirleri (Illness Script) | 6 branş için 5 halkalı şablonlar (Dahiliye, Farmakoloji, Biyokimya, Mikrobiyoloji, Fizyoloji, Anatomi). Ayıran özellik ve "Neden?" açıklaması zorunlu. |
+| 3 Dakikalık Vaka Kartı | Klinisyen/intörn adayların nöbet ve servisteki hastaları 3 dakikada TUS formatına dönüştürme aracı. |

@@ -132,6 +132,7 @@ void main() {
 
   takvimTestleri();
   denemeTestleri();
+  defterlerTestleri();
 }
 
 void takvimTestleri() {
@@ -403,6 +404,43 @@ void denemeTestleri() {
 
     expect(depo.denemeler.length, 1);
     expect(depo.denemeler.first.ad, 'Test Denemesi 1');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void defterlerTestleri() {
+  testWidgets('Bugün ekranından Özel Defterler açılır ve sekmeler gezilir',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Özel Defterler'));
+    await tester.pumpAndSettle();
+    expect(find.text('Özel Defterler & Akıllı Havuz'), findsOneWidget);
+    expect(find.text('Hata & Çeldirici'), findsOneWidget);
+    expect(find.text('Skor Defteri'), findsOneWidget);
+
+    // Skor Defteri sekmesine geç
+    await tester.tap(find.text('Skor Defteri'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Hinchey'), findsOneWidget);
+    expect(find.textContaining('Hodgkin'), findsOneWidget);
+
+    // Mekanizma Zincirleri sekmesine geç
+    await tester.tap(find.text('Mekanizma Zincirleri'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Illness Script'), findsOneWidget);
+
+    // 3 Dk Vaka Kartı sekmesine geç
+    await tester.tap(find.text('3 Dk Vaka Kartı'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Vaka Kartı'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

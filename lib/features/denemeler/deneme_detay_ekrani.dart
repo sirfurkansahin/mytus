@@ -2,6 +2,8 @@ import 'package:app/core/renkler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/denemeler/deneme_ekle_ekrani.dart';
 import 'package:app/features/denemeler/dialoglar.dart';
+import 'package:app/features/defterler/defterler_ekrani.dart';
+import 'package:app/features/defterler/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
@@ -41,6 +43,24 @@ class DenemeDetayEkrani extends StatelessWidget {
       notlar: deneme.notlar,
     );
     await depo.denemeGuncelle(guncelDeneme);
+
+    if (!yeniSoru.dogruMu) {
+      await depo.hataEkle(
+        HataKaydi(
+          id: yeniSoru.id,
+          baslik: '${yeniSoru.oturumTemelMi ? "Temel" : "Klinik"} Soru ${yeniSoru.soruNo}: ${yeniSoru.ayiranKriter.isNotEmpty ? yeniSoru.ayiranKriter : deneme.ad}',
+          dersAdi: yeniSoru.dersAdi,
+          hataSinifi: yeniSoru.hataSinifi ?? HataSinifi.b,
+          guven: yeniSoru.guven,
+          celdirici: yeniSoru.celdirici,
+          ayiranKriter: yeniSoru.ayiranKriter,
+          kural: yeniSoru.kural,
+          tarih: deneme.tarih,
+          denemeId: deneme.id,
+          soruNo: yeniSoru.soruNo,
+        ),
+      );
+    }
   }
 
   Future<void> _soruSil(
@@ -87,6 +107,15 @@ class DenemeDetayEkrani extends StatelessWidget {
       appBar: AppBar(
         title: Text(deneme.ad, style: const TextStyle(fontWeight: FontWeight.w700)),
         actions: [
+          IconButton(
+            tooltip: 'Hata Defteri',
+            icon: const Icon(Icons.rule_folder_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DefterlerEkrani(),
+              ),
+            ),
+          ),
           IconButton(
             tooltip: 'Düzenle',
             icon: const Icon(Icons.edit_outlined),

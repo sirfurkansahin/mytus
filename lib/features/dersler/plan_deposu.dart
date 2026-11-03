@@ -4,6 +4,8 @@ import 'dart:math' as math;
 
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/defterler/hazir_skorlar.dart';
+import 'package:app/features/defterler/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
@@ -56,6 +58,10 @@ class PlanDeposu extends ChangeNotifier {
   final List<OdakKaydi> _odaklar = [];
   FtOturum? _oturum;
   final List<DenemeSinavi> _denemeler = [];
+  final List<HataKaydi> _hataDefteri = [];
+  final List<SkorKarti> _ozelSkorlar = [];
+  final List<MekanizmaZinciri> _zincirler = [];
+  final List<VakaKarti> _vakaKartlari = [];
 
   Timer? _zamanlayici;
   bool _kirli = false;
@@ -200,6 +206,58 @@ class PlanDeposu extends ChangeNotifier {
         ..clear()
         ..addAll(denemeler);
 
+      final hatalar = <HataKaydi>[];
+      final hataListesi = veri['hataDefteri'];
+      if (hataListesi is List) {
+        for (final e in hataListesi) {
+          if (e is Map<String, dynamic>) {
+            hatalar.add(HataKaydi.fromJson(e));
+          }
+        }
+      }
+      _hataDefteri
+        ..clear()
+        ..addAll(hatalar);
+
+      final skorlar = <SkorKarti>[];
+      final skorListesi = veri['ozelSkorlar'];
+      if (skorListesi is List) {
+        for (final e in skorListesi) {
+          if (e is Map<String, dynamic>) {
+            skorlar.add(SkorKarti.fromJson(e));
+          }
+        }
+      }
+      _ozelSkorlar
+        ..clear()
+        ..addAll(skorlar);
+
+      final zincirler = <MekanizmaZinciri>[];
+      final zincirListesi = veri['zincirler'];
+      if (zincirListesi is List) {
+        for (final e in zincirListesi) {
+          if (e is Map<String, dynamic>) {
+            zincirler.add(MekanizmaZinciri.fromJson(e));
+          }
+        }
+      }
+      _zincirler
+        ..clear()
+        ..addAll(zincirler);
+
+      final vakalar = <VakaKarti>[];
+      final vakaListesi = veri['vakaKartlari'];
+      if (vakaListesi is List) {
+        for (final e in vakaListesi) {
+          if (e is Map<String, dynamic>) {
+            vakalar.add(VakaKarti.fromJson(e));
+          }
+        }
+      }
+      _vakaKartlari
+        ..clear()
+        ..addAll(vakalar);
+
       _sonId = math.max(_sonId, enBuyuk);
       return true;
     } on FormatException {
@@ -223,6 +281,10 @@ class PlanDeposu extends ChangeNotifier {
         'odaklar': [for (final o in _odaklar) o.toJson()],
         'oturum': _oturum?.toJson(),
         'denemeler': [for (final d in _denemeler) d.toJson()],
+        'hataDefteri': [for (final h in _hataDefteri) h.toJson()],
+        'ozelSkorlar': [for (final s in _ozelSkorlar) s.toJson()],
+        'zincirler': [for (final z in _zincirler) z.toJson()],
+        'vakaKartlari': [for (final v in _vakaKartlari) v.toJson()],
       };
 
   // ---------------------------------------------------------------- okuma
@@ -783,6 +845,84 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
     await hemenKaydet();
   }
+
+  // ---------------------------------------------------------------- özel defterler
+
+  List<HataKaydi> get hataDefteri => List.unmodifiable(_hataDefteri);
+
+  Future<void> hataEkle(HataKaydi hata) async {
+    _hataDefteri.insert(0, hata);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> hataGuncelle(HataKaydi hata) async {
+    final idx = _hataDefteri.indexWhere((h) => h.id == hata.id);
+    if (idx != -1) {
+      _hataDefteri[idx] = hata;
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
+  Future<void> hataPekistir(String id, bool pekistirildi) async {
+    final idx = _hataDefteri.indexWhere((h) => h.id == id);
+    if (idx != -1) {
+      _hataDefteri[idx] = _hataDefteri[idx].copyWith(pekiştirildi: pekistirildi);
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
+  Future<void> hataSil(String id) async {
+    _hataDefteri.removeWhere((h) => h.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  List<SkorKarti> get tumSkorlar => [...hazirSkorlar, ..._ozelSkorlar];
+  List<SkorKarti> get ozelSkorlar => List.unmodifiable(_ozelSkorlar);
+
+  Future<void> skorEkle(SkorKarti skor) async {
+    _ozelSkorlar.insert(0, skor);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> skorSil(String id) async {
+    _ozelSkorlar.removeWhere((s) => s.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  List<MekanizmaZinciri> get zincirler => List.unmodifiable(_zincirler);
+
+  Future<void> zincirEkle(MekanizmaZinciri zincir) async {
+    _zincirler.insert(0, zincir);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> zincirSil(String id) async {
+    _zincirler.removeWhere((z) => z.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  List<VakaKarti> get vakaKartlari => List.unmodifiable(_vakaKartlari);
+
+  Future<void> vakaEkle(VakaKarti vaka) async {
+    _vakaKartlari.insert(0, vaka);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> vakaSil(String id) async {
+    _vakaKartlari.removeWhere((v) => v.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
 
   @override
   void dispose() {

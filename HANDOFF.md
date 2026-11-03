@@ -1,39 +1,35 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 3 Kasim 2026 (Gemini), Master Rapor Faz 1: Deneme Sınavları & Bilişsel Hata Analizi modülü `main` dalına birleştirildi (PR #12).
+Son guncelleme: 3 Kasim 2026 (Gemini), Master Rapor Faz 2: Özel Defterler & Akıllı Havuz modülü geliştirildi (`model2/ozel-defterler`).
 
 ## Durum
 - Faz 2 (kurulum) ve Faz 3 (UX/UI tasarim) TAMAMLANDI.
-- Master Rapor Faz 1 (PR #12) başarıyla `main` dalına birleştirildi:
-  1. **200 Soru ve Puanlama Mimarisi:**
-     - 100 Temel (TTBT) + 100 Klinik (KTBT) soru yapısı.
-     - Net hesabı ($D - Y/4$).
-     - Ağırlıklı Puanlar ($K = 0.4 \times TTBT + 0.6 \times KTBT$; $T = 0.6 \times TTBT + 0.4 \times KTBT$).
-     - ÖSYM 85 EBAP (En Büyük Ağırlıklı Puan) tavan ölçeklemesi.
-  2. **A–F Hata Sınıfları ve Güven Matrisi:**
-     - A: Bilgi, B: Yanlış inanç, C: Okuma/kurgu, D: Mantık/halka, E: Süre, F: Form.
-     - "Emin + Yanlış" için ⚠️ **HİPERDÜZELTME ALARMI** (aynı gün kapatma uyarısı).
-     - Kalibrasyon Farkı hesabı ($Ortalama Güven - Doğruluk$; $\le \%5$ hedefi, $>+\%8$ aşırı güven uyarısı).
-     - Sınav Öncesi Test Kaygısı (0–10 skalası).
-  3. **Arayüz ve Ekranlar (`lib/features/denemeler/`):**
-     - `DenemelerEkrani`: Deneme listesi, özet kokpit ve net geçmişi.
-     - `DenemeEkleEkrani`: Canlı net ve EBAP puan hesaplayıcı form.
-     - `DenemeDetayEkrani`: A-F hata dağılım çubukları, kayıp net analizi ve soru bazlı çeldirici/kriter incelemesi.
-     - `soruAnalizDialogu`: Hatalı soru ekleme dialogu.
-  4. **Gezinme:**
-     - `BugunEkrani` üst barına "Denemeler & Analiz" butonu eklendi.
-     - `IlerlemeEkrani` içine "Deneme Sınavları & Net Analizi" kartı eklendi.
-  5. **CI / Dağıtım:**
-     - Kod analizi, birim testleri (`test/deneme_test.dart`) ve widget testleri (`test/widget_test.dart`) GitHub Actions'ta yeşil.
-     - APK Firebase App Distribution'a yüklendi, Web sürümü GitHub Pages üzerinde canlı.
+- Master Rapor Faz 1 (Deneme Sınavları & Hata Analizi - PR #12) `main` dalına birleştirildi.
+- Master Rapor Faz 2 (`model2/ozel-defterler`) geliştirildi:
+  1. **Hata Defteri & Çeldirici Bankası (`HataKaydi`):**
+     - Denemelerden veya soru çözümünden gelen hatalar tek havuzda toplanır.
+     - 3 zorunlu alan: Karışan çeldirici, İki şıkkı **ayıran tek kriter** ve Bir daha yapmamak için **kendi kuralım**.
+     - B sınıfı (Emin + Yanlış) için ⚠️ Hiperdüzeltme uyarısı ve "Pekiştirildi" takibi.
+  2. **Sınıflama & Skor Defteri (`SkorKarti`):**
+     - Rapor Tuzak Sınıfı 8 için 10+ kritik hazır TUS skoru (Modifiye Hinchey, Hodgkin IPS, Child-Pugh, Wells PE/DVT, CURB-65, Ranson, qSOFA, Jones ARA, Duke İE, Alvarado).
+     - Kullanıcının kendi özel skorunu ekleme imkanı, arama çubuğu ve ÖSYM çeldirici uyarıları.
+  3. **Mekanizma Zincirleri (`MekanizmaZinciri`):**
+     - 6 branş şablonu (Dahiliye, Farmakoloji, Biyokimya, Mikrobiyoloji, Fizyoloji, Anatomi) ile 5 halkalı hastalık betiği (Illness script).
+     - Komşusundan ayıran tek özellik ve "Neden?" mekanizma açıklaması.
+  4. **3 Dakikalık Vaka Kartı (`VakaKarti`):**
+     - İntörn ve klinisyen adayların günlük hasta karşılaşmasını TUS soru mantığına ve ayırıcı tanıya dönüştürme aracı.
+  5. **Depo & Gezinme Entegrasyonu:**
+     - `PlanDeposu` içinde kalıcı depolama, ekleme, güncelleme, pekiştirme ve silme metotları.
+     - `DenemeDetayEkrani` üzerinde eklenen hatalı soruların otomatik olarak Hata Defteri'ne akması.
+     - `DerslerEkrani` ve `BugunEkrani` üzerinden tek dokunuşla Özel Defterler'e erişim.
+  6. **Testler:**
+     - `test/defterler_test.dart` ile modeller, hazır skorlar, illness scripts ve depo CRUD testleri.
+     - `test/widget_test.dart` içine `defterlerTestleri` eklendi.
 
 ## Siradaki adim
-1. **Master Rapor Faz 2 (Özel Defterler):**
-   - **Hata Defteri & Çeldirici Bankası:** Denemelerden veya soru çözümlerinden gelen hataların toplanıp aralıklı tekrar zincirine (R1/R2) dahil edilmesi, karışan çeldirici ve ayıran tek kriterin gösterimi.
-   - **Sınıflama & Skor Defteri (Tuzak Sınıfı 8):** Hodgkin IPS, Hinchey, Child-Pugh, Wells vb. skorlar için hızlı kart kütüphanesi.
-   - **Mekanizma Zincirleri (Illness Script Rehberi):** 6 temel branş için 5 halkalı kavram zinciri şablonları.
-   - **3 Dakikalık Vaka Kartı:** İntörn/klinisyen vaka dönüştürücü.
-2. **Modul 8 (Surum 2):** Google girisi, KVKK aydinlatma/onay ekranlari, bulut esitleme, davet kodlu arkadas grubu, haftalik puan tablosu ve istege bagli konu paylasimi.
+1. GitHub'a gönderim (push) ve GitHub Actions CI (analiz, test, APK ve Web) doğrulaması.
+2. PR açılarak kullanıcının onayıyla `main` dalına birleştirilmesi.
+3. **Faz 3 (Modül 3):** Nörobiyoloji & Bilişsel Takip (F.T. time blok sonu 1-5 Odak Puanı, günlük 3-4 saat zor bilişsel iş tavanı, Uyku/Kafein disiplini ve PFC Erken Uyarı / %70 Yük kuralı).
 
 ## Bilinen sorunlar / riskler
 - Web ortaminda telefon kilitliyken sistem alarm servisi (`AlarmManager`) bulunmaz; sayaç tarayici acikken kusursuz calisir.

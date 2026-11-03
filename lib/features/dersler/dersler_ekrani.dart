@@ -2,6 +2,7 @@ import 'package:app/core/renkler.dart';
 import 'package:app/features/dersler/ders_detay_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/modeller.dart';
+import 'package:app/features/defterler/defterler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
@@ -80,9 +81,24 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
                   ),
                 ],
               ),
-              FilledButton(
-                onPressed: () => _dersEkle(context, depo),
-                child: const Text('+ Ders ekle'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.rule_folder_outlined, size: 16),
+                    label: const Text('Özel Defterler'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const DefterlerEkrani(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => _dersEkle(context, depo),
+                    child: const Text('+ Ders ekle'),
+                  ),
+                ],
               ),
             ],
           ),
