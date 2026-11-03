@@ -81,8 +81,9 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   OutlinedButton.icon(
                     icon: const Icon(Icons.rule_folder_outlined, size: 16),
@@ -93,7 +94,6 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
                   FilledButton(
                     onPressed: () => _dersEkle(context, depo),
                     child: const Text('+ Ders ekle'),

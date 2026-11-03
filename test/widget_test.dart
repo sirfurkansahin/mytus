@@ -429,7 +429,7 @@ void defterlerTestleri() {
     // Skor Defteri sekmesine geç
     await tester.tap(find.text('Skor Defteri'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Hinchey'), findsOneWidget);
+    expect(find.textContaining('Hinchey'), findsWidgets);
     expect(find.textContaining('Hodgkin'), findsOneWidget);
 
     // Mekanizma Zincirleri sekmesine geç

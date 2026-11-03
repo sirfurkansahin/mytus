@@ -880,7 +880,7 @@ class PlanDeposu extends ChangeNotifier {
     await hemenKaydet();
   }
 
-  List<SkorKarti> get tumSkorlar => [...hazirSkorlar, ..._ozelSkorlar];
+  List<SkorKarti> get tumSkorlar => [..._ozelSkorlar, ...hazirSkorlar];
   List<SkorKarti> get ozelSkorlar => List.unmodifiable(_ozelSkorlar);
 
   Future<void> skorEkle(SkorKarti skor) async {
