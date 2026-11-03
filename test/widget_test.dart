@@ -1,5 +1,4 @@
 import 'package:app/core/veri_kaydi.dart';
-import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
