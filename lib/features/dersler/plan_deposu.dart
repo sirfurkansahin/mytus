@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/takvim/calisma.dart';
@@ -54,6 +55,7 @@ class PlanDeposu extends ChangeNotifier {
 
   final List<OdakKaydi> _odaklar = [];
   FtOturum? _oturum;
+  final List<DenemeSinavi> _denemeler = [];
 
   Timer? _zamanlayici;
   bool _kirli = false;
@@ -184,6 +186,20 @@ class PlanDeposu extends ChangeNotifier {
       }
       _oturum = oturum;
       if (oturum != null) enBuyuk = math.max(enBuyuk, oturum.id);
+
+      final denemeler = <DenemeSinavi>[];
+      final denemeListesi = veri['denemeler'];
+      if (denemeListesi is List) {
+        for (final e in denemeListesi) {
+          if (e is Map<String, dynamic>) {
+            denemeler.add(DenemeSinavi.fromJson(e));
+          }
+        }
+      }
+      _denemeler
+        ..clear()
+        ..addAll(denemeler);
+
       _sonId = math.max(_sonId, enBuyuk);
       return true;
     } on FormatException {
@@ -206,6 +222,7 @@ class PlanDeposu extends ChangeNotifier {
         'ftAyar': ftAyar.toJson(),
         'odaklar': [for (final o in _odaklar) o.toJson()],
         'oturum': _oturum?.toJson(),
+        'denemeler': [for (final d in _denemeler) d.toJson()],
       };
 
   // ---------------------------------------------------------------- okuma
@@ -282,6 +299,7 @@ class PlanDeposu extends ChangeNotifier {
     _calismalar.clear();
     _odaklar.clear();
     _oturum = null;
+    _denemeler.clear();
     mufredatTuru = yeniTur;
     for (final h in yeniDersler) {
       final ders = _dersEkleIc(h.ad, h.grup);
@@ -731,6 +749,39 @@ class PlanDeposu extends ChangeNotifier {
     } catch (_) {
       kayitHatasi = true;
     }
+  }
+
+
+  // ---------------------------------------------------------------- denemeler
+
+  List<DenemeSinavi> get denemeler => List.unmodifiable(_denemeler);
+
+  DenemeSinavi? denemeBul(String id) {
+    for (final d in _denemeler) {
+      if (d.id == id) return d;
+    }
+    return null;
+  }
+
+  Future<void> denemeEkle(DenemeSinavi deneme) async {
+    _denemeler.insert(0, deneme);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> denemeGuncelle(DenemeSinavi deneme) async {
+    final idx = _denemeler.indexWhere((d) => d.id == deneme.id);
+    if (idx != -1) {
+      _denemeler[idx] = deneme;
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
+  Future<void> denemeSil(String id) async {
+    _denemeler.removeWhere((d) => d.id == id);
+    _degisti();
+    await hemenKaydet();
   }
 
   @override

@@ -131,6 +131,7 @@ void main() {
   ilerlemeTestleri();
 
   takvimTestleri();
+  denemeTestleri();
 }
 
 void takvimTestleri() {
@@ -365,6 +366,43 @@ void ilerlemeTestleri() {
     await tester.tap(find.byTooltip('Sonraki hafta'));
     await tester.pumpAndSettle();
     expect(find.text('Bu hafta'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void denemeTestleri() {
+  testWidgets('Bugün ekranından Denemeler açılır ve yeni deneme eklenir',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Denemeler & Analiz'));
+    await tester.pumpAndSettle();
+    expect(find.text('Deneme Sınavları & Analiz'), findsOneWidget);
+    expect(find.text('Henüz deneme kaydı yok'), findsOneWidget);
+
+    await tester.tap(find.text('İlk Denemeni Ekle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Yeni Deneme Ekle'), findsOneWidget);
+    expect(find.textContaining('TTBT'), findsOneWidget);
+    expect(find.textContaining('KTBT'), findsOneWidget);
+
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Deneme Adı veya Yayın'),
+        'Test Denemesi 1');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Denemeyi ve Netleri Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(depo.denemeler.length, 1);
+    expect(depo.denemeler.first.ad, 'Test Denemesi 1');
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
