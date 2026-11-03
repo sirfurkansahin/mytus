@@ -7,6 +7,8 @@ class OdakKaydi {
     required this.tarihMs,
     required this.dakika,
     this.konuId,
+    this.odakPuani = 4,
+    this.zorBilissel = true,
   });
 
   /// "oturumNo:döngüNo". Aynı döngü iki kez puanlanmasın diye kullanılır.
@@ -17,17 +19,44 @@ class OdakKaydi {
   final int dakika;
   final int? konuId;
 
+  /// 1-5 odak puanı (1: Çok Düşük, 2: Düşük, 3: Orta, 4: Yüksek, 5: Zirve Akış / Flow State).
+  final int odakPuani;
+
+  /// Ağır analitik iş mi? (Yeni konu, deneme, derin hata analizi = true; hafif tekrar, skor kartları = false).
+  final bool zorBilissel;
+
   int get puan => dakika;
 
   DateTime get tarih => DateTime.fromMillisecondsSinceEpoch(tarihMs);
 
-  OdakKaydi konuSiz() => OdakKaydi(anahtar: anahtar, tarihMs: tarihMs, dakika: dakika);
+  OdakKaydi konuSiz() => OdakKaydi(
+        anahtar: anahtar,
+        tarihMs: tarihMs,
+        dakika: dakika,
+        odakPuani: odakPuani,
+        zorBilissel: zorBilissel,
+      );
+
+  OdakKaydi kopyala({
+    int? odakPuani,
+    bool? zorBilissel,
+  }) =>
+      OdakKaydi(
+        anahtar: anahtar,
+        tarihMs: tarihMs,
+        dakika: dakika,
+        konuId: konuId,
+        odakPuani: odakPuani ?? this.odakPuani,
+        zorBilissel: zorBilissel ?? this.zorBilissel,
+      );
 
   Map<String, Object?> toJson() => {
         'anahtar': anahtar,
         'tarihMs': tarihMs,
         'dakika': dakika,
         'konuId': konuId,
+        'odakPuani': odakPuani,
+        'zorBilissel': zorBilissel,
       };
 
   static OdakKaydi? fromJson(Object? veri) {
@@ -36,6 +65,8 @@ class OdakKaydi {
     final tarih = veri['tarihMs'];
     final dakika = veri['dakika'];
     final konu = veri['konuId'];
+    final odak = veri['odakPuani'];
+    final zor = veri['zorBilissel'];
     if (anahtar is! String || tarih is! int || dakika is! int || dakika < 0) {
       return null;
     }
@@ -44,6 +75,8 @@ class OdakKaydi {
       tarihMs: tarih,
       dakika: dakika,
       konuId: konu is int ? konu : null,
+      odakPuani: odak is int && odak >= 1 && odak <= 5 ? odak : 4,
+      zorBilissel: zor is bool ? zor : true,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
+import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
@@ -132,6 +133,83 @@ class _FtHazirlikState extends State<FtHazirlik> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
+            ),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: tema.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: depo.zorBilisselTavanAsildi
+                      ? Colors.red
+                      : depo.zorBilisselYaklasti
+                          ? Colors.orange
+                          : tema.colorScheme.outlineVariant,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.psychology_outlined,
+                    color: depo.zorBilisselTavanAsildi
+                        ? Colors.red
+                        : depo.zorBilisselYaklasti
+                            ? Colors.orange
+                            : Colors.indigo,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Ağır Analitik Tavan (3-4 sa)',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                            Text(
+                              '${depo.zorBilisselDakikaBugun()} / 240 dk',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: depo.zorBilisselTavanAsildi
+                                    ? Colors.red
+                                    : depo.zorBilisselYaklasti
+                                        ? Colors.orange
+                                        : Colors.indigo,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: (depo.zorBilisselDakikaBugun() / 240.0).clamp(0.0, 1.0),
+                            minHeight: 6,
+                            color: depo.zorBilisselTavanAsildi
+                                ? Colors.red
+                                : depo.zorBilisselYaklasti
+                                    ? Colors.orange
+                                    : Colors.indigo,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, size: 20),
                 ],
               ),
             ),

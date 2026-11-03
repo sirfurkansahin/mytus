@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
+import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
@@ -225,6 +226,18 @@ class AyarlarEkrani extends StatelessWidget {
             baslik: 'Tema',
             deger: _temaEtiketi(depo.temaSecimi),
             onTap: () => _temaSec(context, depo),
+          ),
+          _baslik(context, 'BİLİŞSEL PERFORMANS & UYKU'),
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            leading: const Icon(Icons.psychology_outlined, color: Colors.indigo),
+            title: const Text('Bilişsel & Uyku Yönetimi'),
+            subtitle: const Text('Zor bilişsel tavan, sirkadiyen odak, kafein kesilme ve PFC koruma.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
+            ),
           ),
           _baslik(context, 'VERİ VE YEDEK'),
           ListTile(
