@@ -201,8 +201,11 @@ class PlanDeposu extends ChangeNotifier {
 
   // ---------------------------------------------------------------- okuma
 
-  List<Ders> dersler(DersGrubu grup) =>
-      _dersler.where((d) => d.grup == grup).toList(growable: false);
+  List<Ders> get tumDersler => List.unmodifiable(_dersler);
+
+  List<Ders> dersler([DersGrubu? grup]) => grup == null
+      ? List.unmodifiable(_dersler)
+      : _dersler.where((d) => d.grup == grup).toList(growable: false);
 
   Ders? dersBul(int id) {
     for (final d in _dersler) {
@@ -262,21 +265,19 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
-  Ders? _dersEkleIc(String ham, DersGrubu grup) {
+  Ders? _dersEkleIc(String ham, [DersGrubu grup = DersGrubu.temel]) {
     final ad = adTemizle(ham);
     if (ad == null) return null;
     final kucuk = ad.toLowerCase();
-    final varMi = _dersler.any(
-      (d) => d.grup == grup && d.ad.toLowerCase() == kucuk,
-    );
+    final varMi = _dersler.any((d) => d.ad.toLowerCase() == kucuk);
     if (varMi) return null;
     final ders = Ders(id: _yeniId(), ad: ad, grup: grup);
     _dersler.add(ders);
     return ders;
   }
 
-  /// Ders ekler. Ad boşsa veya aynı grupta aynı adlı ders varsa null döner.
-  Ders? dersEkle(String ad, DersGrubu grup) {
+  /// Ders ekler. Ad boşsa veya aynı adlı ders varsa null döner.
+  Ders? dersEkle(String ad, [DersGrubu grup = DersGrubu.temel]) {
     final ders = _dersEkleIc(ad, grup);
     if (ders != null) _degisti();
     return ders;
@@ -289,7 +290,7 @@ class PlanDeposu extends ChangeNotifier {
     final ders = _dersler[indeks];
     final kucuk = ad.toLowerCase();
     final baskasiVar = _dersler.any(
-      (d) => d.id != id && d.grup == ders.grup && d.ad.toLowerCase() == kucuk,
+      (d) => d.id != id && d.ad.toLowerCase() == kucuk,
     );
     if (baskasiVar) return false;
     _dersler[indeks] = ders.kopya(ad: ad);

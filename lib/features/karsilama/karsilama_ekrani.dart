@@ -36,7 +36,7 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
     final ad = PlanDeposu.adTemizle(sonuc.ad);
     if (ad == null) return;
     final varMi = _liste.any(
-      (h) => h.grup == sonuc.grup && h.ad.toLowerCase() == ad.toLowerCase(),
+      (h) => h.ad.toLowerCase() == ad.toLowerCase(),
     );
     if (varMi) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,7 +44,7 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
       );
       return;
     }
-    final yeni = HazirDers(ad, sonuc.grup);
+    final yeni = HazirDers(ad, DersGrubu.temel);
     setState(() {
       _liste.add(yeni);
       _secili.add(yeni);
@@ -64,35 +64,29 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
     // Kayıt bitince depo "karşılama tamam" olur ve ana iskelet kendiliğinden açılır.
   }
 
-  Widget _dersCipleri(DersGrubu grup) {
-    final temel = grup == DersGrubu.temel;
+  Widget _tumDersCipleri() {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         for (final h in _liste)
-          if (h.grup == grup)
-            FilterChip(
-              label: Text(h.ad),
-              selected: _secili.contains(h),
-              showCheckmark: true,
-              selectedColor: temel
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : klinikZemin(context),
-              labelStyle: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: temel
-                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                    : klinikYazi(context),
-              ),
-              onSelected: (acik) => setState(() {
-                if (acik) {
-                  _secili.add(h);
-                } else {
-                  _secili.remove(h);
-                }
-              }),
+          FilterChip(
+            label: Text(h.ad),
+            selected: _secili.contains(h),
+            showCheckmark: true,
+            selectedColor: Theme.of(context).colorScheme.primaryContainer,
+            labelStyle: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
             ),
+            onSelected: (acik) => setState(() {
+              if (acik) {
+                _secili.add(h);
+              } else {
+                _secili.remove(h);
+              }
+            }),
+          ),
       ],
     );
   }
@@ -200,28 +194,8 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'TEMEL',
-                      style: tema.textTheme.labelMedium?.copyWith(
-                        color: soluk,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _dersCipleri(DersGrubu.temel),
-                    const SizedBox(height: 16),
-                    Text(
-                      'KLİNİK',
-                      style: tema.textTheme.labelMedium?.copyWith(
-                        color: soluk,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _dersCipleri(DersGrubu.klinik),
+                    const SizedBox(height: 12),
+                    _tumDersCipleri(),
                     const SizedBox(height: 16),
                     OutlinedButton(
                       onPressed: _kendiDersimiEkle,

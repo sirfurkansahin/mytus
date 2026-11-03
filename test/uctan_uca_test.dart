@@ -52,7 +52,7 @@ void main() {
     expect(depo.sinavTarihi, isNotNull);
     expect(find.textContaining('Sınava'), findsOneWidget);
 
-    final ilkDers = depo.dersler(DersGrubu.temel).first;
+    final ilkDers = depo.tumDersler.first;
 
     // Dersler: konu ekle, not yaz.
     await tester.tap(find.text('Dersler'));
@@ -84,9 +84,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Kalp döngüsü'), findsOneWidget);
     expect(find.text('Notu var'), findsOneWidget);
-    final temelDers = depo.dersler(DersGrubu.temel).firstWhere((d) => d.id == ilkDers.id);
+    final dersKaydi = depo.tumDersler.firstWhere((d) => d.id == ilkDers.id);
     expect(
-      depo.konular(temelDers.id).firstWhere((k) => k.ad == 'Kalp döngüsü').not,
+      depo.konular(dersKaydi.id).firstWhere((k) => k.ad == 'Kalp döngüsü').not,
       'Sistol ve diyastol',
     );
 
@@ -96,7 +96,7 @@ void main() {
   testWidgets('Takvim, Bugün ve tekrar zinciri', (tester) async {
     ekranAyarla(tester);
     final depo = await doluDepo(tester);
-    final ders = depo.dersler(DersGrubu.temel).first;
+    final ders = depo.tumDersler.first;
     final konu = depo.konuEkle(ders.id, 'Üst ekstremite')!;
     await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
@@ -221,7 +221,7 @@ void main() {
         koyu: kosul.koyu,
       );
       final depo = await doluDepo(tester);
-      final ders = depo.dersler(DersGrubu.temel).first;
+      final ders = depo.tumDersler.first;
       final konu = depo.konuEkle(ders.id, 'Üst ekstremitenin arteriyel dolaşımı')!;
       final bugun = gunBasi(DateTime.now());
       final c = depo.calismaEkle(konu.id, bugun)!;
@@ -277,8 +277,6 @@ void main() {
       }
 
       await dokun('sekme Dersler', find.text('Dersler'));
-      await dokun('Klinik', find.text('Klinik'));
-      await dokun('Temel', find.text('Temel'));
       await dokun('ders ekrani', find.text(ders.ad));
       await dokun('konu ekrani', find.text('Üst ekstremitenin arteriyel dolaşımı'));
       await geri('konudan geri');

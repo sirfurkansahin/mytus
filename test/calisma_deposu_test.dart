@@ -14,7 +14,7 @@ Future<({PlanDeposu depo, BellekKaydi kayit, int konuId, int dersId})>
     sinavTarihi: DateTime(2027, 4, 1),
     secilenDersler: const [HazirDers('Fizyoloji', DersGrubu.temel)],
   );
-  final ders = depo.dersler(DersGrubu.temel).single;
+  final ders = depo.tumDersler.single;
   final konu = depo.konuEkle(ders.id, 'Kalp döngüsü')!;
   return (depo: depo, kayit: kayit, konuId: konu.id, dersId: ders.id);
 }

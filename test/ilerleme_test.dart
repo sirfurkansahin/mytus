@@ -37,8 +37,8 @@ void main() {
         HazirDers('Biyokimya', DersGrubu.temel),
       ],
     );
-    final f = depo.dersler(DersGrubu.temel).firstWhere((d) => d.ad == 'Fizyoloji');
-    final b = depo.dersler(DersGrubu.temel).firstWhere((d) => d.ad == 'Biyokimya');
+    final f = depo.tumDersler.firstWhere((d) => d.ad == 'Fizyoloji');
+    final b = depo.tumDersler.firstWhere((d) => d.ad == 'Biyokimya');
     return (
       depo: depo,
       fizyoloji: f.id,

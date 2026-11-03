@@ -20,7 +20,7 @@ void main() {
       expect(d.durum, YuklemeDurumu.hazir);
       expect(d.karsilamaTamam, isFalse);
       expect(d.sinavTarihi, isNull);
-      expect(d.dersler(DersGrubu.temel), isEmpty);
+      expect(d.tumDersler, isEmpty);
     });
 
     test('okuma hatasında hata durumuna geçer', () async {
@@ -48,10 +48,10 @@ void main() {
       );
       expect(d.karsilamaTamam, isTrue);
       expect(d.sinavTarihi, DateTime(2027, 4, 1));
-      // 8 Temel sistem + 11 Klinik sistem = 19 SpeeTUS paketi
-      expect(d.dersler(DersGrubu.temel).length, 8);
-      expect(d.dersler(DersGrubu.klinik).length, 11);
-      final ilkDers = d.dersler(DersGrubu.temel).first;
+      // 19 SpeeTUS paketi tek liste olarak yüklenir
+      expect(d.tumDersler.length, 19);
+      final ilkDers = d.tumDersler.first;
+      expect(ilkDers.ad, '1. Tıbbın Temelleri');
       expect(d.konular(ilkDers.id), isNotEmpty);
     });
   });
@@ -59,13 +59,12 @@ void main() {
   group('ders', () {
     test('ekleme adı temizler, boş ve tekrar edeni reddeder', () async {
       final d = await hazirDepo();
-      final a = d.dersEkle('  Anatomi   ', DersGrubu.temel);
+      final a = d.dersEkle('  Anatomi   ');
       expect(a, isNotNull);
       expect(a!.ad, 'Anatomi');
-      expect(d.dersEkle('   ', DersGrubu.temel), isNull);
-      expect(d.dersEkle('anatomi', DersGrubu.temel), isNull);
-      // Aynı ad başka grupta olabilir.
-      expect(d.dersEkle('Anatomi', DersGrubu.klinik), isNotNull);
+      expect(d.dersEkle('   '), isNull);
+      expect(d.dersEkle('anatomi'), isNull);
+      expect(d.dersEkle('Anatomi'), isNull);
     });
 
     test('silince konuları da gider', () async {
@@ -130,7 +129,7 @@ void main() {
         sinavTarihi: DateTime(2027, 4, 1),
         secilenDersler: const [HazirDers('Anatomi', DersGrubu.temel)],
       );
-      final ders = d.dersler(DersGrubu.temel).first;
+      final ders = d.tumDersler.first;
       final k = d.konuEkle(ders.id, 'Üst ekstremite')!;
       d.notYaz(k.id, 'Plexus brachialis');
       await d.hemenKaydet();
@@ -138,7 +137,7 @@ void main() {
       final d2 = await hazirDepo(kayit);
       expect(d2.karsilamaTamam, isTrue);
       expect(d2.sinavTarihi, DateTime(2027, 4, 1));
-      expect(d2.dersler(DersGrubu.temel).single.ad, 'Anatomi');
+      expect(d2.tumDersler.single.ad, 'Anatomi');
       expect(d2.konular(ders.id).single.ad, 'Üst ekstremite');
       expect(d2.konular(ders.id).single.not, 'Plexus brachialis');
     });

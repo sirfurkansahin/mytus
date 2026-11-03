@@ -53,7 +53,7 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
       if (!depo.dersAdiDegistir(widget.dersId, yeni)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Ad boş olamaz ve aynı grupta tekrar edemez.'),
+            content: Text('Ad boş olamaz ve aynı isimde başka bir ders olamaz.'),
           ),
         );
       }

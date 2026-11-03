@@ -1,10 +1,10 @@
 import 'package:app/features/dersler/modeller.dart';
 
 /// SpeeTUS Sarmal Eğitim 19 Sistem Paketi ve hazır alt konuları.
+/// Temel / Klinik ayrımı kaldırılmış, tek sıralı müfredat.
 const List<HazirDers> hazirDersler = [
-  // --- TEMEL SİSTEMLER (8 Paket) ---
   HazirDers(
-    'Tıbbın Temelleri',
+    '1. Tıbbın Temelleri',
     DersGrubu.temel,
     [
       'Fizyoloji · Hücre Histolojisi ve Fizyolojisi',
@@ -25,7 +25,7 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Periferik Sinir Sistemi ve Kas',
+    '2. Periferik Sinir Sistemi ve Kas',
     DersGrubu.temel,
     [
       'Anatomi · Kemikler',
@@ -37,7 +37,7 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Merkezi Sinir Sistemi',
+    '3. Merkezi Sinir Sistemi',
     DersGrubu.temel,
     [
       'Anatomi · Sinir Sistemi Anatomisi',
@@ -52,7 +52,7 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Duyu Organları - Dermatoloji',
+    '4. Duyu Organları - Dermatoloji',
     DersGrubu.temel,
     [
       'Fizyoloji · Doku Histolojisi ve Fizyolojisi Deri',
@@ -61,7 +61,7 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Duyu Organları - KBB',
+    '5. Duyu Organları - KBB',
     DersGrubu.temel,
     [
       'Anatomi · Duyu Organları Kulak',
@@ -72,7 +72,7 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Duyu Organları - Göz',
+    '6. Duyu Organları - Göz',
     DersGrubu.temel,
     [
       'Anatomi · Duyu Organları Göz',
@@ -81,31 +81,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'İmmünoloji ve Alerji',
+    '7. Hematoloji ve Onkoloji',
     DersGrubu.temel,
-    [
-      'Mikrobiyoloji · İmmünoloji',
-      'Pediatri · Pediatrik Alerji ve İmmünoloji',
-    ],
-  ),
-  HazirDers(
-    'Mikrobiyoloji ve Enfeksiyonlar',
-    DersGrubu.temel,
-    [
-      'Mikrobiyoloji · Klinik Bakteriyoloji',
-      'Mikrobiyoloji · Mikoloji',
-      'Mikrobiyoloji · Viroloji',
-      'Mikrobiyoloji · İmmünoloji',
-      'Farmakoloji · Antimikrobiyal İlaçlar',
-      'Farmakoloji · Toksikoloji',
-      'Pediatri · Döküntülü Hastalıklar ve Bağışıklama',
-    ],
-  ),
-
-  // --- KLİNİK SİSTEMLER (11 Paket) ---
-  HazirDers(
-    'Hematoloji ve Onkoloji',
-    DersGrubu.klinik,
     [
       'Fizyoloji · Hematopoetik Sistem Histolojisi ve Fizyolojisi',
       'Patoloji · Hematopoetik Sistem Hastalıkları ve Patolojisi',
@@ -120,8 +97,16 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Gastrointestinal ve Hepatobiliyer Sistem',
-    DersGrubu.klinik,
+    '8. İmmünoloji ve Alerji',
+    DersGrubu.temel,
+    [
+      'Mikrobiyoloji · İmmünoloji',
+      'Pediatri · Pediatrik Alerji ve İmmünoloji',
+    ],
+  ),
+  HazirDers(
+    '9. Gastrointestinal ve Hepatobiliyer Sistem',
+    DersGrubu.temel,
     [
       'Anatomi · Sindirim Sistemi Anatomisi',
       'Fizyoloji · Gastrointestinal Sistem Histolojisi ve Fizyolojisi',
@@ -141,8 +126,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Endokrinoloji',
-    DersGrubu.klinik,
+    '10. Endokrinoloji',
+    DersGrubu.temel,
     [
       'Fizyoloji · Endokrin Sistem Histolojisi ve Fizyolojisi',
       'Biyokimya · Hormon Metabolizması',
@@ -158,16 +143,16 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Meme Hastalıkları',
-    DersGrubu.klinik,
+    '11. Meme Hastalıkları',
+    DersGrubu.temel,
     [
       'Patoloji · Meme Hastalıkları ve Patolojisi',
       'Genel Cerrahi · Meme Hastalıkları ve Cerrahisi',
     ],
   ),
   HazirDers(
-    'Üriner Sistem',
-    DersGrubu.klinik,
+    '12. Üriner Sistem',
+    DersGrubu.temel,
     [
       'Anatomi · Ürogenital Sistem Anatomisi',
       'Fizyoloji · Üriner Sistem Histolojisi ve Fizyolojisi',
@@ -178,8 +163,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Genital Sistem',
-    DersGrubu.klinik,
+    '13. Genital Sistem',
+    DersGrubu.temel,
     [
       'Anatomi · Ürogenital Sistem Anatomisi',
       'Fizyoloji · Genital Sistem Histolojisi ve Fizyolojisi',
@@ -190,8 +175,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Obstetri ve Yenidoğan',
-    DersGrubu.klinik,
+    '14. Obstetri ve Yenidoğan',
+    DersGrubu.temel,
     [
       'Pediatri · Yenidoğan',
       'Pediatri · Genetik',
@@ -199,8 +184,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Kardiyovasküler Sistem',
-    DersGrubu.klinik,
+    '15. Kardiyovasküler Sistem',
+    DersGrubu.temel,
     [
       'Anatomi · Dolaşım Sistemi Anatomisi',
       'Fizyoloji · Kardiyovasküler Sistem Histolojisi ve Fizyolojisi',
@@ -214,8 +199,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Solunum Sistemi',
-    DersGrubu.klinik,
+    '16. Solunum Sistemi',
+    DersGrubu.temel,
     [
       'Anatomi · Solunum Sistemi Anatomisi',
       'Fizyoloji · Solunum Sistemi Histolojisi ve Fizyolojisi',
@@ -226,8 +211,8 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Kas İskelet Sistemi',
-    DersGrubu.klinik,
+    '17. Kas İskelet Sistemi',
+    DersGrubu.temel,
     [
       'Farmakoloji · Otakoidler',
       'Farmakoloji · Non-Steroidal Antiinflamatuvar İlaçlar',
@@ -238,8 +223,21 @@ const List<HazirDers> hazirDersler = [
     ],
   ),
   HazirDers(
-    'Sınıflandırılmayan Konular',
-    DersGrubu.klinik,
+    '18. Mikrobiyoloji ve Enfeksiyonlar',
+    DersGrubu.temel,
+    [
+      'Mikrobiyoloji · Klinik Bakteriyoloji',
+      'Mikrobiyoloji · Mikoloji',
+      'Mikrobiyoloji · Viroloji',
+      'Mikrobiyoloji · İmmünoloji',
+      'Farmakoloji · Antimikrobiyal İlaçlar',
+      'Farmakoloji · Toksikoloji',
+      'Pediatri · Döküntülü Hastalıklar ve Bağışıklama',
+    ],
+  ),
+  HazirDers(
+    '19. Sınıflandırılmayan Konular',
+    DersGrubu.temel,
     [
       'Dahiliye · Geriatri',
       'Pediatri · Pediatrik Acil ve Yoğun Bakım',

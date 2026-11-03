@@ -19,9 +19,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Çalışma planını kuralım'), findsOneWidget);
-    expect(find.text('Tıbbın Temelleri'), findsOneWidget);
+    expect(find.text('1. Tıbbın Temelleri'), findsOneWidget);
     expect(find.text('22 Ağustos 2027'), findsOneWidget);
-    expect(find.text('Hematoloji ve Onkoloji'), findsOneWidget);
+    expect(find.text('7. Hematoloji ve Onkoloji'), findsOneWidget);
     await tester.tap(find.text('Tümünü kaldır'));
     await tester.pumpAndSettle();
     final basla = tester.widget<FilledButton>(
@@ -40,7 +40,7 @@ void main() {
     // Bugün sekmesi: sınava kalan gün yazısı görünür.
     expect(find.textContaining('Sınava'), findsOneWidget);
 
-    final ilkDers = depo.dersler(DersGrubu.temel).first;
+    final ilkDers = depo.tumDersler.first;
 
     await tester.tap(find.text('Dersler'));
     await tester.pumpAndSettle();
@@ -65,20 +65,18 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('Klinik sekmesi klinik dersleri gösterir', (tester) async {
+  testWidgets('Dersler sekmesinde tüm dersler tek liste olarak gösterilir',
+      (tester) async {
     final depo = await doluDepo(tester);
     await tester.pumpWidget(MyTusApp(deposu: depo));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Dersler'));
     await tester.pumpAndSettle();
-    expect(find.text('Tıbbın Temelleri'), findsOneWidget);
-    expect(find.text('Hematoloji ve Onkoloji'), findsNothing);
-
-    await tester.tap(find.text('Klinik'));
-    await tester.pumpAndSettle();
-    expect(find.text('Hematoloji ve Onkoloji'), findsOneWidget);
-    expect(find.text('Tıbbın Temelleri'), findsNothing);
+    expect(find.text('1. Tıbbın Temelleri'), findsOneWidget);
+    expect(find.text('2. Periferik Sinir Sistemi ve Kas'), findsOneWidget);
+    expect(find.text('Klinik'), findsNothing);
+    expect(find.text('Temel'), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -97,7 +95,7 @@ void takvimTestleri() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    final ilkDers = depo.dersler(DersGrubu.temel).first;
+    final ilkDers = depo.tumDersler.first;
     depo.konuEkle(ilkDers.id, 'Özel takvim konusu');
     await tester.pumpWidget(MyTusApp(deposu: depo));
     await tester.pumpAndSettle();
@@ -131,7 +129,7 @@ void takvimTestleri() {
 
   testWidgets('Konu ekranında tekrar planı görünür', (tester) async {
     final depo = await doluDepo(tester);
-    final ilkDers = depo.dersler(DersGrubu.temel).first;
+    final ilkDers = depo.tumDersler.first;
     final konu = depo.konuEkle(ilkDers.id, 'Alt ekstremite')!;
     final c = depo.calismaEkle(konu.id, DateTime.now())!;
     depo.calistim(c.id, DateTime.now());
@@ -224,7 +222,7 @@ void ftTestleri() {
   testWidgets('Tamamlanan oturumda konu için Çalıştım sorusu gelir',
       (tester) async {
     final depo = await doluDepo(tester);
-    final ilkDers = depo.dersler(DersGrubu.temel).first;
+    final ilkDers = depo.tumDersler.first;
     final konu = depo.konuEkle(ilkDers.id, 'Alt ekstremite')!;
     final su = DateTime.now().millisecondsSinceEpoch;
     var o = depo.oturumBaslat(toplamDongu: 1, konuId: konu.id);
@@ -294,7 +292,7 @@ void ilerlemeTestleri() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    final ilkDers = depo.dersler(DersGrubu.temel).first;
+    final ilkDers = depo.tumDersler.first;
     final konu = depo.konuEkle(ilkDers.id, 'Alt ekstremite')!;
     final su = DateTime.now().millisecondsSinceEpoch;
     var o = depo.oturumBaslat(toplamDongu: 1, konuId: konu.id);
