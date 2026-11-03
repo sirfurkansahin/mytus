@@ -4,7 +4,6 @@ import 'package:app/features/denemeler/deneme_detay_ekrani.dart';
 import 'package:app/features/denemeler/deneme_ekle_ekrani.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
-import 'package:app/features/prova/beklenen_deger_dialog.dart';
 import 'package:app/features/prova/panik_protokolu_dialog.dart';
 import 'package:app/features/prova/prova_ekrani.dart';
 import 'package:flutter/material.dart';
