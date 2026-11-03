@@ -868,7 +868,7 @@ class PlanDeposu extends ChangeNotifier {
   Future<void> hataPekistir(String id, bool pekistirildi) async {
     final idx = _hataDefteri.indexWhere((h) => h.id == id);
     if (idx != -1) {
-      _hataDefteri[idx] = _hataDefteri[idx].copyWith(pekiştirildi: pekistirildi);
+      _hataDefteri[idx] = _hataDefteri[idx].copyWith(pekistirildi: pekistirildi);
       _degisti();
       await hemenKaydet();
     }

@@ -70,7 +70,7 @@ class _HataEkleDialoguState extends State<_HataEkleDialogu> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<HataSinifi>(
-                      value: _hataSinifi,
+                      initialValue: _hataSinifi,
                       decoration: const InputDecoration(
                         labelText: 'Hata Sınıfı',
                         border: OutlineInputBorder(),
@@ -85,7 +85,7 @@ class _HataEkleDialoguState extends State<_HataEkleDialogu> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<GuvenSeviyesi>(
-                      value: _guven,
+                      initialValue: _guven,
                       decoration: const InputDecoration(
                         labelText: 'Güven',
                         border: OutlineInputBorder(),
@@ -336,7 +336,7 @@ class _ZincirEkleDialoguState extends State<_ZincirEkleDialogu> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<ZincirTuru>(
-                value: _tur,
+                initialValue: _tur,
                 decoration: const InputDecoration(
                   labelText: 'Branş Şablonu (Rapor Bölüm 4.1)',
                   border: OutlineInputBorder(),
@@ -479,7 +479,7 @@ class _VakaEkleDialoguState extends State<_VakaEkleDialogu> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: _olasiSoruKoku,
+                initialValue: _olasiSoruKoku,
                 decoration: const InputDecoration(
                   labelText: '3. TUS\'ta Hangi Kökle Sorulurdu?',
                   border: OutlineInputBorder(),

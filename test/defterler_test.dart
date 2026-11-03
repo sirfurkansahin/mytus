@@ -21,8 +21,8 @@ void main() {
 
       expect(hata.hiperDuzeltmeGerektirir, isTrue);
 
-      final pekiştirilmiş = hata.copyWith(pekiştirildi: true);
-      expect(pekiştirilmiş.hiperDuzeltmeGerektirir, isFalse);
+      final pekistirilmis = hata.copyWith(pekistirildi: true);
+      expect(pekistirilmis.hiperDuzeltmeGerektirir, isFalse);
     });
 
     test('JSON serileştirme ve geri yükleme çalışır', () {

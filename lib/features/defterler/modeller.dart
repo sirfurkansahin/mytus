@@ -14,7 +14,7 @@ class HataKaydi {
     this.ayiranKriter = '',
     this.kural = '',
     required this.tarih,
-    this.pekiştirildi = false,
+    this.pekistirildi = false,
     this.denemeId,
     this.soruNo,
   });
@@ -29,12 +29,12 @@ class HataKaydi {
   final String ayiranKriter; // İki şıkkı ayıran tek kriter
   final String kural; // Bir daha yapmamak için kural
   final DateTime tarih;
-  final bool pekiştirildi; // Tekrar edilip düzeltildi mi?
+  final bool pekistirildi; // Tekrar edilip düzeltildi mi?
   final String? denemeId;
   final int? soruNo;
 
   bool get hiperDuzeltmeGerektirir =>
-      !pekiştirildi && guven == GuvenSeviyesi.emin && hataSinifi == HataSinifi.b;
+      !pekistirildi && guven == GuvenSeviyesi.emin && hataSinifi == HataSinifi.b;
 
   HataKaydi copyWith({
     String? baslik,
@@ -45,7 +45,7 @@ class HataKaydi {
     String? celdirici,
     String? ayiranKriter,
     String? kural,
-    bool? pekiştirildi,
+    bool? pekistirildi,
   }) {
     return HataKaydi(
       id: id,
@@ -58,7 +58,7 @@ class HataKaydi {
       ayiranKriter: ayiranKriter ?? this.ayiranKriter,
       kural: kural ?? this.kural,
       tarih: tarih,
-      pekiştirildi: pekiştirildi ?? this.pekiştirildi,
+      pekistirildi: pekistirildi ?? this.pekistirildi,
       denemeId: denemeId,
       soruNo: soruNo,
     );
@@ -75,7 +75,7 @@ class HataKaydi {
         'ayiranKriter': ayiranKriter,
         'kural': kural,
         'tarih': tarih.toIso8601String(),
-        'pekiştirildi': pekiştirildi,
+        'pekistirildi': pekistirildi,
         'denemeId': denemeId,
         'soruNo': soruNo,
       };
@@ -92,7 +92,7 @@ class HataKaydi {
       ayiranKriter: json['ayiranKriter'] as String? ?? '',
       kural: json['kural'] as String? ?? '',
       tarih: DateTime.tryParse(json['tarih'] as String? ?? '') ?? DateTime.now(),
-      pekiştirildi: json['pekiştirildi'] as bool? ?? false,
+      pekistirildi: json['pekistirildi'] as bool? ?? false,
       denemeId: json['denemeId'] as String?,
       soruNo: json['soruNo'] as int?,
     );

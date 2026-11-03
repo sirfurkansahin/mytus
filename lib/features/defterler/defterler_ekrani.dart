@@ -213,7 +213,7 @@ class _HataKarti extends StatelessWidget {
     final tema = Theme.of(context);
     return Card(
       elevation: 0,
-      color: hata.pekiştirildi
+      color: hata.pekistirildi
           ? Colors.green.withValues(alpha: 0.05)
           : hata.hiperDuzeltmeGerektirir
               ? Colors.red.withValues(alpha: 0.08)
@@ -221,7 +221,7 @@ class _HataKarti extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: hata.pekiştirildi
+          color: hata.pekistirildi
               ? Colors.green.withValues(alpha: 0.3)
               : hata.hiperDuzeltmeGerektirir
                   ? Colors.red.withValues(alpha: 0.4)
@@ -256,14 +256,16 @@ class _HataKarti extends StatelessWidget {
                     hata.baslik,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      decoration: hata.pekiştirildi ? TextDecoration.lineThrough : null,
+                      decoration: hata.pekistirildi ? TextDecoration.lineThrough : null,
                     ),
                   ),
                 ),
-                Checkbox(
-                  value: hata.pekiştirildi,
-                  onChanged: (v) => onPekistir(v ?? false),
-                  tooltip: 'Pekiştirildi olarak işaretle',
+                Tooltip(
+                  message: 'Pekiştirildi olarak işaretle',
+                  child: Checkbox(
+                    value: hata.pekistirildi,
+                    onChanged: (v) => onPekistir(v ?? false),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, size: 16),
