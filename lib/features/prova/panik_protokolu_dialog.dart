@@ -155,16 +155,16 @@ class _PanikProtokoluDialogState extends State<PanikProtokoluDialog>
               if (!tamamlandi) ...[
                 // Animasyonlu Nefes Halkası
                 SizedBox(
-                  height: 180,
-                  width: 180,
+                  height: 140,
+                  width: 140,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Transform.scale(
                         scale: _olcek,
                         child: Container(
-                          width: 160,
-                          height: 160,
+                          width: 120,
+                          height: 120,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: _halkaRengi.withValues(alpha: 0.18),
@@ -177,14 +177,14 @@ class _PanikProtokoluDialogState extends State<PanikProtokoluDialog>
                         children: [
                           Text(
                             '$_kalanSaniye sn',
-                            style: tema.textTheme.headlineMedium?.copyWith(
+                            style: tema.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: _halkaRengi,
                             ),
                           ),
                           Text(
                             'Döngü $_dongu / $_toplamDongu',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),

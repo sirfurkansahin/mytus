@@ -502,11 +502,11 @@ void provaTestleri() {
 
     // Panik protokolü butonuna tıkla
     await tester.tap(find.byTooltip('90 sn Panik / Nefes'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('90 sn Döngüsel İç Çekme'), findsOneWidget);
     expect(find.textContaining('Bilişsel Yeniden Değerlendirme'), findsOneWidget);
 
-    await tester.tap(find.text('Protokolü Bitir & Devam Et'));
+    await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
 
     // Provayı başlat
