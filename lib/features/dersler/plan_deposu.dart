@@ -1075,7 +1075,7 @@ class PlanDeposu extends ChangeNotifier {
     var toplamHata = 0;
     var cHatasi = 0;
     for (final d in sonDenemeler) {
-      for (final s in d.sorular) {
+      for (final s in d.soruHatalari) {
         if (!s.dogruMu) {
           toplamHata++;
           if (s.hataSinifi == HataSinifi.c) cHatasi++;

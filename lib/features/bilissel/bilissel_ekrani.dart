@@ -1,4 +1,3 @@
-import 'package:app/core/tarih.dart';
 import 'package:app/features/bilissel/dialoglar.dart';
 import 'package:app/features/bilissel/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';

@@ -179,21 +179,25 @@ void main() {
       // Deneme sınavı ekleyelim: 10 yanlış, 3 tanesi C sınıfı (%30 okuma hatası)
       final deneme = DenemeSinavi(
         id: 'd1',
-        baslik: 'TUS Deneme 1',
+        ad: 'TUS Deneme 1',
         tarih: DateTime.now(),
-        ttbtNet: 60,
-        ktbtNet: 65,
-        sorular: [
+        temel: const DenemeOturumu(dogru: 60, yanlis: 30, bos: 10),
+        klinik: const DenemeOturumu(dogru: 65, yanlis: 25, bos: 10),
+        soruHatalari: [
           for (var i = 1; i <= 3; i++)
             DenemeSorusu(
+              id: 's$i',
               soruNo: i,
+              oturumTemelMi: true,
               dersAdi: 'Dahiliye',
               dogruMu: false,
               hataSinifi: HataSinifi.c, // Okuma / dikkat
             ),
           for (var i = 4; i <= 10; i++)
             DenemeSorusu(
+              id: 's$i',
               soruNo: i,
+              oturumTemelMi: false,
               dersAdi: 'Pediatri',
               dogruMu: false,
               hataSinifi: HataSinifi.a, // Bilgi

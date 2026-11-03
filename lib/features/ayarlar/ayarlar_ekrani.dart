@@ -161,6 +161,7 @@ class AyarlarEkrani extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
+    final tema = Theme.of(context);
     final sinav = depo.sinavTarihi ?? resmiSinavTarihi;
     final bugun = gunBasi(DateTime.now());
     final kalan = gunFarki(sinav, bugun);
