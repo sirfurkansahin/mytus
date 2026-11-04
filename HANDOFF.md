@@ -1,55 +1,42 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 4 Kasim 2026 (Gemini), Master Rapor Faz 5: Master Yönetim Kokpiti & "Eğer–O Zaman" Karar Motoru tamamlandı (`model2/master-kokpit`, PR hazırlanıyor).
+Son guncelleme: 4 Kasim 2026 (Gemini), Master Araştırma Raporu'nun 5 fazlık tüm entegrasyonu başarıyla tamamlandı ve `main` dalına birleştirildi.
 
 ## Durum
-- Faz 1 (Deneme Sınavları & Hata Analizi - PR #12) `main` dalına birleştirildi.
-- Faz 2 (Özel Defterler & Akıllı Havuz - PR #13) `main` dalına birleştirildi.
-- Faz 3 (Nörobiyoloji, Uyku & Bilişsel Performans - PR #14) `main` dalına birleştirildi.
-- Faz 4 (Sınav Anı, Panik Protokolü & Provalar - PR #15) `main` dalına birleştirildi.
-- Faz 5 (`model2/master-kokpit`) geliştirildi:
-  1. **Haftalık 8 Bilişsel Gösterge (Rapor Bölüm 6.3):**
-     - Kalibrasyon Farkı (hedef: <= %5).
-     - Aşırı Güven Alarmı (kalibrasyon > +%8).
-     - Uyku Süresi & Sirkadiyen Yatış Sapması (7–9 sa, <= 30 dk).
-     - Prefrontal Korteks & C Tipi Okuma Hatası Oranı (< %10–15).
-     - Test Kaygı Puanı (0–10, hedef: <= 6).
-     - R1 (G+1) Tekrar Geçiş Oranı (hedef: >= %75).
-     - R3 (G+30) Tekrar Geçiş Oranı (hedef: >= %70).
-     - Ortalama Odak Puanı (1–5) & Ağır Analitik Bilişsel Tavan (3–4 saat / 240 dk).
-     - A–F Kayıp Net Dağılımı (en çok kayba yol açan hata sınıfı teşhisi).
-  2. **4 Sınav & Net Göstergesi:**
-     - Temel Bilimler Neti (TTBT) (0–100).
-     - Klinik Bilimler Neti (KTBT) (0–100).
-     - Klinik Ağırlıklı K Puanı (0.4 TTBT + 0.6 KTBT).
-     - Tahmini ÖSYM 85 EBAP Puanı ($55 + 30 \times \dots$).
-  3. **0–100 Kompozit Bilişsel Sağlık Skoru:**
-     - 6 bilişsel eksenin ağırlıklı bileşimi ve durum etiketi ("Optimal Zirve - Türkiye 1.liği Hattı", "Dengeli", "Dengeleme Gerekli", "PFC Yorgunluğu").
-  4. **Otomatik "Eğer–O Zaman" Karar & Strateji Motoru (Rapor Bölüm 6.4):**
-     - Eğer C hatası > %15 ise ➔ %70 Kurtarma Modu eylem önerisi.
-     - Eğer kalibrasyon > +%8 ise ➔ "Emin" öncesi 10 sn tersini düşün ve Çeldirici Bankası eylemi.
-     - Eğer son çeyrek hatası > 1.5x ise ➔ Yorgunluk eşiği ve 135 dk sınav provası / mikro nefes önerisi.
-     - Eğer kaygı >= 7 ise ➔ 90 sn Panik Protokolü & Döngüsel İç Çekme günlük prova önerisi.
-     - Eğer R1 < %75 ise ➔ Yeni konuları %20 kıs ve Sıcak Liste önerisi.
-     - Eğer yatış sapması > 30 dk ise ➔ Biyolojik sirkadiyen sabitleme önerisi.
-     - Eğer 2 şık elenip tereddüt edildiyse ➔ Beklenen Değer (+0.167 net) kuralı.
-     - Tüm göstergeler hedefteyse ➔ Optimal Zirve teyidi.
-  5. **Arayüz ve Entegrasyon:**
-     - `KokpitEkrani`: Master Yönetim Kokpiti ana ekranı, kural kartları, gösterge kartları ve hızlı araçlar.
-     - `BugunEkrani`: AppBar'da Master Kokpit butonu ve gün özetinde hızlı kokpit navigasyon kartı.
-     - `IlerlemeEkrani`: Haftalık inceleme yapan adaya yönelik üst Master Kokpit kartı.
-     - `AyarlarEkrani`: Bilişsel menüde Master Kokpit bağlantısı.
-  6. **Testler:**
-     - `test/kokpit_test.dart` (tüm gösterge hesapları ve 8 Eğer-O Zaman kural birim testleri).
-     - `test/widget_test.dart` (`kokpitTestleri` eklendi).
+Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması tamamlanmıştır:
+- **Faz 1 (Modül 1: Deneme Sınavları & Bilişsel Hata Analizi - PR #12):**
+  - 200 soru (100 TTBT + 100 KTBT, 135'er dk), ÖSYM net formülü (Doğru - Yanlış/4).
+  - Klinik Ağırlıklı K Puanı (0.4 TTBT + 0.6 KTBT) ve ÖSYM 85 EBAP tavan tahmin puanı.
+  - A–F Hata Sınıfları (A: Bilgi, B: Yanlış İnanç, C: Okuma/Kurgu, D: Mantık, E: Süre, F: Form).
+  - Güven Matrisi (Emin / Kararsız / Tahmin), Kalibrasyon Farkı ve B Sınıfı Hiperdüzeltme Alarmları.
+- **Faz 2 (Modül 2: Özel Defterler & Akıllı Havuz - PR #13):**
+  - Hata Defteri & Çeldirici Bankası (karışan çeldirici, ayıran tek kriter, adayın kendi kuralı).
+  - Sınıflama & Skor Defteri (10+ hazır TUS skoru: Hinchey, Wells, CURB-65 vb. ve özel skorlar).
+  - Mekanizma Zincirleri (Illness Script - 6 branş 5 halkalı şablonlar).
+  - 3 Dakikalık Vaka Kartı (klinik vizit vakalarını TUS soru kalıbına dönüştürme).
+- **Faz 3 (Modül 3: Nörobiyoloji, Uyku & Bilişsel Performans - PR #14):**
+  - F.T. Time blok sonu 1-5 odak puanı ve "Ağır Analitik İş" takibi.
+  - Zor Bilişsel İş Tavanı (günlük 180 dk uyarı, 240 dk / 4 saat kanıtlı tavan aşımı).
+  - Sirkadiyen Odak Dağılımı ve 14 günlük biyolojik verim eğrisi.
+  - Uyku & Kafein Disiplini (hedef yatıştan 8 saat önce kafein kesilme alarmı, sirkadiyen sapma hesabı).
+  - Prefrontal Korteks %70 Yük Kurtarma Modu (C hatası > %15 ise yük %70'e iner, sadece R1-R2 tekrarları yapılır).
+- **Faz 4 (Modül 4: Sınav Anı, Panik Protokolü & Provalar - PR #15):**
+  - 84 saniyelik Huberman Lab Döngüsel İç Çekme (Cyclic Sighing) görsel nefes rehberi ve Jamieson uyarılmayı yeniden değerlendirme kartı.
+  - Gerçek Saat Sınav Provası (135 dk geri sayım, 25, 50, 75, 100. soru tempo kontrolleri).
+  - İki oturum arası 135 dk Ara Dinlenme Protokolü.
+  - Beklenen Değer (EV) Kartı (+0.167 net matematiksel kazanç ve cevap değiştirme kuralları).
+- **Faz 5 (Modül 5: Master Yönetim Kokpiti & Karar Motoru - PR #16):**
+  - Haftalık 8 Bilişsel Gösterge (Kalibrasyon, Aşırı Güven, Uyku, PFC C Hatası, Kaygı, R1, R3, Odak/Tavan).
+  - 4 Sınav Göstergesi (Temel Net, Klinik Net, K Puanı, EBAP Puanı).
+  - 0-100 Kompozit Bilişsel Sağlık Skoru.
+  - Otomatik "Eğer–O Zaman" (If-Then) Strateji ve Eylem Motoru.
+  - `KokpitEkrani`, `BugunEkrani`, `IlerlemeEkrani` ve `AyarlarEkrani` tam entegrasyonu.
 
 ## Siradaki adim
-1. Değişiklikler GitHub'a gönderilecek (`origin model2/master-kokpit`) ve PR #16 açılacak.
-2. GitHub Actions (APK derle ve Web dağıt) yeşil olunca kullanıcıya raporlanıp onayı istenecek.
-3. Kullanıcı onayıyla PR #16 birleştirilecek ve 5 fazlık Master Araştırma Raporu entegrasyonu tamamlanacak.
+- Kullanıcıdan yeni istek, ek özellik önerisi veya gerçek cihaz kullanım geri bildirimleri bekleniyor.
 
 ## Bilinen sorunlar / riskler
-- Bulutta yerel derleme kısıtlıdır; testler GitHub Actions üzerinden doğrulanır.
+- Bulut ortamında yerel derleme kısıtlıdır; tüm analiz, test ve derlemeler GitHub Actions üzerinde yeşil olarak doğrulanmaktadır.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.
