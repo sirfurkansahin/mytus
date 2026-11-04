@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
 import 'package:app/features/bilissel/bilissel_ekrani.dart';
+import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
@@ -229,6 +230,18 @@ class AyarlarEkrani extends StatelessWidget {
             onTap: () => _temaSec(context, depo),
           ),
           _baslik(context, 'BİLİŞSEL PERFORMANS & UYKU'),
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            leading: const Icon(Icons.dashboard_customize_outlined, color: Colors.purple),
+            title: const Text('Master Yönetim Kokpiti'),
+            subtitle: const Text('8 bilişsel gösterge, eğer–o zaman karar motoru ve netler.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+            ),
+          ),
+          const SizedBox(height: 8),
           ListTile(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),

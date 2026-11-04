@@ -5,6 +5,7 @@ import 'package:app/features/defterler/defterler_ekrani.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
+import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
@@ -99,11 +100,21 @@ class BugunEkrani extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   IconButton(
+                    tooltip: 'Master Kokpit',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.dashboard_customize_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+                    ),
+                  ),
+                  IconButton(
                     tooltip: 'Bilişsel & Uyku',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.psychology_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
@@ -111,6 +122,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Özel Defterler',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.rule_folder_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const DefterlerEkrani()),
@@ -118,6 +130,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Denemeler & Analiz',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.assignment_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const DenemelerEkrani()),
@@ -125,6 +138,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'İlerleme',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.bar_chart_rounded),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const IlerlemeEkrani()),
@@ -132,6 +146,7 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Ayarlar',
+                    visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.settings_outlined),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const AyarlarEkrani()),
@@ -144,6 +159,40 @@ class BugunEkrani extends StatelessWidget {
           Text(
             gunAdiIleTarih(bugun),
             style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+            ),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: tema.colorScheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: tema.colorScheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.speed, color: tema.colorScheme.primary, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Master Kokpit · 8 Bilişsel Gösterge & Strateji',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: tema.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, color: tema.colorScheme.primary, size: 18),
+                ],
+              ),
+            ),
           ),
           if (depo.kurtarmaModuAktif) ...[
             const SizedBox(height: 12),

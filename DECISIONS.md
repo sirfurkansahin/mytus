@@ -89,3 +89,19 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 | Sınıflama & Skor Defteri (Tuzak Sınıfı 8) | Mantıkla türetilemeyen ezber skorlar için 10+ hazır TUS skoru (Hinchey, Hodgkin IPS, Child-Pugh, Wells, CURB-65, Ranson vb.) kütüphanesi ve kullanıcının özel skor ekleme imkanı. |
 | Mekanizma Zincirleri (Illness Script) | 6 branş için 5 halkalı şablonlar (Dahiliye, Farmakoloji, Biyokimya, Mikrobiyoloji, Fizyoloji, Anatomi). Ayıran özellik ve "Neden?" açıklaması zorunlu. |
 | 3 Dakikalık Vaka Kartı | Klinisyen/intörn adayların nöbet ve servisteki hastaları 3 dakikada TUS formatına dönüştürme aracı. |
+
+## Sınav Anı, Panik Protokolü & Provalar (Modül 4, 4 Kasım 2026)
+| Konu | Karar ve Neden |
+|---|---|
+| 90 sn Panik / Nefes Protokolü | Huberman Lab 84 sn (7 döngü x 12 sn) Döngüsel İç Çekme (Cyclic Sighing) animasyonlu rehberi + Jamieson bilişsel yeniden değerlendirme kartı. |
+| Gerçek Saat Sınav Provası (135 Dk) | 100 soru, 135 dk geri sayım, çeyrek dilim tempo kontrolü (25., 50., 75., 100. sorular), doğrudan Deneme Kaydetme ekranına aktarım. |
+| Ara Dinlenme Protokolü (135 Dk) | TTBT ve KTBT oturumları arasında cevap tartışmasını engelleyen sıfırlama rehberi. |
+| Beklenen Değer (EV) & Cevap Değiştirme | 2 şık elendiğinde işaretlemenin beklenen net kazancı (+0.167 net) ve cevap değiştirme kuralları. |
+
+## Master Yönetim Kokpiti & "Eğer–O Zaman" Algoritmaları (Modül 5, 4 Kasım 2026)
+| Konu | Karar ve Neden |
+|---|---|
+| Master Yönetim Kokpiti | Haftalık 8 Bilişsel + 4 Sınav Göstergesini ve 0-100 Kompozit Bilişsel Sağlık Skorunu tek ekranda birleştirir. |
+| 8 Bilişsel Gösterge | 1. Kalibrasyon Farkı, 2. Aşırı Güven Alarmı, 3. Uyku Süresi & Sirkadiyen Sapma, 4. Prefrontal Korteks & C Tipi Hata Oranı, 5. Test Kaygı Puanı, 6. R1 Tekrar Geçiş Oranı, 7. R3 Tekrar Geçiş Oranı, 8. Odak Puanı & Ağır Analitik Tavan. |
+| 4 Sınav Göstergesi | Temel Net (TTBT), Klinik Net (KTBT), Klinik Ağırlıklı K Puanı (0.4 TTBT + 0.6 KTBT), Tahmini ÖSYM 85 EBAP Puanı. |
+| Otomatik "Eğer–O Zaman" Motoru | C hatası > %15 ➔ %70 Kurtarma Modu; Kalibrasyon > +%8 ➔ Çeldiriciye tersini düşün; Son çeyrek hatası > 1.5x ➔ Tempo & mikro nefes molası; Kaygı ≥ 7 ➔ 90 sn panik provaları; R1 < %75 ➔ Yeni konuyu %20 kıs; Uyku sapması > 30 dk ➔ Sirkadiyen sabitleme; EV ➔ 2 şık elendiğinde boş bırakma yasağı. |
