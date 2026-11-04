@@ -105,3 +105,9 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 | 8 Bilişsel Gösterge | 1. Kalibrasyon Farkı, 2. Aşırı Güven Alarmı, 3. Uyku Süresi & Sirkadiyen Sapma, 4. Prefrontal Korteks & C Tipi Hata Oranı, 5. Test Kaygı Puanı, 6. R1 Tekrar Geçiş Oranı, 7. R3 Tekrar Geçiş Oranı, 8. Odak Puanı & Ağır Analitik Tavan. |
 | 4 Sınav Göstergesi | Temel Net (TTBT), Klinik Net (KTBT), Klinik Ağırlıklı K Puanı (0.4 TTBT + 0.6 KTBT), Tahmini ÖSYM 85 EBAP Puanı. |
 | Otomatik "Eğer–O Zaman" Motoru | C hatası > %15 ➔ %70 Kurtarma Modu; Kalibrasyon > +%8 ➔ Çeldiriciye tersini düşün; Son çeyrek hatası > 1.5x ➔ Tempo & mikro nefes molası; Kaygı ≥ 7 ➔ 90 sn panik provaları; R1 < %75 ➔ Yeni konuyu %20 kıs; Uyku sapması > 30 dk ➔ Sirkadiyen sabitleme; EV ➔ 2 şık elendiğinde boş bırakma yasağı. |
+
+## Kullanım Rehberi & Görsel Tanıtım Turu (4 Kasım 2026 - Kullanıcı Kararı: Seçenek 1 Hibrit Model)
+| Konu | Karar ve Neden |
+|---|---|
+| Görsel Tanıtım Turu (TanitimTuruEkrani) | 5 tematik slayt (1. Planlama & R0-R4 Tekrarlar, 2. F.T. time & 3-4 Saat Tavanı, 3. Denemeler & Özel Defterler, 4. Sınav Anı & 90 sn Nefes, 5. Master Kokpit). Karşılama ekranında, Bugün ekranında, Rehberde ve Ayarlarda tek dokunuşla izlenebilir. |
+| Kullanım Rehberi & SSS (RehberEkrani) | 6 ana kategoride pratik soru-cevap rehberi: İlk gün adımları, R0-R4 tekrar formülleri, gecikme kayması, kafein kesilme alarmı, %70 kurtarma modu, A-F hata kodlaması, 90 sn panik protokolü, Beklenen Değer (EV) kuralı ve Master Kokpit göstergeleri. |

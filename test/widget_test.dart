@@ -136,6 +136,7 @@ void main() {
   bilisselTestleri();
   provaTestleri();
   kokpitTestleri();
+  rehberTestleri();
 }
 
 void takvimTestleri() {
@@ -557,6 +558,39 @@ void kokpitTestleri() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Beklenen Değer (EV)'), findsWidgets);
     await tester.tap(find.text('Anladım'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+void rehberTestleri() {
+  testWidgets('Bugün ekranından Rehber ve Tanıtım Turu açılır', (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    // Bugün ekranındaki Rehber kartına dokun
+    expect(find.text('Kullanım Rehberi & 1 Dk Tanıtım Turu'), findsOneWidget);
+    await tester.tap(find.text('Kullanım Rehberi & 1 Dk Tanıtım Turu'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kullanım Rehberi & SSS'), findsOneWidget);
+    expect(find.text('Tanıtım Turunu Başlat (5 Slayt)'), findsOneWidget);
+
+    // Tanıtım turunu başlat
+    await tester.tap(find.text('Tanıtım Turunu Başlat (5 Slayt)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1. Akıllı Planlama & Tekrar Sistemi (R0–R4)'), findsOneWidget);
+    await tester.tap(find.text('Atla'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(const SizedBox.shrink());
