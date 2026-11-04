@@ -4,6 +4,8 @@ import 'package:app/core/tarih.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
 import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
+import 'package:app/features/rehber/rehber_ekrani.dart';
+import 'package:app/features/rehber/tanitim_turu_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
@@ -251,6 +253,30 @@ class AyarlarEkrani extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
+            ),
+          ),
+          _baslik(context, 'KULLANIM REHBERİ & DESTEK'),
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            leading: const Icon(Icons.menu_book_outlined, color: Colors.teal),
+            title: const Text('Kullanım Rehberi & SSS'),
+            subtitle: const Text('Soru-cevap rehberi ve tüm modüllerin kullanım kılavuzu.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const RehberEkrani()),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            leading: const Icon(Icons.slideshow_rounded, color: Colors.deepOrange),
+            title: const Text('Görsel Tanıtım Turunu Tekrar İzle'),
+            subtitle: const Text('5 slaytlık görsel özet.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const TanitimTuruEkrani()),
             ),
           ),
           _baslik(context, 'VERİ VE YEDEK'),

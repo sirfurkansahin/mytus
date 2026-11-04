@@ -4,6 +4,7 @@ import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/rehber/tanitim_turu_ekrani.dart';
 import 'package:flutter/material.dart';
 
 /// İlk açılış: resmi sınav tarihi (22 Ağustos 2027) ve çalışılacak dersler (onaylı tasarım: Karşılama).
@@ -320,6 +321,16 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                       ),
                     ),
                     child: const Text('Başla'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const TanitimTuruEkrani(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.help_outline, size: 18),
+                    label: const Text('Uygulama Nasıl Kullanılır? (Tanıtım Turu)'),
                   ),
                 ],
               ),

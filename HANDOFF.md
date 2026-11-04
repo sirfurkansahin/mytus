@@ -1,6 +1,6 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 4 Kasim 2026 (Gemini), Master Araştırma Raporu'nun 5 fazlık tüm entegrasyonu başarıyla tamamlandı ve `main` dalına birleştirildi.
+Son guncelleme: 4 Kasim 2026 (Gemini), Kullanım Rehberi & Görsel Tanıtım Turu tamamlandı (`model2/kullanim-rehberi`, PR hazırlanıyor).
 
 ## Durum
 Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması tamamlanmıştır:
@@ -30,10 +30,16 @@ Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması 
   - 4 Sınav Göstergesi (Temel Net, Klinik Net, K Puanı, EBAP Puanı).
   - 0-100 Kompozit Bilişsel Sağlık Skoru.
   - Otomatik "Eğer–O Zaman" (If-Then) Strateji ve Eylem Motoru.
-  - `KokpitEkrani`, `BugunEkrani`, `IlerlemeEkrani` ve `AyarlarEkrani` tam entegrasyonu.
+- **Kullanım Rehberi & Görsel Tanıtım Turu (`model2/kullanim-rehberi`):**
+  - `TanitimTuruEkrani`: 5 tematik görsel slayt (Planlama & Tekrar, Odak & 3-4 Saat Tavanı, Hata Defteri & Çeldirici, Sınav Anı & 90 sn Nefes, Master Kokpit).
+  - `RehberEkrani`: 6 ana kategoride detaylı Sıkça Sorulan Sorular (SSS) ve modül kullanım kılavuzu.
+  - Karşılama, Bugün ve Ayarlar ekranlarında doğrudan erişim kısayolları.
+  - `test/rehber_test.dart` ve `test/widget_test.dart` (rehberTestleri) ile doğrulandı.
 
 ## Siradaki adim
-- Kullanıcıdan yeni istek, ek özellik önerisi veya gerçek cihaz kullanım geri bildirimleri bekleniyor.
+1. Değişiklikler GitHub'a gönderilecek (`origin model2/kullanim-rehberi`) ve PR açılacak.
+2. GitHub Actions (APK derle ve Web dağıt) yeşil olunca kullanıcıya raporlanıp onayı istenecek.
+3. Kullanıcı onayıyla PR birleştirilecek.
 
 ## Bilinen sorunlar / riskler
 - Bulut ortamında yerel derleme kısıtlıdır; tüm analiz, test ve derlemeler GitHub Actions üzerinde yeşil olarak doğrulanmaktadır.

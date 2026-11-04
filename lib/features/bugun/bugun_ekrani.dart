@@ -6,6 +6,7 @@ import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
+import 'package:app/features/rehber/rehber_ekrani.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
@@ -145,6 +146,14 @@ class BugunEkrani extends StatelessWidget {
                     ),
                   ),
                   IconButton(
+                    tooltip: 'Kullanım Rehberi & SSS',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const RehberEkrani()),
+                    ),
+                  ),
+                  IconButton(
                     tooltip: 'Ayarlar',
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.settings_outlined),
@@ -190,6 +199,40 @@ class BugunEkrani extends StatelessWidget {
                     ),
                   ),
                   Icon(Icons.chevron_right, color: tema.colorScheme.primary, size: 18),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const RehberEkrani()),
+            ),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.indigo.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.indigo.withValues(alpha: 0.3),
+                ),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.menu_book_outlined, color: Colors.indigo, size: 20),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Kullanım Rehberi & 1 Dk Tanıtım Turu',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: Colors.indigo,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, color: Colors.indigo, size: 18),
                 ],
               ),
             ),
