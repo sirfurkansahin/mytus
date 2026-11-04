@@ -1,6 +1,6 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 4 Kasim 2026 (Gemini), Kullanım Rehberi & Görsel Tanıtım Turu tamamlandı (`model2/kullanim-rehberi`, PR hazırlanıyor).
+Son guncelleme: 4 Kasim 2026 (Gemini), Kullanım Rehberi & Görsel Tanıtım Turu tamamlandı ve main dalına birleştirildi (PR #18).
 
 ## Durum
 Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması tamamlanmıştır:
@@ -37,10 +37,8 @@ Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması 
   - `test/rehber_test.dart` ve `test/widget_test.dart` (rehberTestleri) ile doğrulandı.
 
 ## Siradaki adim
-1. Değişiklikler GitHub'a gönderilecek (`origin model2/kullanim-rehberi`) ve PR açılacak.
-2. GitHub Actions (APK derle ve Web dağıt) yeşil olunca kullanıcıya raporlanıp onayı istenecek.
-3. Kullanıcı onayıyla PR birleştirilecek.
-
+- TUS Master Araştırma Raporunun 5 fazlık entegrasyonu ve Kullanım Rehberi & Tanıtım Turu tamamlandı.
+- Kullanıcıdan yeni istek veya gerçek cihaz kullanım geri bildirimleri bekleniyor.
 ## Bilinen sorunlar / riskler
 - Bulut ortamında yerel derleme kısıtlıdır; tüm analiz, test ve derlemeler GitHub Actions üzerinde yeşil olarak doğrulanmaktadır.
 
