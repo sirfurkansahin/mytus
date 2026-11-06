@@ -1,6 +1,6 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 4 Kasim 2026 (Gemini), Kullanım Rehberi & Görsel Tanıtım Turu tamamlandı ve main dalına birleştirildi (PR #18).
+Son guncelleme: 6 Kasım 2026, sadeleştirme planı ve kararlar işlendi (dal `model2/sadelestirme-plani`). Önceki: 4 Kasım 2026 Kullanım Rehberi & Görsel Tanıtım Turu main'e birleştirildi (PR #18).
 
 ## Durum
 Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması tamamlanmıştır:
@@ -38,7 +38,9 @@ Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması 
 
 ## Siradaki adim
 - TUS Master Araştırma Raporunun 5 fazlık entegrasyonu ve Kullanım Rehberi & Tanıtım Turu tamamlandı.
-- Kullanıcıdan yeni istek veya gerçek cihaz kullanım geri bildirimleri bekleniyor.
+- 6 Kasım 2026: Pazar analizi ve özellik budama raporu üzerine kullanıcı kararları alındı (`DECISIONS.md` > "Sadelestirme ve Rakip Analizi Kararlari"). Görev listesi: `docs/sadelestirme-plani.md`. Dal: `model2/sadelestirme-plani` (yalnızca dokümantasyon, kod değişmedi).
+- Sıradaki iş: K1-K8 (özellikleri GİZLEME, veri silinmez) ile başla. Her maddeyi küçük adımla yap, sonrasında kullanıcıdan onay al.
+- Bildirim sorunu bu planın dışında; kullanıcı kendisi ilgilenecek, ona bağımlı görev kurma.
 ## Bilinen sorunlar / riskler
 - Bulut ortamında yerel derleme kısıtlıdır; tüm analiz, test ve derlemeler GitHub Actions üzerinde yeşil olarak doğrulanmaktadır.
 

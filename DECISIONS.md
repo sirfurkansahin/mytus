@@ -4,7 +4,7 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 
 | Konu | Karar |
 |---|---|
-| Urun | Calisma sureci takibi + planlama. Soru bankasi degil. Tibbi icerik yok. |
+| Urun | Calisma sureci takibi + planlama. Soru bankasi degil. Tibbi icerik yok; ISTISNA (6 Kasim 2026): kucuk, salt-okunur "Referans" (hazir skorlar, mekanizma sablonlari) serbest. |
 | Kullanicilar | Kullanicinin arkadaslari, 2-10 kisi, hepsi Android ve 18+. Ucretsiz. |
 | Uygulama adi / modul | MY TUS / "F.T. time" (odak sayaci modulu) |
 | Paket adi | com.mytus.app |
@@ -111,3 +111,15 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 |---|---|
 | Görsel Tanıtım Turu (TanitimTuruEkrani) | 5 tematik slayt (1. Planlama & R0-R4 Tekrarlar, 2. F.T. time & 3-4 Saat Tavanı, 3. Denemeler & Özel Defterler, 4. Sınav Anı & 90 sn Nefes, 5. Master Kokpit). Karşılama ekranında, Bugün ekranında, Rehberde ve Ayarlarda tek dokunuşla izlenebilir. |
 | Kullanım Rehberi & SSS (RehberEkrani) | 6 ana kategoride pratik soru-cevap rehberi: İlk gün adımları, R0-R4 tekrar formülleri, gecikme kayması, kafein kesilme alarmı, %70 kurtarma modu, A-F hata kodlaması, 90 sn panik protokolü, Beklenen Değer (EV) kuralı ve Master Kokpit göstergeleri. |
+
+
+## Sadelestirme ve Rakip Analizi Kararlari (6 Kasim 2026 - Kullanici Karari)
+Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari `docs/sadelestirme-plani.md` icinde.
+
+| Konu | Karar |
+|---|---|
+| Budama yontemi | Ozellikler SILINMEZ, arayuzden GIZLENIR. Mevcut JSON verisi ve kullanici notlari korunur. |
+| Hazir tibbi referans | Hazir skor listesi ve mekanizma sablonlari salt-okunur kucuk "Referans" olarak kalir. Yukaridaki "Tibbi icerik yok" karari buna gore guncellendi. |
+| Grup motivasyonu (Surum 2) | Iki secenek de olacak: haftalik siralama VE ortak haftalik hedef. Kullanici hangisini gorecegini secebilir. |
+| Gunluk limit | Iki sinir birlikte: gunde en fazla 4 YENI konu + en fazla 10 TEKRAR. (Eski "10 tekrar/gun" karari yeni konu siniriyla tamamlandi.) |
+| Bildirim sorunu | Planlamanin DISINDA. Kullanici ozel bir zamanda kendisi ilgilenecek. Yeni gorevlerde bu soruna bagimlilik kurulmaz. Sorun HANDOFF > Bilinen sorunlar'da kalir. |
