@@ -9,6 +9,7 @@ import 'package:app/features/defterler/hazir_skorlar.dart';
 import 'package:app/features/defterler/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
+import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/takvim/calisma.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
@@ -71,6 +72,7 @@ class PlanDeposu extends ChangeNotifier {
   final List<MekanizmaZinciri> _zincirler = [];
   final List<VakaKarti> _vakaKartlari = [];
   final List<UykuKaydi> _uykular = [];
+  final List<Kitap> _kitaplar = [];
   bool _kurtarmaModuAktif = false;
   String _hedefYatisSaati = '23:30';
   String _hedefKalkisSaati = '07:30';
@@ -331,6 +333,7 @@ class PlanDeposu extends ChangeNotifier {
         'zincirler': [for (final z in _zincirler) z.toJson()],
         'vakaKartlari': [for (final v in _vakaKartlari) v.toJson()],
         'uykular': [for (final u in _uykular) u.toJson()],
+        'kitaplar': [for (final k in _kitaplar) k.toJson()],
         'kurtarmaModuAktif': _kurtarmaModuAktif,
         'hedefYatisSaati': _hedefYatisSaati,
         'hedefKalkisSaati': _hedefKalkisSaati,
@@ -803,6 +806,7 @@ class PlanDeposu extends ChangeNotifier {
     _zincirler.clear();
     _vakaKartlari.clear();
     _uykular.clear();
+    _kitaplar.clear();
     _kurtarmaModuAktif = false;
     _hedefYatisSaati = '23:30';
     _hedefKalkisSaati = '07:30';
@@ -1219,6 +1223,63 @@ class PlanDeposu extends ChangeNotifier {
   }
 
 
+  // ---------------------------------------------------------------- kÃ¼tÃ¼phane
+
+  List<Kitap> get kitaplar => List.unmodifiable(_kitaplar);
+
+  Kitap? kitapBul(String id) {
+    for (final k in _kitaplar) {
+      if (k.id == id) return k;
+    }
+    return null;
+  }
+
+  Future<void> kitapEkle(Kitap kitap) async {
+    _kitaplar.insert(0, kitap);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapGuncelle(Kitap kitap) async {
+    final idx = _kitaplar.indexWhere((k) => k.id == kitap.id);
+    if (idx != -1) {
+      _kitaplar[idx] = kitap;
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
+  Future<void> kitapSil(String id) async {
+    _kitaplar.removeWhere((k) => k.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapBolumDurumuDegistir(
+    String kitapId,
+    String bolumId,
+    bool tamamlandi,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        yeniBolumler.add(
+          b.kopya(
+            tamamlandi: tamamlandi,
+            tamamlanmaTarihi: tamamlandi ? DateTime.now() : null,
+          ),
+        );
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
   @override
   void dispose() {
     _zamanlayici?.cancel();

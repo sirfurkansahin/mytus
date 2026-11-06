@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ft_time/ft_ekrani.dart';
+import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,11 +166,17 @@ void main() {
     ekranAyarla(tester);
     final depo = await doluDepo(tester);
     depo.ftAyarBelirle(depo.ftAyar.kopya(donguSayisi: 2));
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    final kontrol = FtKontrol(depo, SahteNative());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('F.T. time'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Başlat'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Döngü 1 / 2'), findsOneWidget);
@@ -314,4 +322,49 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets('Kütüphane: kitap ekleme, bölümler ve tamamlama', (tester) async {
+    ekranAyarla(tester);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
+    expect(find.text('Kütüphaneniz Henüz Boş'), findsOneWidget);
+
+    await tester.tap(find.text('Kitap Ekle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kütüphaneye Kitap Ekle'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Patoloji Konu Kitabı');
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byType(TextField).at(2),
+      'Hücre Hasarı (s. 1-30)\nİltihap (s. 31-60)',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.textContaining('Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Patoloji Konu Kitabı'), findsOneWidget);
+    expect(find.textContaining('Sırada: Hücre Hasarı'), findsOneWidget);
+    expect(depo.kitaplar.length, 1);
+
+    await tester.tap(find.text('Patoloji Konu Kitabı'));
+    await tester.pumpAndSettle();
+    expect(find.text('BÖLÜMLER (2)'), findsOneWidget);
+
+    await tester.tap(find.text('Çalıştım ✓'));
+    await tester.pumpAndSettle();
+
+    expect(depo.kitaplar.first.tamamlananBolumSayisi, 1);
+    expect(depo.kitaplar.first.yuzde, 50);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
 }

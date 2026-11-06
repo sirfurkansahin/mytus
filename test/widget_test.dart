@@ -3,6 +3,8 @@ import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
+import 'package:app/features/ft_time/ft_ekrani.dart';
+import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -138,6 +140,7 @@ void main() {
   provaTestleri();
   kokpitTestleri();
   rehberTestleri();
+  kutuphaneTestleri();
 }
 
 void takvimTestleri() {
@@ -210,9 +213,15 @@ void ftTestleri() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: KisitliNative()));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('F.T. time'));
+    final kontrol = FtKontrol(depo, KisitliNative());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Başlat'));
     await tester.pump(const Duration(milliseconds: 300));
@@ -234,10 +243,15 @@ void ftTestleri() {
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     final native = SahteNative();
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: native));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('F.T. time'));
+    final kontrol = FtKontrol(depo, native);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Toplam yaklaşık süre'), findsOneWidget);
     expect(find.text('1 sa 55 dk'), findsOneWidget);
@@ -283,9 +297,15 @@ void ftTestleri() {
     depo.oturumGuncelle(o);
     expect(depo.toplamPuan, 25);
 
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('F.T. time'));
+    final kontrol = FtKontrol(depo, SahteNative());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Oturum tamamlandı'), findsOneWidget);
@@ -602,6 +622,31 @@ void rehberTestleri() {
 
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+
+void kutuphaneTestleri() {
+  testWidgets('Kütüphane sekmesi açılır, boş ekran ve kitap ekleme penceresi görünür',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
+    expect(find.text('Kütüphaneniz Henüz Boş'), findsOneWidget);
+
+    await tester.tap(find.text('Kitap Ekle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kütüphaneye Kitap Ekle'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

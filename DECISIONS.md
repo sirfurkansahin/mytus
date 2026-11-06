@@ -124,3 +124,13 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Gunluk limit | Iki sinir birlikte: gunde en fazla 4 YENI konu + en fazla 10 TEKRAR. (Eski "10 tekrar/gun" karari yeni konu siniriyla tamamlandi.) |
 | Bildirim sorunu | Planlamanin DISINDA. Kullanici ozel bir zamanda kendisi ilgilenecek. Yeni gorevlerde bu soruna bagimlilik kurulmaz. Sorun HANDOFF > Bilinen sorunlar'da kalir. |
 | Hata kodu esleme (S5) | Kullanici karari devretti (6 Kasim 2026), model karar verdi: A ve D -> Bilgi, B -> Yanlis biliyordum, C, E, F -> Dikkat-Sure. Neden: D (mantik/halka hatasi) neden-sonuc zincirinde eksik bilgiden kaynaklanir; dikkat veya sure sorunu degildir. Eski kayitlar silinmez, yalnizca gosterimde eslenir. |
+
+## Kütüphane Modülü ve F.T. Time Geçici Kaldırma (6 Kasım 2026)
+| Konu | Karar |
+|---|---|
+| F.T. Time Modülü | Geçici olarak projeden kaldırıldı/gizlendi (`ftTimeAcik = false`). Kodlar silinmedi; düzenleme yapıldıktan sonra yeniden açılacak. |
+| Alt Menü Dönüşümü | 4. sekme olan F.T. time yerine **Kütüphane** sekmesi yerleştirildi (Bugün · Dersler · Takvim · Kütüphane). |
+| Kütüphane Modülü | Sürüm 1 için kitap ekleme, içindekiler/bölüm yerleştirme, çalışma işaretleme ve ilerleme takibi. |
+| İçindekiler Girişi | 1) Toplu Yapıştırma: alt alta yapıştırılan veya telefon kamerasından (Google Lens / Canlı Metin) kopyalanan içindekiler metnini otomatik bölümlere ayırma. 2) Tek tek bölüm ekleme. İsteğe bağlı sayfa aralığı desteği. |
+| İlerleme Takibi | Kitap bazında (% ve bölüm sayısı) ve genel kütüphane bazında tamamlama oranı; sıradaki çalışılacak bölümün öne çıkarılması. |
+| Veri Saklama | Kitap ve bölüm verileri yerel `PlanDeposu` JSON yapısına entegre edildi. |

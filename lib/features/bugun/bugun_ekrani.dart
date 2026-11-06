@@ -426,8 +426,9 @@ class BugunEkrani extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
+                    if (ftTimeAcik) ...[
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
                       onPressed: () {
                         final o = depo.oturumBaslat(
                           toplamDongu: depo.ftAyar.donguSayisi,
@@ -451,6 +452,7 @@ class BugunEkrani extends StatelessWidget {
                         ),
                       ),
                     ),
+                    ],
                   ],
                 ),
               ),

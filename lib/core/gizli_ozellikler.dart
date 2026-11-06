@@ -3,6 +3,9 @@
 /// Bir özelliği geri açmak için ilgili değeri `true` yapmak yeterlidir.
 library;
 
+/// F.T. time modülü (geçici olarak kapatıldı; düzenleme sonrası tekrar açılacak).
+const bool ftTimeAcik = false;
+
 /// K1: Günlük uyku kaydı girişi ve son kayıtlar listesi.
 /// (Hedef yatış saati ve kafein kesilme saati kartı açık kalır.)
 const bool gunlukUykuGirisiAcik = false;
