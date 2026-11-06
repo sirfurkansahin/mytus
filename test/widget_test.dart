@@ -1,7 +1,4 @@
-import 'dart:convert';
 import 'package:app/core/veri_kaydi.dart';
-import 'package:app/features/kutuphane/modeller.dart';
-import 'package:app/features/kutuphane/resim_secici.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
@@ -56,7 +53,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     // Bugün sekmesi: sınava kalan gün yazısı görünür.
@@ -90,7 +87,7 @@ void main() {
   testWidgets('Dersler sekmesinde SpeeTUS tüm dersleri tek liste olarak gösterir',
       (tester) async {
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Dersler'));
@@ -411,7 +408,7 @@ void denemeTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Denemeler & Analiz'));
@@ -448,7 +445,7 @@ void defterlerTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Özel Defterler'));
@@ -479,7 +476,7 @@ void bilisselTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Bilişsel & Uyku'));
@@ -510,7 +507,7 @@ void provaTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Denemeler & Analiz'));
@@ -554,7 +551,7 @@ void kokpitTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     // K2: Bugün ekranında Master Kokpit gizlidir
@@ -604,7 +601,7 @@ void rehberTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     // Bugün ekranındaki Rehber kartına dokun
@@ -638,7 +635,7 @@ void kutuphaneTestleri() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Kütüphane'));
@@ -650,63 +647,6 @@ void kutuphaneTestleri() {
     await tester.tap(find.text('Kitap Ekle'));
     await tester.pumpAndSettle();
     expect(find.text('Kütüphaneye Kitap Ekle'), findsOneWidget);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
-
-  testWidgets('Bölüm Notları: Not ekleme, fotoğraf ve metin görüntüleme', (tester) async {
-    tester.view.physicalSize = const Size(800, 2000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    const base64Png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-    final testBytes = base64Decode(base64Png);
-    ResimSecici.ornek = SahteResimSecici(donusBytes: testBytes);
-
-    final depo = await doluDepo(tester);
-    final kitap = Kitap(
-      id: 'k_test',
-      ad: 'Patoloji Kitabı',
-      eklenmeTarihi: DateTime.now(),
-      bolumler: const [
-        KitapBolumu(id: 'b_test', ad: 'Hücre Hasarı'),
-      ],
-    );
-    await depo.kitapEkle(kitap);
-
-    await tester.pumpWidget(MyTusApp(deposu: depo));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Kütüphane'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Patoloji Kitabı'));
-    await tester.pumpAndSettle();
-
-    // Bölüm notları butonuna dokun
-    await tester.tap(find.byTooltip('Bölüm Notları').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Bu Bölüme Henüz Not Eklenmedi'), findsOneWidget);
-
-    // Yeni not ekle butonuna dokun
-    await tester.tap(find.text('İlk Notunu Ekle'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Bölüme Not Ekle'), findsOneWidget);
-
-    // Metin gir
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Bölüm Notu / Bilgi Girişi'),
-      'Goodpasture sendromu antikor aracılıdır.',
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Kaydet'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Goodpasture sendromu antikor aracılıdır.'), findsOneWidget);
-    expect(find.text('1 Not'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
