@@ -134,3 +134,12 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | İçindekiler Girişi | 1) Toplu Yapıştırma: alt alta yapıştırılan veya telefon kamerasından (Google Lens / Canlı Metin) kopyalanan içindekiler metnini otomatik bölümlere ayırma. 2) Tek tek bölüm ekleme. İsteğe bağlı sayfa aralığı desteği. |
 | İlerleme Takibi | Kitap bazında (% ve bölüm sayısı) ve genel kütüphane bazında tamamlama oranı; sıradaki çalışılacak bölümün öne çıkarılması. |
 | Veri Saklama | Kitap ve bölüm verileri yerel `PlanDeposu` JSON yapısına entegre edildi. |
+
+## Kütüphane Bölüm Notları ve Fotoğraf Ekleme (6 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Bölüm Notları | Her kitabın her bölümüne birden fazla fotoğraflı veya metinli not kartı eklenebilir. İstendiğinde sadece fotoğraf, sadece metin veya her ikisi birlikte kullanılabilir. |
+| Fotoğraf Kaynağı | Hem cihaz kamerası (anında çekim) hem de galeri (ekran görüntüleri) desteklenir (`image_picker`). |
+| Fotoğraf Görüntüleme & Zoom | Eklenen fotoğrafa dokunulduğunda tam ekran açılır ve iki parmakla yakınlaştırma (pinch-to-zoom) yapılabilir (`InteractiveViewer`). |
+| Veri & Optimizasyon | Fotoğraflar okunabilirlik korunarak optimize edilir ve yerel JSON içinde Base64 olarak saklanır; böylece harici dosya kaybı riski olmadan yedeklenebilir. |
+| Test Soyutlaması | `ResimSecici` soyut arayüzü sayesinde testler `SahteResimSecici` ile çalışır; platform/kamera bağımlılığı testleri etkilemez. |

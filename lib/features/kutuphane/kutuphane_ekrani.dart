@@ -319,6 +319,17 @@ class _KitapKarti extends StatelessWidget {
                                 ),
                               ),
                             ],
+                            if (kitap.toplamNotSayisi > 0) ...[
+                              const SizedBox(width: 6),
+                              Text(
+                                '· ${kitap.toplamNotSayisi} not',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: tema.colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],

@@ -1,30 +1,31 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 6 Kasım 2026, Kütüphane Modülü eklendi ve F.T. Time geçici olarak gizlendi (dal `model2/kutuphane-modulu`).
+Son guncelleme: 6 Kasım 2026, Kütüphane Bölüm Notları ve Fotoğraf Ekleme özelliği eklendi (dal `model2/kutuphane-modulu`).
 
 ## Durum
-Kullanıcı direktifleri doğrultusunda Sürüm 1'e Kütüphane modülü eklendi ve F.T. time modülü geçici olarak arayüzden kaldırıldı:
-- **F.T. Time Modülü:**
-  - `lib/core/gizli_ozellikler.dart` içinde `const bool ftTimeAcik = false;` tanımlandı.
-  - Kodlar silinmedi; motor ve sayaç mantığı projede duruyor. Düzenleme sonrası tekrar açılacak.
-  - Bugün ekranındaki sayaç başlatma butonu gizlendi.
-  - Alt gezinme çubuğundaki (NavigationBar) 4. sekme F.T. time yerine **Kütüphane** oldu.
-- **Kütüphane Modülü (`lib/features/kutuphane/`):**
-  - `modeller.dart`: `Kitap` ve `KitapBolumu` modelleri, ilerleme oranı, kalan bölüm sayısı, sıradaki çalışılacak bölüm hesabı ve `topluBolumleriAyristir()` fonksiyonu.
-  - `kitap_ekle_dialogu.dart`: Kitap adı, ders/branş seçimi, toplam sayfa sayısı ve 2 farklı içindekiler ekleme modu:
-    1. *Toplu Yapıştırma (Hızlı):* Sayfadan kopyalanan veya telefon kamerasından (Google Lens / Canlı Metin) taranan çok satırlı metni alt alta satır satır bölümlere ve sayfa aralıklarına dönüştürür.
-    2. *Tek Tek Ekleme:* Bölüm adı ve isteğe bağlı sayfa aralığı (örn. s. 1–35).
-  - `kitap_detay_ekrani.dart`: Bölüm listesi, tek dokunuşla `[✓] Çalışıldı` işaretleme, çalışma tarihi, en üstte sıradaki çalışılacak bölüm odak kartı, filtreler (Tümü / Kalanlar / Bitenler), yeni bölüm ekleme ve kitap silme.
-  - `kutuphane_ekrani.dart`: Genel kütüphane ilerleme kartı (toplam kitap, toplam bölüm, biten bölüm, genel yüzde), kitap kartları (ders rozeti, yüzde, ilerleme çubuğu, sıradaki bölüm etiketi) ve boş kütüphane karşılama kartı.
-- **Veri Kalıcılığı:**
-  - Kitaplar ve bölümler `PlanDeposu`'nun yerel JSON yapısına entegre edildi (`kitaplar` anahtarı); yedekleme, geri yükleme ve sıfırlama sistemine tam uyumlu.
-- **Testler ve CI Durumu:**
-  - `test/kutuphane_test.dart`: Model hesapları, toplu metin ayrıştırma, JSON serileştirme ve depo entegrasyonu testleri.
-  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: F.T. time testleri doğrudan ekran üzerinden çağrılarak korundu; yeni Kütüphane widget ve uçtan uca testleri (küçük telefon, büyük yazı, koyu tema) eklendi.
-  - GitHub Actions CI üzerinde hem **APK derleme** (`42249756198`) hem de **Web/iPhone PWA dağıtımı** (`42249756011`) 0 hata ile yeşil geçti (`completed success`).
+Kullanıcı direktifleri doğrultusunda Kütüphane modülüne bölüm notları alanı ve fotoğraf desteği eklendi:
+- **Bölüm Notları (`lib/features/kutuphane/bolum_notlari_ekrani.dart`):**
+  - Her bölümün içine birden fazla not kartı eklenebilir.
+  - İsteğe bağlı fotoğraf (kamera/galeri) + bilgi girişi/metin alanı. Sadece fotoğraf veya sadece metin de eklenebilir.
+  - Kartlarda fotoğraf önizlemesi, metin, eklenme tarihi, düzenleme ve silme butonları.
+  - `TamEkranResimEkrani`: Fotoğrafa dokunulduğunda tam ekran açılır ve iki parmakla serbest yakınlaştırma/uzaklaştırma (pinch-to-zoom) yapılabilir (`InteractiveViewer`).
+- **Resim Seçici Soyutlaması (`lib/features/kutuphane/resim_secici.dart`):**
+  - `ResimSecici` arayüzü, `CihazResimSecici` (`image_picker` ile kamera/galeri) ve `SahteResimSecici` (testler için sıfır bağımlılık).
+- **Veri Modelleri & Depo:**
+  - `BolumNotu`: id, metin, resimBase64, olusturmaTarihi.
+  - `KitapBolumu`: notlar listesi, `notSayisi`, `notVar`.
+  - `PlanDeposu`: `kitapBolumNotuEkle`, `kitapBolumNotuGuncelle`, `kitapBolumNotuSil`.
+- **Arayüz Entegrasyonu:**
+  - Bölüm kartlarında not rozeti (`📝 1 not`) ve doğrudan notları açan buton/dokunma alanı.
+  - "SIRADAKİ ÇALIŞILACAK BÖLÜM" odak kartında hızlı not butonu.
+  - Kütüphane genel kartında toplam not sayısı gösterimi.
+- **Testler:**
+  - `test/kutuphane_test.dart`: Model serileştirme ve depo not CRUD testleri.
+  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: Bölüm notları açma, fotoğraf ekleme simülasyonu, metin girme, kaydetme ve rozet görünüm testleri.
 
 ## Siradaki adim
-- F.T. time modülü üzerinde yapılacak düzenlemeler ve yeni özellikler için kullanıcı direktifleri beklenecek.
+- GitHub Actions CI (APK derleme ve Web testleri) doğrulanacak.
+- F.T. time modülü üzerinde yapılacak düzenlemeler için kullanıcı direktifleri beklenecek.
 
 ## Bilinen sorunlar / riskler
 - Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.

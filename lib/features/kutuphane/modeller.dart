@@ -1,6 +1,56 @@
 /// Kütüphane modülü veri modelleri (Sürüm 1).
-/// Kitap ve içindekiler/bölüm yapısı, ilerleme hesabı ve toplu ayrıştırma.
+/// Kitap, içindekiler/bölüm yapısı ve bölümlere ait fotoğraflı/metinli notlar.
 library;
+
+/// Kitabın bir bölümüne eklenen fotoğraflı veya metinli not kartı.
+class BolumNotu {
+  const BolumNotu({
+    required this.id,
+    this.metin = '',
+    this.resimBase64,
+    required this.olusturmaTarihi,
+  });
+
+  final String id;
+  final String metin;
+  final String? resimBase64;
+  final DateTime olusturmaTarihi;
+
+  bool get resimVar => resimBase64 != null && resimBase64!.isNotEmpty;
+  bool get metinVar => metin.trim().isNotEmpty;
+
+  BolumNotu kopya({
+    String? id,
+    String? metin,
+    String? resimBase64,
+    DateTime? olusturmaTarihi,
+  }) {
+    return BolumNotu(
+      id: id ?? this.id,
+      metin: metin ?? this.metin,
+      resimBase64: resimBase64 ?? this.resimBase64,
+      olusturmaTarihi: olusturmaTarihi ?? this.olusturmaTarihi,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        if (metin.isNotEmpty) 'metin': metin,
+        if (resimBase64 != null) 'resimBase64': resimBase64,
+        'olusturmaTarihi': olusturmaTarihi.toIso8601String(),
+      };
+
+  factory BolumNotu.fromJson(Map<String, dynamic> json) {
+    return BolumNotu(
+      id: json['id'] as String? ?? '',
+      metin: json['metin'] as String? ?? '',
+      resimBase64: json['resimBase64'] as String?,
+      olusturmaTarihi: json['olusturmaTarihi'] != null
+          ? DateTime.tryParse(json['olusturmaTarihi'] as String) ?? DateTime.now()
+          : DateTime.now(),
+    );
+  }
+}
 
 class KitapBolumu {
   const KitapBolumu({
@@ -10,6 +60,7 @@ class KitapBolumu {
     this.bitisSayfa,
     this.tamamlandi = false,
     this.tamamlanmaTarihi,
+    this.notlar = const [],
   });
 
   final String id;
@@ -18,6 +69,10 @@ class KitapBolumu {
   final int? bitisSayfa;
   final bool tamamlandi;
   final DateTime? tamamlanmaTarihi;
+  final List<BolumNotu> notlar;
+
+  int get notSayisi => notlar.length;
+  bool get notVar => notlar.isNotEmpty;
 
   int? get sayfaSayisi {
     if (baslangicSayfa == null || bitisSayfa == null) return null;
@@ -40,6 +95,7 @@ class KitapBolumu {
     int? bitisSayfa,
     bool? tamamlandi,
     DateTime? tamamlanmaTarihi,
+    List<BolumNotu>? notlar,
   }) {
     return KitapBolumu(
       id: id ?? this.id,
@@ -48,6 +104,7 @@ class KitapBolumu {
       bitisSayfa: bitisSayfa ?? this.bitisSayfa,
       tamamlandi: tamamlandi ?? this.tamamlandi,
       tamamlanmaTarihi: tamamlanmaTarihi ?? this.tamamlanmaTarihi,
+      notlar: notlar ?? this.notlar,
     );
   }
 
@@ -59,9 +116,12 @@ class KitapBolumu {
         'tamamlandi': tamamlandi,
         if (tamamlanmaTarihi != null)
           'tamamlanmaTarihi': tamamlanmaTarihi!.toIso8601String(),
+        if (notlar.isNotEmpty)
+          'notlar': [for (final n in notlar) n.toJson()],
       };
 
   factory KitapBolumu.fromJson(Map<String, dynamic> json) {
+    final rawNotlar = json['notlar'] as List<dynamic>? ?? [];
     return KitapBolumu(
       id: json['id'] as String? ?? '',
       ad: json['ad'] as String? ?? '',
@@ -71,6 +131,10 @@ class KitapBolumu {
       tamamlanmaTarihi: json['tamamlanmaTarihi'] != null
           ? DateTime.tryParse(json['tamamlanmaTarihi'] as String)
           : null,
+      notlar: [
+        for (final item in rawNotlar)
+          if (item is Map<String, dynamic>) BolumNotu.fromJson(item),
+      ],
     );
   }
 }
@@ -100,6 +164,8 @@ class Kitap {
       bolumler.where((b) => b.tamamlandi).length;
 
   int get kalanBolumSayisi => toplamBolumSayisi - tamamlananBolumSayisi;
+
+  int get toplamNotSayisi => bolumler.fold(0, (toplam, b) => toplam + b.notSayisi);
 
   double get ilerlemeOrani {
     if (bolumler.isEmpty) return 0.0;

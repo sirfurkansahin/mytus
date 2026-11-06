@@ -150,5 +150,62 @@ void main() {
       await depo.kitapSil('k1');
       expect(depo.kitaplar, isEmpty);
     });
+
+    test('bölüm notu ekleme, güncelleme, silme ve kalıcılık', () async {
+      final kayit = BellekKaydi();
+      final depo = PlanDeposu(kayit: kayit, kayitGecikmesi: Duration.zero);
+      await depo.yukle();
+
+      final kitap = Kitap(
+        id: 'k_not',
+        ad: 'Patoloji',
+        eklenmeTarihi: DateTime.now(),
+        bolumler: const [
+          KitapBolumu(id: 'b_not', ad: 'Hücre Hasarı'),
+        ],
+      );
+      await depo.kitapEkle(kitap);
+
+      expect(depo.kitapBul('k_not')!.bolumler.first.notVar, isFalse);
+      expect(depo.kitapBul('k_not')!.toplamNotSayisi, 0);
+
+      // 1. Not ekleme (metin + base64 sahte resim)
+      final not1 = BolumNotu(
+        id: 'n1',
+        metin: 'Goodpasture sendromu Tip 2 aşırı duyarlılık örneğidir.',
+        resimBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+        olusturmaTarihi: DateTime(2026, 11, 6, 20, 0),
+      );
+
+      await depo.kitapBolumNotuEkle('k_not', 'b_not', not1);
+      var guncelBolum = depo.kitapBul('k_not')!.bolumler.first;
+      expect(guncelBolum.notSayisi, 1);
+      expect(guncelBolum.notVar, isTrue);
+      expect(guncelBolum.notlar.first.metin, contains('Goodpasture'));
+      expect(guncelBolum.notlar.first.resimVar, isTrue);
+      expect(depo.kitapBul('k_not')!.toplamNotSayisi, 1);
+
+      // 2. Not güncelleme
+      final guncelNot1 = not1.kopya(metin: 'Tip 2 aşırı duyarlılık (antikor aracılı)');
+      await depo.kitapBolumNotuGuncelle('k_not', 'b_not', guncelNot1);
+      guncelBolum = depo.kitapBul('k_not')!.bolumler.first;
+      expect(guncelBolum.notlar.first.metin, 'Tip 2 aşırı duyarlılık (antikor aracılı)');
+
+      // 3. Kalıcılık kontrolü
+      final depo2 = PlanDeposu(
+        kayit: BellekKaydi(icerik: jsonEncode(depo.toJson())),
+        kayitGecikmesi: Duration.zero,
+      );
+      await depo2.yukle();
+      final bolum2 = depo2.kitapBul('k_not')!.bolumler.first;
+      expect(bolum2.notSayisi, 1);
+      expect(bolum2.notlar.first.metin, 'Tip 2 aşırı duyarlılık (antikor aracılı)');
+      expect(bolum2.notlar.first.resimVar, isTrue);
+
+      // 4. Not silme
+      await depo2.kitapBolumNotuSil('k_not', 'b_not', 'n1');
+      expect(depo2.kitapBul('k_not')!.bolumler.first.notVar, isFalse);
+      expect(depo2.kitapBul('k_not')!.bolumler.first.notSayisi, 0);
+    });
   });
 }

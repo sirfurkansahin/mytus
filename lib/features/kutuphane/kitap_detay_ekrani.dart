@@ -1,4 +1,5 @@
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/kutuphane/bolum_notlari_ekrani.dart';
 import 'package:app/features/kutuphane/modeller.dart';
 import 'package:flutter/material.dart';
 
@@ -126,6 +127,17 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
             child: const Text('Sil'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _bolumNotlariniAc(String bolumId) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BolumNotlariEkrani(
+          kitapId: widget.kitapId,
+          bolumId: bolumId,
+        ),
       ),
     );
   }
@@ -313,21 +325,35 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                         ],
                       ),
                     ),
-                    FilledButton.tonal(
-                      style: FilledButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                      ),
-                      onPressed: () {
-                        depo.kitapBolumDurumuDegistir(kitap.id, siradaki.id, true);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Tebrikler! "${siradaki.ad}" tamamlandı.'),
-                            duration: const Duration(seconds: 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            siradaki.notVar ? Icons.note_alt : Icons.note_alt_outlined,
+                            color: Colors.teal,
+                            size: 22,
                           ),
-                        );
-                      },
-                      child: const Text('Çalıştım ✓'),
+                          tooltip: 'Bölüm Notları (${siradaki.notSayisi})',
+                          onPressed: () => _bolumNotlariniAc(siradaki.id),
+                        ),
+                        FilledButton.tonal(
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                          ),
+                          onPressed: () {
+                            depo.kitapBolumDurumuDegistir(kitap.id, siradaki.id, true);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Tebrikler! "${siradaki.ad}" tamamlandı.'),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          child: const Text('Çalıştım ✓'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -402,6 +428,7 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                 onDegisti: (tamam) {
                   depo.kitapBolumDurumuDegistir(kitap.id, filtrelenmis[i].id, tamam);
                 },
+                onNotlar: () => _bolumNotlariniAc(filtrelenmis[i].id),
                 onSil: () {
                   final guncel = List<KitapBolumu>.from(kitap.bolumler)
                     ..removeWhere((b) => b.id == filtrelenmis[i].id);
@@ -421,12 +448,14 @@ class _BolumKarti extends StatelessWidget {
     required this.sira,
     required this.bolum,
     required this.onDegisti,
+    required this.onNotlar,
     required this.onSil,
   });
 
   final int sira;
   final KitapBolumu bolum;
   final ValueChanged<bool> onDegisti;
+  final VoidCallback onNotlar;
   final VoidCallback onSil;
 
   @override
@@ -447,6 +476,7 @@ class _BolumKarti extends StatelessWidget {
       ),
       color: tamam ? Colors.teal.withValues(alpha: 0.04) : null,
       child: ListTile(
+        onTap: onNotlar,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
         leading: Checkbox(
           value: tamam,
@@ -462,20 +492,65 @@ class _BolumKarti extends StatelessWidget {
             color: tamam ? tema.colorScheme.outline : null,
           ),
         ),
-        subtitle: bolum.sayfaAraligiMetni.isNotEmpty
-            ? Text(
-                bolum.sayfaAraligiMetni,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: tema.colorScheme.onSurfaceVariant,
-                ),
+        subtitle: (bolum.sayfaAraligiMetni.isNotEmpty || bolum.notVar)
+            ? Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 6,
+                runSpacing: 2,
+                children: [
+                  if (bolum.sayfaAraligiMetni.isNotEmpty)
+                    Text(
+                      bolum.sayfaAraligiMetni,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: tema.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  if (bolum.notVar)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: tema.colorScheme.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.edit_note, size: 13, color: tema.colorScheme.primary),
+                          const SizedBox(width: 2),
+                          Text(
+                            '${bolum.notSayisi} not',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: tema.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               )
             : null,
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline, size: 18),
-          color: tema.colorScheme.outline,
-          tooltip: 'Bölümü Sil',
-          onPressed: onSil,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                bolum.notVar ? Icons.note_alt : Icons.note_alt_outlined,
+                size: 20,
+                color: bolum.notVar ? tema.colorScheme.primary : tema.colorScheme.outline,
+              ),
+              tooltip: 'Bölüm Notları',
+              onPressed: onNotlar,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, size: 18),
+              color: tema.colorScheme.outline,
+              tooltip: 'Bölümü Sil',
+              onPressed: onSil,
+            ),
+          ],
         ),
       ),
     );

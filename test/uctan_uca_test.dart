@@ -352,6 +352,29 @@ void main() {
     expect(depo.kitaplar.first.tamamlananBolumSayisi, 1);
     expect(depo.kitaplar.first.yuzde, 50);
 
+    // Bölüm notları ekranını aç ve yeni not ekle
+    await tester.tap(find.byTooltip('Bölüm Notları').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Bu Bölüme Henüz Not Eklenmedi'), findsOneWidget);
+
+    await tester.tap(find.text('İlk Notunu Ekle'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Bölüm Notu / Bilgi Girişi'),
+      'Önemli vaka spot notu: Antikor aracılı reaksiyon',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Önemli vaka spot notu: Antikor aracılı reaksiyon'), findsOneWidget);
+    expect(find.text('1 Not'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 not'), findsOneWidget);
+
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

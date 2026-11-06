@@ -1293,6 +1293,72 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
     await hemenKaydet();
   }
+
+  Future<void> kitapBolumNotuEkle(
+    String kitapId,
+    String bolumId,
+    BolumNotu not,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        final guncelNotlar = List<BolumNotu>.from(b.notlar)..insert(0, not);
+        yeniBolumler.add(b.kopya(notlar: guncelNotlar));
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapBolumNotuGuncelle(
+    String kitapId,
+    String bolumId,
+    BolumNotu guncelNot,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        final guncelNotlar = b.notlar.map((n) => n.id == guncelNot.id ? guncelNot : n).toList();
+        yeniBolumler.add(b.kopya(notlar: guncelNotlar));
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapBolumNotuSil(
+    String kitapId,
+    String bolumId,
+    String notId,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        final guncelNotlar = b.notlar.where((n) => n.id != notId).toList();
+        yeniBolumler.add(b.kopya(notlar: guncelNotlar));
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
   @override
   void dispose() {
     _zamanlayici?.cancel();

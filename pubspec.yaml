@@ -12,6 +12,8 @@ dependencies:
   # Turkce tarih secici ve sistem yazilari icin (Flutter'in kendi paketi, ek surum riski yok).
   flutter_localizations:
     sdk: flutter
+  # Bolum notlarina fotograflar eklemek icin resmi Flutter paketi.
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
