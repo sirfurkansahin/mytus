@@ -18,13 +18,13 @@ Kullanıcı direktifleri doğrultusunda Sürüm 1'e Kütüphane modülü eklendi
   - `kutuphane_ekrani.dart`: Genel kütüphane ilerleme kartı (toplam kitap, toplam bölüm, biten bölüm, genel yüzde), kitap kartları (ders rozeti, yüzde, ilerleme çubuğu, sıradaki bölüm etiketi) ve boş kütüphane karşılama kartı.
 - **Veri Kalıcılığı:**
   - Kitaplar ve bölümler `PlanDeposu`'nun yerel JSON yapısına entegre edildi (`kitaplar` anahtarı); yedekleme, geri yükleme ve sıfırlama sistemine tam uyumlu.
-- **Testler:**
+- **Testler ve CI Durumu:**
   - `test/kutuphane_test.dart`: Model hesapları, toplu metin ayrıştırma, JSON serileştirme ve depo entegrasyonu testleri.
-  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: F.T. time testleri doğrudan ekran üzerinden çağrılarak korundu; yeni Kütüphane widget ve uçtan uca testleri eklendi.
+  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: F.T. time testleri doğrudan ekran üzerinden çağrılarak korundu; yeni Kütüphane widget ve uçtan uca testleri (küçük telefon, büyük yazı, koyu tema) eklendi.
+  - GitHub Actions CI üzerinde hem **APK derleme** (`42249756198`) hem de **Web/iPhone PWA dağıtımı** (`42249756011`) 0 hata ile yeşil geçti (`completed success`).
 
 ## Siradaki adim
-- GitHub Actions CI (APK derleme ve Web testleri) doğrulanacak.
-- F.T. time modülü üzerinde yapılacak düzenlemeler için kullanıcı direktifleri beklenecek.
+- F.T. time modülü üzerinde yapılacak düzenlemeler ve yeni özellikler için kullanıcı direktifleri beklenecek.
 
 ## Bilinen sorunlar / riskler
 - Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.
