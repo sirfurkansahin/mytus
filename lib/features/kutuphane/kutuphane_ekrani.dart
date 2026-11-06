@@ -338,7 +338,10 @@ class _KitapKarti extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Row(
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 2,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -355,8 +358,7 @@ class _KitapKarti extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            if (kitap.toplamSayfa != null) ...[
-                              const SizedBox(width: 6),
+                            if (kitap.toplamSayfa != null)
                               Text(
                                 '${kitap.toplamSayfa} sayfa',
                                 style: TextStyle(
@@ -364,9 +366,7 @@ class _KitapKarti extends StatelessWidget {
                                   color: tema.colorScheme.outline,
                                 ),
                               ),
-                            ],
-                            if (kitap.toplamNotSayisi > 0) ...[
-                              const SizedBox(width: 6),
+                            if (kitap.toplamNotSayisi > 0)
                               Text(
                                 '· ${kitap.toplamNotSayisi} not',
                                 style: TextStyle(
@@ -375,12 +375,12 @@ class _KitapKarti extends StatelessWidget {
                                   color: tema.colorScheme.primary,
                                 ),
                               ),
-                            ],
                           ],
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
