@@ -1,3 +1,4 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/features/bilissel/dialoglar.dart';
 import 'package:app/features/bilissel/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
@@ -44,9 +45,11 @@ class BilisselEkrani extends StatelessWidget {
           _zorBilisselTavanKarti(context, depo, zorDk, toplamDk),
           const SizedBox(height: 16),
 
-          // 2. Sirkadiyen Odak Dağılımı ve Eğrisi
-          _odakEgrisiKarti(context, depo, ortOdak),
-          const SizedBox(height: 16),
+          // 2. Sirkadiyen Odak Dağılımı ve Eğrisi (K1: gizli, bkz. gizli_ozellikler.dart)
+          if (sirkadiyenGrafikAcik) ...[
+            _odakEgrisiKarti(context, depo, ortOdak),
+            const SizedBox(height: 16),
+          ],
 
           // 3. Uyku, Kafein ve Sirkadiyen Ritim Kartı
           _uykuKafeinKarti(context, depo, bugunkuUyku),
@@ -449,6 +452,8 @@ class BilisselEkrani extends StatelessWidget {
                 ],
               ),
             ),
+            // K1: Günlük uyku girişi gizli (bkz. gizli_ozellikler.dart)
+            if (gunlukUykuGirisiAcik) ...[
             const SizedBox(height: 12),
             if (bugunkuUyku != null) ...[
               Container(
@@ -523,6 +528,7 @@ class BilisselEkrani extends StatelessWidget {
                     ],
                   ),
                 ),
+            ],
             ],
           ],
         ),

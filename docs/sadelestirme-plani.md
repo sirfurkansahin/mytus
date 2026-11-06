@@ -1,9 +1,9 @@
-﻿# Sadelestirme Plani (6 Kasim 2026)
+# Sadelestirme Plani (6 Kasim 2026)
 
 Kullanici kararlari `DECISIONS.md` icinde. Her madde kucuk bir is; sirayla, her biri sonrasi kullanici onayi alinarak yapilir. Hicbir veri silinmez, yalnizca arayuzden gizlenir.
 
 ## ğŸ”´ Gizlenecekler
-- [ ] K1. Gunluk uyku/kafein/kaygi giris ekrani ve 14 gunluk sirkadiyen grafigi
+- [x] K1. Gunluk uyku/kafein/kaygi giris ekrani ve 14 gunluk sirkadiyen grafigi (gizlendi; bayraklar: lib/core/gizli_ozellikler.dart. Hedef yatis saati + kafein kesilme karti acik kaldi. Kaygi puani girisi K2 ile birlikte Kokpit tarafinda ele alinacak)
 - [ ] K2. Master Kokpit ve 0-100 Bilissel Saglik Skoru
 - [ ] K3. 3 Dakikalik Vaka Karti (ana menuden)
 - [ ] K4. Mekanizma Zincirleri (ana menuden; Referans'a tasinir)

@@ -249,7 +249,7 @@ class AyarlarEkrani extends StatelessWidget {
             tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             leading: const Icon(Icons.psychology_outlined, color: Colors.indigo),
             title: const Text('Bilişsel & Uyku Yönetimi'),
-            subtitle: const Text('Zor bilişsel tavan, sirkadiyen odak, kafein kesilme ve PFC koruma.'),
+            subtitle: const Text('Zor bilişsel tavan, hedef uyku saati, kafein kesilme ve PFC koruma.'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),

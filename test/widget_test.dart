@@ -466,7 +466,9 @@ void bilisselTestleri() {
 
     expect(find.text('Bilişsel & Uyku Yönetimi'), findsOneWidget);
     expect(find.textContaining('Zor Bilişsel İş Tavanı'), findsOneWidget);
-    expect(find.textContaining('Sirkadiyen Odak'), findsOneWidget);
+    // K1: sirkadiyen grafik ve günlük uyku girişi gizli; hedef/kafein kartı açık.
+    expect(find.textContaining('Sirkadiyen Odak'), findsNothing);
+    expect(find.text('Dün Geceki Uykuyu Kaydet'), findsNothing);
     expect(find.textContaining('Uyku & Kafein Disiplini'), findsOneWidget);
     expect(find.textContaining('Prefrontal Korteks (PFC) & Kurtarma'), findsOneWidget);
 
