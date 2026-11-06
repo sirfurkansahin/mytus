@@ -14,21 +14,20 @@ Bu dosyayi her oturumun basinda oku. Sonra `HANDOFF.md` (durum, siradaki adim) v
 - Isi birakirken `HANDOFF.md` dosyasini guncelle: ne yapildi, siradaki adim, bilinen sorunlar.
 
 ## Proje
-- Uygulama adi: MY TUS. Android paket adi: `com.mytus.app`. Dart paket adi: `app` (ornek: `import 'package:app/main.dart';`).
-- Teknoloji: Flutter (Dart) + Firebase Spark (ucretsiz plan). Cloud Functions ve Cloud Storage Spark planinda YOK, kullanma. Puan hesabi istemcide yapilir.
-- Surum 1: hesapsiz, yalnizca telefonda calisir (yerel veri). Surum 2: Google girisi, bulut, grup, puan tablosu, paylasim.
-- Hedef: Android, arkadas grubu (2-10 kisi). Dagitim: Firebase App Distribution.
+- Uygulama adi: MY TUS. Dart paket adi: `app` (ornek: `import 'package:app/main.dart';`).
+- Teknoloji: Flutter (Dart) + Web Mobil (PWA) + Firebase Spark (ucretsiz plan). Cloud Functions ve Cloud Storage Spark planinda YOK, kullanma. Puan hesabi istemcide yapilir.
+- Surum 1: hesapsiz, yerel veriyle (tarayici yerel bellegi / localStorage) telefonlarda tam ekran Web Mobil (PWA) olarak calisir. Surum 2: Google girisi, bulut, grup, puan tablosu, paylasim.
+- Hedef & Dagitim: Web Mobil uygulama (tum mobil cihazlar, iPhone ve Android; canli adres: `https://sirfurkansahin.github.io/mytus/`). APK derlemesi 6 Kasim 2026 kullanici karariyla planlardan kaldirilmistir.
 
 ## Derleme ortami (ONEMLI)
-- Bulut gelistirme ortaminda Flutter/pub.dev/Android araclarina erisim engellidir. Kod orada DERLENEMEZ ve calistirilamaz.
-- Derleme ve test GitHub Actions'ta yapilir: `.github/workflows/build-apk.yml` (analiz + test + APK).
-- Hatalari Actions gunluklerinden (log) oku. Her adimdan sonra GitHub'a gonderip APK derlemesi baslatma; ara adimlarda yerelde kal, yalnizca is bittiginde veya kullanici istediginde gonder/derle.
-- Ilk kurulumda `android/` klasoru `bootstrap-android.yml` akisiyla uretilir.
+- Bulut gelistirme ortaminda Flutter/pub.dev araclarina erisim engellidir. Kod orada DERLENEMEZ ve calistirilamaz.
+- Derleme, test ve canli yayin GitHub Actions'ta yapilir: `.github/workflows/deploy-web.yml` (kod analizi + birim/widget/uctan uca testler + Web Mobil PWA dagitimi).
+- Hatalari Actions gunluklerinden (log) oku. Ara adimlarda yerelde kal, yalnizca is bittiginde veya kullanici istediginde gonder/derle.
 
 ## Kod kurallari
 - Kucuk, tek sorumluluklu dosyalar. Her ozellik kendi klasorunde: `lib/features/<ozellik>/`.
 - Kisa Turkce yorumlar. Karmasik mantik (ozellikle tekrar motoru) birim testiyle birlikte.
-- Gizli bilgi (anahtar, sifre, keystore) ASLA depoya girmez. Depo ACIKTIR (public).
+- Gizli bilgi (anahtar, sifre) ASLA depoya girmez. Depo ACIKTIR (public).
 - Notlar kullanicinin ozel verisidir, hicbir zaman paylasilmaz.
 - Commit mesajlari Turkce, kisa ve aciklayici.
 

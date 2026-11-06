@@ -144,3 +144,12 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Veri & Optimizasyon | Fotoğraflar okunabilirlik korunarak optimize edilir ve yerel JSON içinde Base64 olarak saklanır; böylece harici dosya kaybı riski olmadan yedeklenebilir. |
 | Test Soyutlaması | `ResimSecici` soyut arayüzü sayesinde testler `SahteResimSecici` ile çalışır; platform/kamera bağımlılığı testleri etkilemez. |
 | Örnek Kitap Desteği | İlk kurulumda veya kütüphane boşken/menüden tek dokunuşla yüklenebilen zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, 2 tamamlanmış bölüm ve örnek klinik not). |
+
+## Web Mobil Uygulamaya Geçiş ve APK Derlemesinin Kaldırılması (6 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Platform Stratejisi | Android APK derlemesi ve dağıtımı (`build-apk.yml`) planlardan ve iş akışlarından kaldırıldı. Proje tamamen **Web Mobil Uygulama** (PWA: Progressive Web App) olarak devam eder. |
+| Hedef Kitle & Cihazlar | Hem iPhone (iOS / Safari) hem de Android (Chrome / diğer) mobil tarayıcılardan doğrudan çalışır. "Ana Ekrana Ekle" seçeneğiyle tam ekran, adres çubuğu olmadan yerel uygulama gibi kullanılır. |
+| Dağıtım & Canlı Adres | GitHub Pages: `https://sirfurkansahin.github.io/mytus/` |
+| CI / CD İş Akışı | `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesi tek akışta çalışır, her başarılı gönderimde otomatik olarak yayına alınır. |
+| Veri Saklama | Tarayıcı yerel belleği (`window.localStorage`) üzerinden tam veri kalıcılığı ve güvenlik sağlanır (`lib/core/veri_kaydi.dart`). |

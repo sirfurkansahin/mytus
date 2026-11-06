@@ -1,29 +1,24 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 6 Kasım 2026, Kütüphaneye örnek TUSDATA Patoloji Konu Kitabı ve tek dokunuşla yükleme desteği eklendi (dal `model2/kutuphane-modulu`).
+Son guncelleme: 6 Kasım 2026, APK derlemesi kaldırıldı, Web Mobil Uygulama (PWA) mimarisine geçildi (dal `model2/web-mobil-gecis`).
 
 ## Durum
-Kullanıcı direktifleri doğrultusunda Kütüphane modülüne hazır ve zengin bir örnek kitap eklendi:
-- **Örnek Kitap İçeriği (`lib/features/kutuphane/modeller.dart`):**
-  - "TUSDATA Patoloji Konu Kitabı" (6 bölüm, toplam 260 sayfa).
-  - 1. Bölüm: Hücre Hasarı ve Adaptasyon Mekanizmaları (s. 1–36) [Tamamlandı ✓]
-  - 2. Bölüm: Akut ve Kronik İltihap (s. 37–72) [Tamamlandı ✓]
-  - 3. Bölüm: Hemodinamik Bozukluklar, Tromboz ve Şok (s. 73–108) [Sırada çalışılacak]
-  - 4. Bölüm: İmmün Sistem Hastalıkları ve Amiloidoz (s. 109–154) [1 Adet Klinik Spot Notlu: Tip 2 Aşırı Duyarlılık Goodpasture tuzağı]
-  - 5. Bölüm: Neoplazi ve Onkogenez (s. 155–215)
-  - 6. Bölüm: Genetik ve Pediyatrik Hastalıklar (s. 216–260)
-- **Depo ve Karşılama Entegrasyonu (`lib/features/dersler/plan_deposu.dart`):**
-  - İlk kurulumda (`karsilamayiTamamla`) ve eski veri yükseltmesinde (`_yukle`) kütüphaneye otomatik eklenir.
-  - `ornekKitapYukle()` metodu: mükerrer eklemeyi engeller, listeye ekler ve kaydeder.
-- **Arayüz Entegrasyonu (`lib/features/kutuphane/kutuphane_ekrani.dart`):**
-  - Kütüphane AppBar menüsünde `PopupMenuButton` ile "Örnek Kitap Yükle" aksiyonu.
-  - Kütüphane tamamen boşaldığında karşılama kartında "Örnek Kitap Yükle" butonu.
-- **Testler ve Doğrulama:**
-  - `test/kutuphane_test.dart`: `ornekKitapUret ve ornekKitapYukle kütüphaneye hazır kitap ekler` birim testi.
-  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: Başlangıçta örnek kitabın varlığı, bölümlerin listelenmesi, tamamlanma yüzdesi ve yeni kitap ekleme akışları.
+Kullanıcı kararı doğrultusunda projenin platform ve dağıtım stratejisi güncellendi:
+- **APK Derlemesi Kaldırıldı:**
+  - `.github/workflows/build-apk.yml` iş akışı silindi. Android APK derleme ve Firebase App Distribution adımları emekliye ayrıldı.
+  - Proje artık gereksiz Android derleme bekleme sürelerinden arındırıldı.
+- **Web Mobil Uygulama (PWA) Ana Mimarisi:**
+  - Tüm cihazlarda (iPhone iOS / Safari ve Android / Chrome) tam ekran, tarayıcı çubuğu olmadan yerel mobil uygulama gibi çalışır.
+  - Dağıtım ve canlı adres: `https://sirfurkansahin.github.io/mytus/`
+  - `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesini tek seferde çalıştırıp doğrudan yayına alır.
+- **Kütüphane Modülü & Örnek Kitap:**
+  - Zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, tamamlananlar ve klinik spot notuyla) aktif.
+  - Kütüphane kartlarında metin taşması engellendi (`Wrap`).
+- **Belgeler:**
+  - `AGENTS.md` ve `DECISIONS.md` Web Mobil odaklı olarak güncellendi.
 
 ## Siradaki adim
-- Kullanıcının yeni direktifleri veya F.T. time modülü üzerinde yapılacak düzenlemeler.
+- F.T. time modülü üzerinde yapılacak düzenlemeler veya kullanıcının sıradaki istekleri.
 
 ## Bilinen sorunlar / riskler
 - Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.

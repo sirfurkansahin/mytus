@@ -1,13 +1,14 @@
-# MY TUS Web ve iPhone (PWA) Canlı Test Dağıtımı
-# Her gönderimde veya elle tetiklendiğinde: analiz + test + Flutter Web derlemesi.
+# MY TUS Web Mobil (PWA) Canlı Dağıtımı ve Testleri
+# Her gönderimde veya elle tetiklendiğinde: kod analizi + birim/widget/uçtan uca testler + Flutter Web derlemesi.
 # Sonuç doğrudan GitHub Pages (https://sirfurkansahin.github.io/mytus/) üzerine yayınlanır.
-name: Web ve iPhone (PWA) Dağıt
+name: Web Mobil (PWA) Dağıt
 
 on:
   push:
     branches:
       - main
       - 'model2/*'
+      - 'claude/*'
     paths-ignore:
       - "**.md"
       - "docs/**"
