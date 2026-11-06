@@ -105,7 +105,7 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
         : _tekEklenenBolumler.length;
 
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 540, maxHeight: 720),
@@ -117,10 +117,12 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Kütüphaneye Kitap Ekle',
-                    style: tema.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Text(
+                      'Kütüphaneye Kitap Ekle',
+                      style: tema.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -148,6 +150,7 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
                         Expanded(
                           flex: 3,
                           child: DropdownButtonFormField<int?>(
+                            isExpanded: true,
                             initialValue: _seciliDersId,
                             decoration: const InputDecoration(
                               labelText: 'Ders / Branş',

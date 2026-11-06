@@ -183,7 +183,7 @@ List<KitapBolumu> topluBolumleriAyristir(String hamMetin) {
     int? bitSayfa;
 
     final sayfaRegex = RegExp(
-      r'(?:s\.?|sayfa|\.{2,}|[-–—]|\()?\s*(\d{1,4})\s*[-–—]\s*(\d{1,4})\s*\)?$',
+      r'[\(\[]?\s*(?:s\.?|sayfa|\.{2,}|[-–—])?\s*(\d{1,4})\s*[-–—]\s*(\d{1,4})\s*[\)\]]?$',
       caseSensitive: false,
     );
     final match = sayfaRegex.firstMatch(satir);
@@ -203,7 +203,7 @@ List<KitapBolumu> topluBolumleriAyristir(String hamMetin) {
     }
 
     // Başındaki gereksiz noktaları veya tireleri temizle
-    satir = satir.replaceAll(RegExp(r'[\.\-_]+$'), '').trim();
+    satir = satir.replaceAll(RegExp(r'[\.\-_:,([\s]+$'), '').trim();
 
     if (satir.isEmpty) {
       satir = 'Bölüm $sayac';

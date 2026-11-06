@@ -298,6 +298,19 @@ class PlanDeposu extends ChangeNotifier {
       _uykular
         ..clear()
         ..addAll(uykular);
+
+      final kitaplar = <Kitap>[];
+      final kitapListesi = veri['kitaplar'];
+      if (kitapListesi is List) {
+        for (final e in kitapListesi) {
+          if (e is Map<String, dynamic>) {
+            kitaplar.add(Kitap.fromJson(e));
+          }
+        }
+      }
+      _kitaplar
+        ..clear()
+        ..addAll(kitaplar);
       _kurtarmaModuAktif = veri['kurtarmaModuAktif'] as bool? ?? false;
       _hedefYatisSaati = veri['hedefYatisSaati'] as String? ?? '23:30';
       _hedefKalkisSaati = veri['hedefKalkisSaati'] as String? ?? '07:30';
