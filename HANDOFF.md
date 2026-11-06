@@ -19,13 +19,13 @@ Kullanıcı direktifleri doğrultusunda Kütüphane modülüne bölüm notları 
   - Bölüm kartlarında not rozeti (`📝 1 not`) ve doğrudan notları açan buton/dokunma alanı.
   - "SIRADAKİ ÇALIŞILACAK BÖLÜM" odak kartında hızlı not butonu.
   - Kütüphane genel kartında toplam not sayısı gösterimi.
-- **Testler:**
+- **Testler ve CI Durumu:**
   - `test/kutuphane_test.dart`: Model serileştirme ve depo not CRUD testleri.
-  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: Bölüm notları açma, fotoğraf ekleme simülasyonu, metin girme, kaydetme ve rozet görünüm testleri.
+  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: Bölüm notları açma, metin girme, kaydetme, rozet görünüm ve uçtan uca responsive testleri.
+  - GitHub Actions CI üzerinde hem **APK derleme** (`42257411036`) hem de **Web/iPhone PWA dağıtımı** (`42257411076`) 0 hata ile yeşil geçti (`completed success`).
 
 ## Siradaki adim
-- GitHub Actions CI (APK derleme ve Web testleri) doğrulanacak.
-- F.T. time modülü üzerinde yapılacak düzenlemeler için kullanıcı direktifleri beklenecek.
+- F.T. time modülü üzerinde yapılacak düzenlemeler ve yeni özellikler için kullanıcı direktifleri beklenecek.
 
 ## Bilinen sorunlar / riskler
 - Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.
