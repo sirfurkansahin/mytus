@@ -216,15 +216,18 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                       ),
                       if (kitap.toplamSayfa != null) ...[
                         const SizedBox(width: 8),
-                        Text(
-                          '${kitap.toplamSayfa} sayfa',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: tema.colorScheme.onSurfaceVariant,
+                        Expanded(
+                          child: Text(
+                            '${kitap.toplamSayfa} sayfa',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: tema.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
-                      ],
-                      const Spacer(),
+                      ] else
+                        const Spacer(),
+                      const SizedBox(width: 8),
                       Text(
                         '%${kitap.yuzde}',
                         style: TextStyle(
@@ -335,8 +338,11 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
           const SizedBox(height: 16),
 
           // Filtreler
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
             children: [
               Text(
                 'BÖLÜMLER (${kitap.toplamBolumSayisi})',
