@@ -24,8 +24,7 @@ class _HataEkleDialoguState extends State<_HataEkleDialogu> {
   final _ayiranKriterKontrol = TextEditingController();
   final _kuralKontrol = TextEditingController();
 
-  HataSinifi _hataSinifi = HataSinifi.b;
-  GuvenSeviyesi _guven = GuvenSeviyesi.emin;
+  HataSinifi _hataSinifi = HataSinifi.a;
 
   @override
   void dispose() {
@@ -66,65 +65,49 @@ class _HataEkleDialoguState extends State<_HataEkleDialogu> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
                 children: [
-                  Expanded(
-                    child: DropdownButtonFormField<HataSinifi>(
-                      initialValue: _hataSinifi,
-                      decoration: const InputDecoration(
-                        labelText: 'Hata Sınıfı',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        for (final s in HataSinifi.values)
-                          DropdownMenuItem(value: s, child: Text('${s.kod} · ${s.ad}')),
-                      ],
-                      onChanged: (v) => setState(() => _hataSinifi = v ?? HataSinifi.b),
+                  for (final s in HataSinifi.grupTemsilcileri)
+                    ChoiceChip(
+                      label: Text(s.grupAdi),
+                      selected: _hataSinifi.grupAdi == s.grupAdi,
+                      selectedColor: s.renk.withValues(alpha: 0.25),
+                      onSelected: (_) => setState(() => _hataSinifi = s),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: DropdownButtonFormField<GuvenSeviyesi>(
-                      initialValue: _guven,
-                      decoration: const InputDecoration(
-                        labelText: 'Güven',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        for (final g in GuvenSeviyesi.values)
-                          DropdownMenuItem(value: g, child: Text(g.ad)),
-                      ],
-                      onChanged: (v) => setState(() => _guven = v ?? GuvenSeviyesi.emin),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: _celdiriciKontrol,
-                decoration: const InputDecoration(
-                  labelText: 'Karışan Çeldirici Şık / Kavram',
-                  hintText: 'Örn: Primer Biliyer Kolanjit',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _ayiranKriterKontrol,
-                decoration: const InputDecoration(
-                  labelText: 'İki Şıkkı Ayıran Tek Kriter (Zorunlu)',
-                  hintText: 'Örn: AMA (+) ve kadın = PBC; p-ANCA ve ERCP = PSC',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
                 controller: _kuralKontrol,
                 decoration: const InputDecoration(
-                  labelText: 'Bir Daha Yapmamak İçin Kuralım',
+                  labelText: 'Bir daha ne yapacağım?',
                   hintText: 'Örn: Kolestaz sorusunda önce ERCP bulgusuna bak',
                   border: OutlineInputBorder(),
                 ),
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: const Text('Ayrıntı (isteğe bağlı)', style: TextStyle(fontSize: 13)),
+                children: [
+                  TextField(
+                    controller: _celdiriciKontrol,
+                    decoration: const InputDecoration(
+                      labelText: 'Karışan Çeldirici Şık / Kavram',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _ayiranKriterKontrol,
+                    decoration: const InputDecoration(
+                      labelText: 'İki Şıkkı Ayıran Tek Kriter',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
             ],
           ),
@@ -143,7 +126,8 @@ class _HataEkleDialoguState extends State<_HataEkleDialogu> {
               baslik: _baslikKontrol.text.trim(),
               dersAdi: _dersKontrol.text.trim(),
               hataSinifi: _hataSinifi,
-              guven: _guven,
+              // Yanlış biliyordum = Emin + Yanlış (yanlış inanç); diğerleri kararsız.
+              guven: _hataSinifi == HataSinifi.b ? GuvenSeviyesi.emin : GuvenSeviyesi.kararsiz,
               celdirici: _celdiriciKontrol.text.trim(),
               ayiranKriter: _ayiranKriterKontrol.text.trim(),
               kural: _kuralKontrol.text.trim(),

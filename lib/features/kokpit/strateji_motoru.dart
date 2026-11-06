@@ -183,7 +183,7 @@ List<KokpitKurali> stratejiAnaliziYap(KokpitGostergeleri g, PlanDeposu depo) {
         id: 'zor_bilissel_tavan',
         baslik: 'Ağır Analitik Bilişsel Tavan Doldu (4 Saat)',
         oncelik: OncelikSeviyesi.uyari,
-        eger: 'Bugünkü zor bilişsel iş süresi ${g.zorBilisselDakikaBugun} dk oldu (Günlük kanıtlı tavan: 240 dk).',
+        eger: 'Bugünkü zor bilişsel iş süresi ${g.zorBilisselDakikaBugun} dk oldu (Günlük referans tavan: 240 dk).',
         oZaman: 'Prefrontal korteks kapasitesi doldu. Bu saatten sonra yeni konu veya ağır deneme analizi yapma; '
             'kalan çalışma süresini kart kuyruğu, tablo turu veya hafif soruya ayır.',
         eylemEtiketi: 'Bilişsel Takip',

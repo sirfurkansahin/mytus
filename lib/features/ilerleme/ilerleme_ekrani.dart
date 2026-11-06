@@ -1,3 +1,4 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
@@ -47,6 +48,7 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
         children: [
+          if (kokpitAcik) // K2: Master Kokpit gizli (gizli_ozellikler.dart)
           Card(
             elevation: 0,
             margin: const EdgeInsets.only(bottom: 12),

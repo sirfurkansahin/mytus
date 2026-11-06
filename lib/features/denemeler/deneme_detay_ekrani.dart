@@ -1,3 +1,4 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/denemeler/deneme_ekle_ekrani.dart';
@@ -155,14 +156,16 @@ class DenemeDetayEkrani extends StatelessWidget {
             const SizedBox(height: 16),
           ],
 
-          // 3. Güven Matrisi ve Kalibrasyon Farkı (Rapor Bölüm 4.2)
-          _KalibrasyonKarti(
-            deneme: deneme,
-            kalibrasyon: kalibrasyon,
-          ),
-          const SizedBox(height: 16),
+          // 3. Güven Matrisi ve Kalibrasyon Farkı (K7: soru bazlı güven gizli)
+          if (soruBazliGuvenAcik) ...[
+            _KalibrasyonKarti(
+              deneme: deneme,
+              kalibrasyon: kalibrasyon,
+            ),
+            const SizedBox(height: 16),
+          ],
 
-          // 4. A–F Hata Sınıfları Dağılımı (Rapor Bölüm 3.3)
+          // 4. Hata dağılımı (S5: 3 kategori)
           _HataSiniflariKarti(hataDagilimi: hataDagilimi),
           const SizedBox(height: 20),
 
@@ -198,7 +201,7 @@ class DenemeDetayEkrani extends StatelessWidget {
               child: const Padding(
                 padding: EdgeInsets.all(20),
                 child: Text(
-                  'Bu denemede henüz soru bazlı hata analizi yapılmadı. Yanlış yaptığın veya kararsız kaldığın soruları ekleyerek A–F sınıflandırması yapabilirsin.',
+                  'Bu denemede henüz soru bazlı hata analizi yapılmadı. İstersen yanlış yaptığın soruları 3 kategoriden biriyle (Bilgi, Yanlış biliyordum, Dikkat-Süre) ekleyebilirsin.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 13),
                 ),
@@ -593,7 +596,7 @@ class _HataSiniflariKarti extends StatelessWidget {
                 Icon(Icons.pie_chart_outline_rounded, size: 18, color: tema.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'A–F Hata Sınıfları Dağılımı',
+                  'Hata Dağılımı',
                   style: tema.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
@@ -604,10 +607,13 @@ class _HataSiniflariKarti extends StatelessWidget {
               style: TextStyle(fontSize: 11, color: tema.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 12),
-            for (final sinif in HataSinifi.values) ...[
+            // S5: 6 eski sınıf 3 gruba toplanır (A+D, B, C+E+F).
+            for (final sinif in HataSinifi.grupTemsilcileri) ...[
               _HataSinifSatiri(
                 sinif: sinif,
-                adet: hataDagilimi[sinif] ?? 0,
+                adet: hataDagilimi.entries
+                    .where((e) => e.key.grupAdi == sinif.grupAdi)
+                    .fold<int>(0, (t, e) => t + e.value),
               ),
               const SizedBox(height: 6),
             ],
@@ -649,7 +655,7 @@ class _HataSinifSatiri extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              sinif.kod,
+              sinif.grupAdi.substring(0, 1),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
@@ -663,12 +669,8 @@ class _HataSinifSatiri extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  sinif.ad,
+                  sinif.grupAdi,
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  sinif.aciklama,
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
                 ),
               ],
             ),
@@ -755,7 +757,7 @@ class _SoruAnalizKarti extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      'Sınıf ${soru.hataSinifi!.kod}: ${soru.hataSinifi!.ad}',
+                      soru.hataSinifi!.grupAdi,
                       style: TextStyle(
                         color: soru.hataSinifi!.renk,
                         fontSize: 11,
@@ -764,14 +766,15 @@ class _SoruAnalizKarti extends StatelessWidget {
                     ),
                   ),
                 const Spacer(),
-                Text(
-                  'Güven: ${soru.guven.ad}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: tema.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+                if (soruBazliGuvenAcik)
+                  Text(
+                    'Güven: ${soru.guven.ad}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: tema.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
                 IconButton(
                   icon: const Icon(Icons.close, size: 16),
                   onPressed: onSil,

@@ -1,3 +1,4 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/defterler/dialoglar.dart';
@@ -6,44 +7,43 @@ import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
-/// Rapor Bölüm 2.2, 3.3, 4.1 ve 5.5 kapsamındaki 4 özel defter merkezi:
-/// 1. Hata Defteri & Çeldirici Bankası
-/// 2. Sınıflama & Skor Defteri
-/// 3. Mekanizma Zincirleri (Illness Script)
-/// 4. 3 Dakikalık Vaka Kartları
-class DefterlerEkrani extends StatelessWidget {
+/// Rapor Bölüm 2.2, 3.3, 4.1 ve 5.5 kapsamındaki özel defter merkezi.
+/// Sadeleştirme (6 Kasım 2026): tek \ extends StatelessWidget {
   const DefterlerEkrani({super.key, this.baslangicSekmesi = 0});
 
   final int baslangicSekmesi;
 
   @override
   Widget build(BuildContext context) {
+    const sekmeler = <Tab>[
+      Tab(icon: Icon(Icons.rule_folder_outlined), text: 'Hata & Çeldirici'),
+      Tab(icon: Icon(Icons.format_list_numbered_rounded), text: 'Referans'),
+      if (mekanizmaZinciriAcik)
+        Tab(icon: Icon(Icons.hub_outlined), text: 'Mekanizma Zincirleri'),
+      if (vakaKartiAcik)
+        Tab(icon: Icon(Icons.medical_services_outlined), text: '3 Dk Vaka Kartı'),
+    ];
     return DefaultTabController(
-      length: 4,
-      initialIndex: baslangicSekmesi,
+      length: sekmeler.length,
+      initialIndex: baslangicSekmesi < sekmeler.length ? baslangicSekmesi : 0,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Özel Defterler & Akıllı Havuz',
+            'Defter',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
           bottom: const TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(icon: Icon(Icons.rule_folder_outlined), text: 'Hata & Çeldirici'),
-              Tab(icon: Icon(Icons.format_list_numbered_rounded), text: 'Skor Defteri'),
-              Tab(icon: Icon(Icons.hub_outlined), text: 'Mekanizma Zincirleri'),
-              Tab(icon: Icon(Icons.medical_services_outlined), text: '3 Dk Vaka Kartı'),
-            ],
+            tabs: sekmeler,
           ),
         ),
         body: const TabBarView(
           children: [
             _HataDefteriSekmesi(),
             _SkorDefteriSekmesi(),
-            _ZincirlerSekmesi(),
-            _VakalarSekmesi(),
+            if (mekanizmaZinciriAcik) _ZincirlerSekmesi(),
+            if (vakaKartiAcik) _VakalarSekmesi(),
           ],
         ),
       ),
@@ -80,7 +80,9 @@ class _HataDefteriSekmesiState extends State<_HataDefteriSekmesi> {
       liste = liste.where((h) => h.hiperDuzeltmeGerektirir).toList();
     }
     if (_seciliSinif != null) {
-      liste = liste.where((h) => h.hataSinifi == _seciliSinif).toList();
+      liste = liste
+          .where((h) => h.hataSinifi.grupAdi == _seciliSinif!.grupAdi)
+          .toList();
     }
 
     final hiperSayisi = depo.hataDefteri.where((h) => h.hiperDuzeltmeGerektirir).length;
@@ -149,9 +151,9 @@ class _HataDefteriSekmesiState extends State<_HataDefteriSekmesi> {
                   }),
                 ),
                 const SizedBox(width: 6),
-                for (final s in HataSinifi.values) ...[
+                for (final s in HataSinifi.grupTemsilcileri) ...[
                   FilterChip(
-                    label: Text('${s.kod} · ${s.ad}'),
+                    label: Text(s.grupAdi),
                     selected: _seciliSinif == s,
                     onSelected: (v) => setState(() {
                       _seciliSinif = v ? s : null;
@@ -242,7 +244,7 @@ class _HataKarti extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    hata.hataSinifi.kod,
+                    hata.hataSinifi.grupAdi,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,

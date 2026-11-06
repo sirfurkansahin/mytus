@@ -31,6 +31,18 @@ enum HataSinifi {
   final String ad;
   final String aciklama;
   final Color renk;
+
+  /// Sadeleştirilmiş 3'lü gösterim (S5, 6 Kasım 2026):
+  /// A, D -> Bilgi; B -> Yanlış biliyordum; C, E, F -> Dikkat-Süre.
+  /// Kayıtlar eski A–F koduyla saklanır, yalnızca gösterim eşlenir.
+  String get grupAdi {
+    if (this == a || this == d) return 'Bilgi';
+    if (this == b) return 'Yanlış biliyordum';
+    return 'Dikkat-Süre';
+  }
+
+  /// Gruplar için temsilci sınıflar (yeni kayıtlarda bunlar saklanır).
+  static const List<HataSinifi> grupTemsilcileri = [a, b, c];
 }
 
 /// Soru çözümünde güven seviyesi (Rapor Bölüm 3.3 Güven Matrisi).

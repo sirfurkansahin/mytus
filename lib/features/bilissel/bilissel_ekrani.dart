@@ -199,14 +199,19 @@ class BilisselEkrani extends StatelessWidget {
     final Color renk;
     final String durumYazisi;
     if (zorDk >= 240) {
-      renk = Colors.red;
-      durumYazisi = '⛔ Ağır Analitik Tavan Doldu (4 saat)! Kalan sürede sadece hafif tekrar ve kart çalışın.';
+      // K6: sert kırmızı uyarı yerine soluk, bilgilendirici not.
+      renk = sertTavanUyarisiAcik ? Colors.red : Colors.blueGrey;
+      durumYazisi = sertTavanUyarisiAcik
+          ? '⛔ Ağır Analitik Tavan Doldu (4 saat)! Kalan sürede sadece hafif tekrar ve kart çalışın.'
+          : 'Bugün 4 saatten fazla derin çalıştın. Bir ara ver; istersen hafif tekrarla devam et.';
     } else if (zorDk >= 180) {
-      renk = Colors.orange;
-      durumYazisi = '⚡ Zor Bilişsel Tavana Yaklaşıldı (3+ saat). PFC yorulmak üzere.';
+      renk = sertTavanUyarisiAcik ? Colors.orange : Colors.blueGrey;
+      durumYazisi = sertTavanUyarisiAcik
+          ? '⚡ Zor Bilişsel Tavana Yaklaşıldı (3+ saat). PFC yorulmak üzere.'
+          : 'Bugün 3 saatten fazla derin çalıştın. Kısa bir mola iyi gelir.';
     } else {
       renk = Colors.green;
-      durumYazisi = '✅ Prefrontal korteks analitik kapasitesi dengeli.';
+      durumYazisi = 'Bugünkü derin çalışma yükü dengeli.';
     }
 
     return Card(
