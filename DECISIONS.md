@@ -153,3 +153,20 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Dağıtım & Canlı Adres | GitHub Pages: `https://sirfurkansahin.github.io/mytus/` |
 | CI / CD İş Akışı | `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesi tek akışta çalışır, her başarılı gönderimde otomatik olarak yayına alınır. |
 | Veri Saklama | Tarayıcı yerel belleği (`window.localStorage`) üzerinden tam veri kalıcılığı ve güvenlik sağlanır (`lib/core/veri_kaydi.dart`). |
+
+## Hesap ve Bulut Esitleme (6 Kasim 2026 - Kullanici Karari)
+Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin gunceller. Google girisi ve Analytics daha sonra ayrica ele alinacak.
+
+| Konu | Karar |
+|---|---|
+| Giris zorunlulugu | Zorunlu. Yalnizca ilk acilista sorulur; sonra oturum acik kalir (her acilista sifre sorulmaz). |
+| Giris yontemi | E-posta + sifre (Firebase Authentication). Profilde ayrica takma ad. Kullanici adiyla giris YOK. |
+| Sifre sifirlama | E-posta ile sifirlama baglantisi. |
+| Google girisi | Ilk asamada YOK, ileride eklenebilir. |
+| Fotograflar | Ilk asamada yalnizca cihazda kalir, buluta gitmez. Kalici bulut cozumu ileride aranacak. |
+| Firebase yapilandirmasi | Depoya yazilmaz; GitHub Actions gizli degiskenlerinde (Secrets) tutulur, derlemede `--dart-define` ile eklenir. |
+| Cikis yapinca | Cihazdaki veri silinir (bulutta durur). Gonderilemeyen degisiklik varsa once uyari verilir. |
+| Bulut verisi | Firestore: `kullanicilar/{uid}` altinda bolumlere ayrilmis belgeler. Herkes yalnizca kendi verisini okur/yazar (guvenlik kurallari). |
+| Ilk giriste yerel veri | Cihazda veri var, bulut bos: buluta aktarilir. Ikisinde de varsa kullaniciya sorulur; secilmeyen taraf cihazda yedek olarak saklanir. |
+| Cakisma kurali | Bolum bazinda en son degistiren kazanir. |
+| Analytics | Bu ise dahil degil. |
