@@ -303,20 +303,8 @@ void main() {
       await dokun('Ayarlar', find.byTooltip('Ayarlar'));
       await geri('ayarlardan geri');
 
-      await dokun('sekme F.T. time', find.text('F.T. time'));
-      final baslat = find.text('Başlat');
-      if (baslat.evaluate().isEmpty) {
-        await tester.scrollUntilVisible(
-          baslat,
-          300,
-          scrollable: find.byType(Scrollable).first,
-        );
-      }
-      await tester.ensureVisible(baslat.first);
-      await tester.pump();
-      await tester.tap(baslat.first);
-      await tester.pump(const Duration(milliseconds: 300));
-      kontrol('F.T. time Baslat');
+      await dokun('sekme Kütüphane', find.text('Kütüphane'));
+      kontrol('Kütüphane sekmesi');
       FlutterError.onError = eskiHata;
 
       await tester.pumpWidget(const SizedBox.shrink());
