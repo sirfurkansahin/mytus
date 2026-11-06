@@ -1,4 +1,4 @@
-import 'package:app/core/gizli_ozellikler.dart';
+﻿import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/defterler/dialoglar.dart';
@@ -8,7 +8,7 @@ import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
 /// Rapor Bölüm 2.2, 3.3, 4.1 ve 5.5 kapsamındaki özel defter merkezi.
-/// Sadeleştirme (6 Kasım 2026): tek \ extends StatelessWidget {
+class DefterlerEkrani extends StatelessWidget {
   const DefterlerEkrani({super.key, this.baslangicSekmesi = 0});
 
   final int baslangicSekmesi;

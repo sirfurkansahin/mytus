@@ -1,4 +1,4 @@
-import 'package:app/core/gizli_ozellikler.dart';
+﻿import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/features/ft_time/ft_sayac_ekrani.dart';
@@ -56,6 +56,10 @@ class BugunEkrani extends StatelessWidget {
       for (final t in tumTekrarlar)
         if (t.eylemYapilabilir && t.tarih.isBefore(bugun)) t,
     ];
+    final bugunTekrarlari = [
+      for (final t in tumTekrarlar)
+        if (ayniGun(t.tarih, bugun)) t,
+    ];
     final bugunCalismalari = [
       for (final c in tumCalismalar)
         if (ayniGun(c.tarih, bugun)) c,
@@ -77,10 +81,6 @@ class BugunEkrani extends StatelessWidget {
       for (final c in bugunCalismalari)
         if (c.tamam)
           if (depo.konuBul(c.konuId) case final k?) k.ad,
-    ];
-    final bugunTekrarlari = [
-      for (final t in tumTekrarlar)
-        if (ayniGun(t.tarih, bugun)) t,
     ];
     final yarinCalismaSayisi = [
       for (final c in tumCalismalar)
@@ -375,7 +375,8 @@ class BugunEkrani extends StatelessWidget {
                   ],
                 ],
               ),
-                      ),
+            ),
+          ),
           if (siradakiKonu != null) ...[
             const SizedBox(height: 12),
             Card(

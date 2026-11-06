@@ -1,4 +1,4 @@
-import 'package:app/core/gizli_ozellikler.dart';
+﻿import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
@@ -40,7 +40,7 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
     final metin = '''
 🎯 MY TUS · Haftalık Çalışma Raporu
 📅 Sınav: 22 Ağustos 2027 ($kalan gün kaldı)
-⏱️ Odak Süresi: ${ozet.toplamDakika ~/ 60} sa ${ozet.toplamDakika % 60} dk
+⏱️ Odak Süresi: ${ozet.odakDakika ~/ 60} sa ${ozet.odakDakika % 60} dk
 📚 Tamamlanan Konu: ${genel.calisilanKonu}/${genel.toplamKonu} (%${genel.yuzde})
 🔄 Toplam Tekrar: ${genel.toplamTekrar}
 📝 Bugün Çözülen Soru: $bugunkuSoru
@@ -130,7 +130,7 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
                       Expanded(
                         child: _OzetKutusu(
                           baslik: 'Odak',
-                          deger: '${ozet.toplamDakika ~/ 60} sa ${ozet.toplamDakika % 60} dk',
+                          deger: '${ozet.odakDakika ~/ 60} sa ${ozet.odakDakika % 60} dk',
                           renk: tema.colorScheme.primary,
                         ),
                       ),
