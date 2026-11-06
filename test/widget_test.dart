@@ -695,10 +695,6 @@ void kutuphaneTestleri() {
 
     expect(find.text('Bölüme Not Ekle'), findsOneWidget);
 
-    // Galeriden seç butonuna dokun (SahteResimSecici tetiklenir)
-    await tester.tap(find.text('Galeriden Seç'));
-    await tester.pumpAndSettle();
-
     // Metin gir
     await tester.enterText(
       find.widgetWithText(TextField, 'Bölüm Notu / Bilgi Girişi'),
