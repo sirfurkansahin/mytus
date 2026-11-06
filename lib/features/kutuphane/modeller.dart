@@ -1,5 +1,6 @@
 /// Kütüphane modülü veri modelleri (Sürüm 1).
 /// Kitap ve içindekiler/bölüm yapısı, ilerleme hesabı ve toplu ayrıştırma.
+library;
 
 class KitapBolumu {
   const KitapBolumu({

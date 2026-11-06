@@ -148,7 +148,7 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
                         Expanded(
                           flex: 3,
                           child: DropdownButtonFormField<int?>(
-                            value: _seciliDersId,
+                            initialValue: _seciliDersId,
                             decoration: const InputDecoration(
                               labelText: 'Ders / Branş',
                               border: OutlineInputBorder(),
