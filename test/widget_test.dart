@@ -2,6 +2,7 @@ import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -426,25 +427,19 @@ void defterlerTestleri() {
 
     await tester.tap(find.byTooltip('Özel Defterler'));
     await tester.pumpAndSettle();
-    expect(find.text('Özel Defterler & Akıllı Havuz'), findsOneWidget);
+    expect(find.text('Defter'), findsOneWidget);
     expect(find.text('Hata & Çeldirici'), findsOneWidget);
-    expect(find.text('Skor Defteri'), findsOneWidget);
+    expect(find.text('Referans'), findsOneWidget);
 
-    // Skor Defteri sekmesine geç
-    await tester.tap(find.text('Skor Defteri'));
+    // K3 & K4: Mekanizma Zincirleri ve Vaka Kartı arayüzden gizlidir
+    expect(find.text('Mekanizma Zincirleri'), findsNothing);
+    expect(find.text('3 Dk Vaka Kartı'), findsNothing);
+
+    // Referans sekmesine geç
+    await tester.tap(find.text('Referans'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Hinchey'), findsWidgets);
     expect(find.textContaining('Hodgkin'), findsOneWidget);
-
-    // Mekanizma Zincirleri sekmesine geç
-    await tester.tap(find.text('Mekanizma Zincirleri'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Illness Script'), findsOneWidget);
-
-    // 3 Dk Vaka Kartı sekmesine geç
-    await tester.tap(find.text('3 Dk Vaka Kartı'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Vaka Kartı'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -536,8 +531,18 @@ void kokpitTestleri() {
     await tester.pumpWidget(MyTusApp(deposu: depo));
     await tester.pumpAndSettle();
 
-    // Bugün ekranındaki Master Kokpit butonuna dokun
-    await tester.tap(find.byTooltip('Master Kokpit'));
+    // K2: Bugün ekranında Master Kokpit gizlidir
+    expect(find.byTooltip('Master Kokpit'), findsNothing);
+
+    // Doğrudan Kokpit ekranı açılır
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: const KokpitEkrani(),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Master Yönetim Kokpiti'), findsOneWidget);

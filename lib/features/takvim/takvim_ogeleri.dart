@@ -118,39 +118,93 @@ class TekrarSatiri extends StatelessWidget {
     ].join(' · ');
     return _kart(
       context,
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        leading: IconButton(
-          tooltip: tekrar.yapildi ? 'Yaptım işaretini geri al' : 'Tekrar yaptım',
-          icon: Icon(
-            tekrar.yapildi ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: tekrar.yapildi || tekrar.eylemYapilabilir
-                ? vurgu
-                : tema.colorScheme.outline,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            leading: IconButton(
+              tooltip: tekrar.yapildi ? 'Yaptım işaretini geri al' : 'Tekrar yaptım',
+              icon: Icon(
+                tekrar.yapildi ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: tekrar.yapildi || tekrar.eylemYapilabilir
+                    ? vurgu
+                    : tema.colorScheme.outline,
+              ),
+              onPressed: tekrar.yapildi
+                  ? () => depo.tekrarGeriAl(tekrar.calismaId, tekrar.no)
+                  : tekrar.eylemYapilabilir
+                      ? () => depo.tekrarYapildi(tekrar.calismaId, tekrar.no, bugun)
+                      : null,
+            ),
+            title: Text(
+              konu.ad,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                decoration: tekrar.yapildi ? TextDecoration.lineThrough : null,
+              ),
+            ),
+            subtitle: Text(altYazi),
+            trailing: Text(
+              etiket,
+              style: TextStyle(
+                color: vurgu,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+            onTap: () => tekrarEylemleri(context, tekrar, bugun),
           ),
-          onPressed: tekrar.yapildi
-              ? () => depo.tekrarGeriAl(tekrar.calismaId, tekrar.no)
-              : tekrar.eylemYapilabilir
-                  ? () => depo.tekrarYapildi(tekrar.calismaId, tekrar.no, bugun)
-                  : null,
-        ),
-        title: Text(
-          konu.ad,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            decoration: tekrar.yapildi ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Text(altYazi),
-        trailing: Text(
-          etiket,
-          style: TextStyle(
-            color: vurgu,
-            fontWeight: FontWeight.w700,
-            fontSize: 12,
-          ),
-        ),
-        onTap: () => tekrarEylemleri(context, tekrar, bugun),
+          if (tekrar.eylemYapilabilir && !tekrar.yapildi)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () => depo.tekrarYapildi(tekrar.calismaId, tekrar.no, bugun),
+                      child: const Text('✅ Hatırladım', style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () {
+                        depo.tekrarYapildi(tekrar.calismaId, tekrar.no, bugun);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Tekrar tamamlandı. Zorlandığın detayı Hata Defteri\'ne ekleyebilirsin.'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: const Text('😐 Zorlandım', style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
+                    tooltip: 'Yarına ertele',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                    onPressed: () {
+                      final calisma = depo.calismaBul(tekrar.calismaId);
+                      if (calisma != null) {
+                        depo.calismaGunuDegistir(calisma.id, gunEkle(calisma.tarih, 1));
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

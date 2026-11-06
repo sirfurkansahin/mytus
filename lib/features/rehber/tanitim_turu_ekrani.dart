@@ -56,7 +56,7 @@ class _TanitimTuruEkraniState extends State<TanitimTuruEkrani> {
       maddeler: [
         '⏱️ Blok Presetleri: Klasik Pomodoro (25/5 dk) veya derin çalışma (50/10 dk) bloklarını tek dokunuşla başlat.',
         '⭐ Blok Sonu Puanı: Her çalışma bitiminde 1-5 arası odak puanı vererek kendi verim eğrini gör.',
-        '🧠 3–4 Saat Kuralı: Nitelikli "zor analitik iş" (yeni konu, ağır soru) için günlük kanıtlı tavan 180-240 dakikadır.',
+        '🧠 3–4 Saat Kuralı: Nitelikli "zor analitik iş" (yeni konu, ağır soru) için günlük referans tavan 180-240 dakikadır.',
         '☕ Kafein Disiplini: Yatış saatinden 8 saat önce otomatik kafein kesilme uyarısıyla derin yavaş dalga uykunu koru.',
       ],
       ozet: 'TUS günde 12 saat oturmakla değil; 3-4 saat yüksek odaklı zor iş ve kaliteli uykuyla kazanılır.',

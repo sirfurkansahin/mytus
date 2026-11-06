@@ -1,4 +1,10 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
+import 'package:app/features/ft_time/ft_kontrol.dart';
+import 'package:app/features/ft_time/ft_sayac_ekrani.dart';
+import 'package:app/features/takvim/calisma.dart';
+import 'package:app/features/takvim/gun_siniri.dart';
+import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
 import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/defterler/defterler_ekrani.dart';
@@ -25,6 +31,7 @@ class BugunEkrani extends StatelessWidget {
       MaterialPageRoute<int>(builder: (_) => const KonuSecEkrani()),
     );
     if (konuId == null || !context.mounted) return;
+    if (!await yeniKonuSiniriOnayi(context, depo, bugun) || !context.mounted) return;
     depo.calismaEkle(konuId, bugun);
   }
 
@@ -53,6 +60,19 @@ class BugunEkrani extends StatelessWidget {
       for (final c in tumCalismalar)
         if (ayniGun(c.tarih, bugun)) c,
     ];
+    final siradakiCalisma = bugunCalismalari.cast<Calisma?>().firstWhere(
+          (c) => c != null && !c.tamam,
+          orElse: () => null,
+        );
+    final siradakiTekrar = siradakiCalisma != null
+        ? null
+        : bugunTekrarlari.cast<TekrarOgesi?>().firstWhere(
+            (t) => t != null && t.eylemYapilabilir,
+            orElse: () => null,
+          );
+    final siradakiKonuId = siradakiCalisma?.konuId ?? siradakiTekrar?.konuId;
+    final siradakiKonu = siradakiKonuId != null ? depo.konuBul(siradakiKonuId) : null;
+    final siradakiDers = siradakiKonu != null ? depo.dersBul(siradakiKonu.dersId) : null;
     final bugunTamamKonular = [
       for (final c in bugunCalismalari)
         if (c.tamam)
@@ -105,14 +125,15 @@ class BugunEkrani extends StatelessWidget {
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  IconButton(
-                    tooltip: 'Master Kokpit',
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.dashboard_customize_outlined),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+                  if (kokpitAcik)
+                    IconButton(
+                      tooltip: 'Master Kokpit',
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.dashboard_customize_outlined),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+                      ),
                     ),
-                  ),
                   IconButton(
                     tooltip: 'Bilişsel & Uyku',
                     visualDensity: VisualDensity.compact,
@@ -169,40 +190,42 @@ class BugunEkrani extends StatelessWidget {
             gunAdiIleTarih(bugun),
             style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
           ),
-          const SizedBox(height: 12),
-          InkWell(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
-            ),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: tema.colorScheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: tema.colorScheme.primary.withValues(alpha: 0.3),
-                ),
+          if (kokpitAcik) ...[
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.speed, color: tema.colorScheme.primary, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Master Kokpit · 8 Bilişsel Gösterge & Strateji',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        color: tema.colorScheme.primary,
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: tema.colorScheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: tema.colorScheme.primary.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.speed, color: tema.colorScheme.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Master Kokpit · 8 Bilişsel Gösterge & Strateji',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: tema.colorScheme.primary,
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(Icons.chevron_right, color: tema.colorScheme.primary, size: 18),
-                ],
+                    Icon(Icons.chevron_right, color: tema.colorScheme.primary, size: 18),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
           const SizedBox(height: 8),
           InkWell(
             onTap: () => Navigator.of(context).push(
@@ -266,7 +289,7 @@ class BugunEkrani extends StatelessWidget {
                 ),
               ),
             ),
-          ] else if (depo.zorBilisselTavanAsildi) ...[
+          ] else if (sertTavanUyarisiAcik && depo.zorBilisselTavanAsildi) ...[
             const SizedBox(height: 12),
             InkWell(
               onTap: () => Navigator.of(context).push(
@@ -352,9 +375,183 @@ class BugunEkrani extends StatelessWidget {
                   ],
                 ],
               ),
+                      ),
+          if (siradakiKonu != null) ...[
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: tema.colorScheme.primary.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+              ),
+              color: tema.colorScheme.primary.withValues(alpha: 0.06),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.bolt_rounded, color: tema.colorScheme.primary, size: 20),
+                        const SizedBox(width: 6),
+                        Text(
+                          'SIRADAKİ GÖREV',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: tema.colorScheme.primary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (siradakiDers != null)
+                          Text(
+                            siradakiDers.ad,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: tema.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      siradakiKonu.ad,
+                      style: tema.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      onPressed: () {
+                        final o = depo.oturumBaslat(
+                          toplamDongu: depo.ftAyar.donguSayisi,
+                          konuId: siradakiKonuId,
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => FtSayacEkrani(
+                              key: ValueKey(o.id),
+                              kontrol: FtKontrol(depo),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.play_arrow_rounded, size: 24),
+                      label: Text('BAŞLA (${depo.ftAyar.calismaDk} dk Odak)'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          // Günlük Soru Sayacı (E7)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: tema.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.edit_note_rounded, color: tema.colorScheme.primary, size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Bugün Çözülen Soru',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        '${depo.soruSayisiGun(bugun)} soru',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton.outlined(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.remove, size: 16),
+                  onPressed: depo.soruSayisiGun(bugun) > 0
+                      ? () => depo.soruEkle(bugun, -5)
+                      : null,
+                ),
+                const SizedBox(width: 4),
+                IconButton.filledTonal(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.add, size: 16),
+                  onPressed: () => depo.soruEkle(bugun, 5),
+                ),
+                const SizedBox(width: 4),
+                FilledButton.tonal(
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  onPressed: () => depo.soruEkle(bugun, 20),
+                  child: const Text('+20'),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
+          if (depo.zorGunMu(bugun)) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.teal.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.teal.withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.nightlife_outlined, color: Colors.teal, size: 20),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      '🛡️ Zor Gün Modu: Ağır konular ertelendi, tekrar yükü hafifletildi.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.teal,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: depo.zorGunKapat,
+                    child: const Text('Kapat'),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => depo.zorGunBaslat(bugun),
+                icon: const Icon(Icons.nightlife_outlined, size: 16),
+                label: const Text('Bugün nöbetteyim / Yoğun gün'),
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+              ),
+            ),
+          ],
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
@@ -382,11 +579,26 @@ class BugunEkrani extends StatelessWidget {
               spacing: 8,
               children: [
                 BolumBasligi(baslik: 'Geciken', bilgi: '$geciken iş'),
-                if (gecikenCalismalar.isNotEmpty)
-                  TextButton(
-                    onPressed: () => depo.gecikenleriBuguneAl(bugun),
-                    child: const Text('Tümünü bugüne al'),
-                  ),
+                Wrap(
+                  spacing: 4,
+                  children: [
+                    if (gecikenCalismalar.isNotEmpty)
+                      TextButton(
+                        onPressed: () => depo.gecikenleriBuguneAl(bugun),
+                        child: const Text('Tümünü bugüne al'),
+                      ),
+                    if (gecikenTekrarlar.isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          final n = depo.gecikenTekrarlariSifirla(bugun);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$n adet geciken tekrar bugünden itibaren yeniden dağıtıldı.')),
+                          );
+                        },
+                        child: const Text('Tekrarları affet & dağıt'),
+                      ),
+                  ],
+                ),
               ],
             ),
             for (final c in gecikenCalismalar) ...[

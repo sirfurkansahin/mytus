@@ -201,6 +201,22 @@ class AyarlarEkrani extends StatelessWidget {
             },
           ),
           AyarSatiri(
+            baslik: 'Günlük yeni konu sınırı',
+            altYazi: 'Bir güne yerleştirilmesi önerilen en çok yeni konu sayısı',
+            deger: ' konu',
+            onTap: () async {
+              final v = await sayiDialogu(
+                context,
+                baslik: 'Günlük yeni konu sınırı',
+                ilkDeger: depo.gunlukYeniKonuSiniri,
+                enAz: 1,
+                enCok: 15,
+                birim: 'konu',
+              );
+              if (v != null) depo.gunlukYeniKonuSinirBelirle(v);
+            },
+          ),
+          AyarSatiri(
             baslik: 'Günlük tekrar sınırı',
             altYazi: 'Bir güne bundan fazla tekrar düşmez, fazlası ertesi güne kayar',
             deger: '${depo.gunlukTekrarSiniri} tekrar',

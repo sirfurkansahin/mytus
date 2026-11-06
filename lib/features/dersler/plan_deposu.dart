@@ -53,9 +53,16 @@ class PlanDeposu extends ChangeNotifier {
   /// Bir güne düşebilecek en çok tekrar sayısı (varsayılan 10).
   int gunlukTekrarSiniri = 10;
 
+  /// Bir güne yerleştirilmesi önerilen en çok yeni konu sayısı (varsayılan 4).
+  int gunlukYeniKonuSiniri = 4;
+
+  /// "Zor gün" (nöbet/yoğun gün) olarak işaretlenen gün; o gün yük hafifler. Yoksa null.
+  DateTime? _zorGun;
+
   /// F.T. time süre ayarları.
   FtAyarlari ftAyar = const FtAyarlari();
 
+  final Map<String, int> _gunlukSorular = {};
   final List<OdakKaydi> _odaklar = [];
   FtOturum? _oturum;
   final List<DenemeSinavi> _denemeler = [];
@@ -171,7 +178,21 @@ class PlanDeposu extends ChangeNotifier {
       turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 3;
       final sinir = veri['gunlukTekrarSiniri'];
       gunlukTekrarSiniri = sinir is int && sinir >= 0 ? sinir : 10;
+      final yeniSinir = veri['gunlukYeniKonuSiniri'];
+      gunlukYeniKonuSiniri =
+          yeniSinir is int && yeniSinir >= 1 && yeniSinir <= 20 ? yeniSinir : 4;
+      final zorGun = veri['zorGun'];
+      _zorGun = zorGun is String ? tarihCoz(zorGun) : null;
       ftAyar = FtAyarlari.fromJson(veri['ftAyar']);
+      final sorular = veri['gunlukSorular'];
+      if (sorular is Map) {
+        _gunlukSorular.clear();
+        for (final entry in sorular.entries) {
+          if (entry.key is String && entry.value is int) {
+            _gunlukSorular[entry.key as String] = entry.value as int;
+          }
+        }
+      }
       final odaklar = <OdakKaydi>[];
       final odakListesi = veri['odaklar'];
       if (odakListesi is List) {
@@ -298,6 +319,9 @@ class PlanDeposu extends ChangeNotifier {
         'calismalar': [for (final c in _calismalar) c.toJson()],
         'turSayisi': turSayisi,
         'gunlukTekrarSiniri': gunlukTekrarSiniri,
+        'gunlukYeniKonuSiniri': gunlukYeniKonuSiniri,
+        'gunlukSorular': _gunlukSorular,
+        'zorGun': _zorGun == null ? null : tarihAnahtari(_zorGun!),
         'ftAyar': ftAyar.toJson(),
         'odaklar': [for (final o in _odaklar) o.toJson()],
         'oturum': _oturum?.toJson(),
@@ -569,8 +593,61 @@ class PlanDeposu extends ChangeNotifier {
       calismalar: _calismalar,
       sinavTarihi: sinav,
       bugun: bugun,
-      gunlukSinir: gunlukTekrarSiniri,
+      gunlukSinir: etkinTekrarSiniri(bugun),
     );
+  }
+
+  /// Bir güne yerleştirilmiş konu sayısı (tamamlananlar dahil).
+  int gundekiKonuSayisi(DateTime gun) => calismalarGun(gun).length;
+
+  /// O gün için önerilen yeni konu sınırına ulaşıldı mı?
+  bool gunDolu(DateTime gun) => gundekiKonuSayisi(gun) >= gunlukYeniKonuSiniri;
+
+  /// Verilen gün "Zor gün" olarak işaretli mi?
+  bool zorGunMu(DateTime gun) => _zorGun != null && ayniGun(_zorGun!, gun);
+
+  /// O günün tekrar sınırı: zor günde %70'e iner (en az 3).
+  int etkinTekrarSiniri(DateTime gun) => zorGunMu(gun)
+      ? math.max(3, (gunlukTekrarSiniri * 0.7).floor())
+      : gunlukTekrarSiniri;
+
+  /// "Zor gün": bugünün ve geciken yapılmamış konuları yarına taşır, tekrar yükünü %70'e indirir.
+  void zorGunBaslat(DateTime bugun) {
+    final g = gunBasi(bugun);
+    final yarin = gunEkle(g, 1);
+    for (var i = 0; i < _calismalar.length; i++) {
+      final c = _calismalar[i];
+      if (!c.tamam && !c.tarih.isAfter(g)) {
+        _calismalar[i] = c.kopya(tarih: yarin);
+      }
+    }
+    _zorGun = g;
+    _degisti();
+  }
+
+  /// Zor gün işaretini kaldırır (taşınan konular yerinde kalır).
+  void zorGunKapat() {
+    if (_zorGun == null) return;
+    _zorGun = null;
+    _degisti();
+  }
+
+  /// Geciken tekrarları "bugün yapıldı" sayar; sonraki tekrarlar mevcut kayma kuralıyla yeniden dağılır.
+  int gecikenTekrarlariSifirla(DateTime bugun) {
+    final g = gunBasi(bugun);
+    var sayac = 0;
+    for (var tur = 0; tur < 500; tur++) {
+      TekrarOgesi? hedef;
+      for (final t in tekrarlar(g)) {
+        if (t.eylemYapilabilir && t.tarih.isBefore(g)) {
+          hedef = t;
+          break;
+        }
+      }
+      if (hedef == null || !tekrarYapildi(hedef.calismaId, hedef.no, g)) break;
+      sayac++;
+    }
+    return sayac;
   }
 
   /// Konuyu bir güne yerleştirir. Aynı konu tekrar yerleştirilebilir (sonraki tur).
@@ -670,6 +747,30 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
+  void gunlukYeniKonuSinirBelirle(int sayi) {
+    gunlukYeniKonuSiniri = sayi < 1 ? 1 : (sayi > 20 ? 20 : sayi);
+    _degisti();
+  }
+
+  Map<String, int> get gunlukSorular => Map.unmodifiable(_gunlukSorular);
+
+  int soruSayisiGun(DateTime gun) => _gunlukSorular[tarihAnahtari(gun)] ?? 0;
+
+  void soruSayisiAyarla(DateTime gun, int adet) {
+    final anahtar = tarihAnahtari(gun);
+    final yeni = math.max(0, adet);
+    if (yeni == 0) {
+      _gunlukSorular.remove(anahtar);
+    } else {
+      _gunlukSorular[anahtar] = yeni;
+    }
+    _degisti();
+  }
+
+  void soruEkle(DateTime gun, int fark) {
+    soruSayisiAyarla(gun, soruSayisiGun(gun) + fark);
+  }
+
   void ftAyarBelirle(FtAyarlari ayar) {
     ftAyar = ayar;
     _degisti();
@@ -709,6 +810,9 @@ class PlanDeposu extends ChangeNotifier {
     karsilamaTamam = false;
     turSayisi = 3;
     gunlukTekrarSiniri = 10;
+    gunlukYeniKonuSiniri = 4;
+    _gunlukSorular.clear();
+    _zorGun = null;
     ftAyar = const FtAyarlari();
     _degisti();
     await hemenKaydet();

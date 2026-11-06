@@ -1,6 +1,7 @@
 import 'package:app/core/renkler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/takvim/gun_siniri.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +44,7 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
       MaterialPageRoute<int>(builder: (_) => const KonuSecEkrani()),
     );
     if (!mounted || konuId == null) return;
+    if (!await yeniKonuSiniriOnayi(context, depo, _secili) || !mounted) return;
     final c = depo.calismaEkle(konuId, _secili);
     if (c == null) return;
     final konu = depo.konuBul(konuId);

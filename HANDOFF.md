@@ -1,48 +1,40 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 6 Kasım 2026, sadeleştirme planı ve kararlar işlendi (dal `model2/sadelestirme-plani`). Önceki: 4 Kasım 2026 Kullanım Rehberi & Görsel Tanıtım Turu main'e birleştirildi (PR #18).
+Son guncelleme: 6 Kasım 2026, Sadeleştirme ve Pratik Özellikler uygulandı (dal `model2/gizleme-k1-k8`).
 
 ## Durum
-Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması tamamlanmıştır:
-- **Faz 1 (Modül 1: Deneme Sınavları & Bilişsel Hata Analizi - PR #12):**
-  - 200 soru (100 TTBT + 100 KTBT, 135'er dk), ÖSYM net formülü (Doğru - Yanlış/4).
-  - Klinik Ağırlıklı K Puanı (0.4 TTBT + 0.6 KTBT) ve ÖSYM 85 EBAP tavan tahmin puanı.
-  - A–F Hata Sınıfları (A: Bilgi, B: Yanlış İnanç, C: Okuma/Kurgu, D: Mantık, E: Süre, F: Form).
-  - Güven Matrisi (Emin / Kararsız / Tahmin), Kalibrasyon Farkı ve B Sınıfı Hiperdüzeltme Alarmları.
-- **Faz 2 (Modül 2: Özel Defterler & Akıllı Havuz - PR #13):**
-  - Hata Defteri & Çeldirici Bankası (karışan çeldirici, ayıran tek kriter, adayın kendi kuralı).
-  - Sınıflama & Skor Defteri (10+ hazır TUS skoru: Hinchey, Wells, CURB-65 vb. ve özel skorlar).
-  - Mekanizma Zincirleri (Illness Script - 6 branş 5 halkalı şablonlar).
-  - 3 Dakikalık Vaka Kartı (klinik vizit vakalarını TUS soru kalıbına dönüştürme).
-- **Faz 3 (Modül 3: Nörobiyoloji, Uyku & Bilişsel Performans - PR #14):**
-  - F.T. Time blok sonu 1-5 odak puanı ve "Ağır Analitik İş" takibi.
-  - Zor Bilişsel İş Tavanı (günlük 180 dk uyarı, 240 dk / 4 saat kanıtlı tavan aşımı).
-  - Sirkadiyen Odak Dağılımı ve 14 günlük biyolojik verim eğrisi.
-  - Uyku & Kafein Disiplini (hedef yatıştan 8 saat önce kafein kesilme alarmı, sirkadiyen sapma hesabı).
-  - Prefrontal Korteks %70 Yük Kurtarma Modu (C hatası > %15 ise yük %70'e iner, sadece R1-R2 tekrarları yapılır).
-- **Faz 4 (Modül 4: Sınav Anı, Panik Protokolü & Provalar - PR #15):**
-  - 84 saniyelik Huberman Lab Döngüsel İç Çekme (Cyclic Sighing) görsel nefes rehberi ve Jamieson uyarılmayı yeniden değerlendirme kartı.
-  - Gerçek Saat Sınav Provası (135 dk geri sayım, 25, 50, 75, 100. soru tempo kontrolleri).
-  - İki oturum arası 135 dk Ara Dinlenme Protokolü.
-  - Beklenen Değer (EV) Kartı (+0.167 net matematiksel kazanç ve cevap değiştirme kuralları).
-- **Faz 5 (Modül 5: Master Yönetim Kokpiti & Karar Motoru - PR #16):**
-  - Haftalık 8 Bilişsel Gösterge (Kalibrasyon, Aşırı Güven, Uyku, PFC C Hatası, Kaygı, R1, R3, Odak/Tavan).
-  - 4 Sınav Göstergesi (Temel Net, Klinik Net, K Puanı, EBAP Puanı).
-  - 0-100 Kompozit Bilişsel Sağlık Skoru.
-  - Otomatik "Eğer–O Zaman" (If-Then) Strateji ve Eylem Motoru.
-- **Kullanım Rehberi & Görsel Tanıtım Turu (`model2/kullanim-rehberi`):**
-  - `TanitimTuruEkrani`: 5 tematik görsel slayt (Planlama & Tekrar, Odak & 3-4 Saat Tavanı, Hata Defteri & Çeldirici, Sınav Anı & 90 sn Nefes, Master Kokpit).
-  - `RehberEkrani`: 6 ana kategoride detaylı Sıkça Sorulan Sorular (SSS) ve modül kullanım kılavuzu.
-  - Karşılama, Bugün ve Ayarlar ekranlarında doğrudan erişim kısayolları.
-  - `test/rehber_test.dart` ve `test/widget_test.dart` (rehberTestleri) ile doğrulandı.
+Kullanıcı direktifleri doğrultusunda pazar analizi ve sadeleştirme planı aşamaları uygulandı:
+- **Gizlenenler (K1-K8):**
+  - Veri kaybı veya JSON şema değişikliği yapılmadan `lib/core/gizli_ozellikler.dart` üzerinden arayüzden gizlendi.
+  - Günlük uyku/kaygı giriş formu ve sirkadiyen grafik gizlendi (hedef yatış saati ve kafein kesilme saati kartı sade biçimde korundu).
+  - Master Kokpit ve 0-100 Bilişsel Sağlık Skoru Bugün ekranından gizlendi.
+  - Vaka Kartı ve Mekanizma Zincirleri ana menüden kaldırıldı; hazır şablonlar "Defter" içindeki salt-okunur "Referans" sekmesinde korundu.
+  - Blok sonu zorunlu odak puanı ve ağır analitik kutucuğu isteğe bağlı ayara bağlandı (varsayılan kapalı).
+  - Sert tavan kırmızı uyarısı gizlendi.
+  - Soru bazlı güven matrisi sadeleştirildi (oturum sonu genel güven dağılımı korundu).
+  - Tanıtım turundaki "kanıtlı tavan" ifadesi "referans tavan" olarak yumuşatıldı.
+- **Sadeleştirmeler (S2, S3, S5, S6, S8, S9, S14):**
+  - Bugün ekranı: "SIRADAKİ GÖREV" kartı eklendi, karmaşa temizlendi.
+  - Tekrar satırları: 3 hızlı işlem butonu eklendi (`✅ Hatırladım`, `😐 Zorlandım`, `➡️ Yarına ertele`).
+  - Hata kodları 3 ana gruba uyarlandı (Bilgi / Yanlış biliyordum / Dikkat-Süre).
+  - İlerleme ekranına Master Kokpit yerine sade "Haftalık Özet" kartı konuldu.
+  - Zor Gün Modu: Tek dokunuşla "Bugün nöbetteyim / Yoğun gün" modu açılıp kapanabilir hale getirildi (tekrar yükünü %70'e çeker).
+  - Günlük Limit: 4 yeni konu + 10 tekrar sınırı getirildi (ayarlardan değiştirilebilir; gün dolduğunda uyarır).
+- **Yeni Eklenenler (E2, E3, E5, E7):**
+  - E2: Bugün ekranından tek dokunuşla 25 dk odak sayacı başlatma (sıradaki konuya/tekrara doğrudan bağlanır).
+  - E3: İlerleme ekranından WhatsApp'a tek tıkla yapıştırılabilir formatlı haftalık çalışma özeti kopyalama.
+  - E5: Geciken tekrarları affetme ve bugünden itibaren takvime yeniden dağıtma butonu.
+  - E7: Bugün ekranında hızlı soru sayacı `[-] [X Soru] [+] [+20]` (kalıcı ve pratik).
+- **Testler:**
+  - `test/plan_deposu_test.dart` ve `test/widget_test.dart` güncellendi, yeni özelliklerin testleri eklendi.
 
 ## Siradaki adim
-- TUS Master Araştırma Raporunun 5 fazlık entegrasyonu ve Kullanım Rehberi & Tanıtım Turu tamamlandı.
-- 6 Kasım 2026: Pazar analizi ve özellik budama raporu üzerine kullanıcı kararları alındı (`DECISIONS.md` > "Sadelestirme ve Rakip Analizi Kararlari"). Görev listesi: `docs/sadelestirme-plani.md`. Dal: `model2/sadelestirme-plani` (yalnızca dokümantasyon, kod değişmedi).
-- Sıradaki iş: K1-K8 (özellikleri GİZLEME, veri silinmez) ile başla. Her maddeyi küçük adımla yap, sonrasında kullanıcıdan onay al.
-- Bildirim sorunu bu planın dışında; kullanıcı kendisi ilgilenecek, ona bağımlı görev kurma.
+- `git add` ve `git commit` yapılarak GitHub'a pushlanacak.
+- GitHub Actions CI (APK derleme ve Web testleri) doğrulanacak.
+- Kullanıcı onayına göre Sürüm 2 (Firebase arkadas grubu, canlı çalışma şeridi, haftalık grup sıralaması/ortak hedef) aşamasına geçilecek.
+
 ## Bilinen sorunlar / riskler
-- Bulut ortamında yerel derleme kısıtlıdır; tüm analiz, test ve derlemeler GitHub Actions üzerinde yeşil olarak doğrulanmaktadır.
+- Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

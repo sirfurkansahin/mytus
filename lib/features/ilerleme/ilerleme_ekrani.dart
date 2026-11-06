@@ -6,6 +6,7 @@ import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/ilerleme/ilerleme_hesabi.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// İlerleme: haftalık özet, günlük odak grafiği ve en çok çalışılan dersler
 /// (onaylı tasarım: İlerleme). Sürüm 1'de yalnızca kendi verin gösterilir.
@@ -20,6 +21,40 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
   late DateTime _hafta = haftaBasi(DateTime.now());
 
   void _git(int hafta) => setState(() => _hafta = gunEkle(_hafta, 7 * hafta));
+
+  void _whatsappOzetiKopyala(
+    BuildContext context,
+    PlanDeposu depo,
+    HaftaOzeti ozet,
+    GenelIlerleme genel,
+    DateTime bugun,
+  ) {
+    final sinav = depo.sinavTarihi ?? resmiSinavTarihi;
+    final kalan = gunFarki(sinav, bugun);
+    final sonDeneme = depo.denemeler.isNotEmpty ? depo.denemeler.first : null;
+    final sonDenemeStr = sonDeneme != null
+        ? '${sonDeneme.toplamNet.toStringAsFixed(1)} net (${sonDeneme.ad})'
+        : 'Girilmedi';
+    final bugunkuSoru = depo.soruSayisiGun(bugun);
+
+    final metin = '''
+🎯 MY TUS · Haftalık Çalışma Raporu
+📅 Sınav: 22 Ağustos 2027 ($kalan gün kaldı)
+⏱️ Odak Süresi: ${ozet.toplamDakika ~/ 60} sa ${ozet.toplamDakika % 60} dk
+📚 Tamamlanan Konu: ${genel.calisilanKonu}/${genel.toplamKonu} (%${genel.yuzde})
+🔄 Toplam Tekrar: ${genel.toplamTekrar}
+📝 Bugün Çözülen Soru: $bugunkuSoru
+📊 Son Deneme: $sonDenemeStr
+🔥 Çalışma Serisi: ${genel.seriGun} gün
+'''.trim();
+
+    Clipboard.setData(ClipboardData(text: metin));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Haftalık özet panoya kopyalandı! WhatsApp grubuna yapıştırabilirsin.'),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +83,81 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
         children: [
+          // S6: Master Kokpit yerine sade Haftalık Özet Kartı
+          Card(
+            elevation: 0,
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: tema.colorScheme.primary.withValues(alpha: 0.3),
+              ),
+            ),
+            color: tema.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Haftalık Özet',
+                        style: tema.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _whatsappOzetiKopyala(
+                          context,
+                          depo,
+                          ozet,
+                          genel,
+                          bugun,
+                        ),
+                        icon: const Icon(Icons.share_outlined, size: 16),
+                        label: const Text('WhatsApp Özeti'),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _OzetKutusu(
+                          baslik: 'Odak',
+                          deger: '${ozet.toplamDakika ~/ 60} sa ${ozet.toplamDakika % 60} dk',
+                          renk: tema.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _OzetKutusu(
+                          baslik: 'Konu',
+                          deger: '%${genel.yuzde}',
+                          renk: Colors.indigo,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _OzetKutusu(
+                          baslik: 'Son Deneme',
+                          deger: depo.denemeler.isNotEmpty
+                              ? '${depo.denemeler.first.toplamNet.toStringAsFixed(1)} net'
+                              : '-',
+                          renk: Colors.teal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           if (kokpitAcik) // K2: Master Kokpit gizli (gizli_ozellikler.dart)
           Card(
             elevation: 0,
@@ -487,6 +597,55 @@ class _DenemelerIlerlemeKarti extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _OzetKutusu extends StatelessWidget {
+  const _OzetKutusu({
+    required this.baslik,
+    required this.deger,
+    required this.renk,
+  });
+
+  final String baslik;
+  final String deger;
+  final Color renk;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: tema.colorScheme.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: tema.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            baslik,
+            style: TextStyle(
+              fontSize: 11,
+              color: tema.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            deger,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: renk,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
