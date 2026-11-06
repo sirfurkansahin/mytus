@@ -307,6 +307,8 @@ class PlanDeposu extends ChangeNotifier {
             kitaplar.add(Kitap.fromJson(e));
           }
         }
+      } else {
+        kitaplar.add(ornekKitapUret());
       }
       _kitaplar
         ..clear()
@@ -409,6 +411,9 @@ class PlanDeposu extends ChangeNotifier {
           _konuEkleIc(ders.id, k);
         }
       }
+    }
+    if (_kitaplar.isEmpty) {
+      _kitaplar.add(ornekKitapUret());
     }
     karsilamaTamam = true;
     _degisti();
@@ -1264,6 +1269,15 @@ class PlanDeposu extends ChangeNotifier {
 
   Future<void> kitapSil(String id) async {
     _kitaplar.removeWhere((k) => k.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Kütüphaneye zengin örnek bir TUS kitabı yükler.
+  Future<void> ornekKitapYukle() async {
+    final ornek = ornekKitapUret();
+    if (_kitaplar.any((k) => k.id == ornek.id)) return;
+    _kitaplar.insert(0, ornek);
     _degisti();
     await hemenKaydet();
   }

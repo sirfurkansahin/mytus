@@ -288,3 +288,71 @@ List<KitapBolumu> topluBolumleriAyristir(String hamMetin) {
 
   return sonuc;
 }
+
+/// Kullanıcıya kütüphanenin nasıl çalıştığını göstermek için zengin örnek TUS kitabı.
+Kitap ornekKitapUret() {
+  return Kitap(
+    id: 'k_ornek_patoloji',
+    ad: 'TUSDATA Patoloji Konu Kitabı',
+    dersAdi: 'Patoloji',
+    dersId: 5,
+    toplamSayfa: 260,
+    eklenmeTarihi: DateTime.now(),
+    bolumler: [
+      KitapBolumu(
+        id: 'b_ornek_1',
+        ad: 'Hücre Hasarı, Adaptasyon ve Hücre Ölümü',
+        baslangicSayfa: 1,
+        bitisSayfa: 36,
+        tamamlandi: true,
+        tamamlanmaTarihi: DateTime.now().subtract(const Duration(days: 3)),
+      ),
+      KitapBolumu(
+        id: 'b_ornek_2',
+        ad: 'Akut ve Kronik İltihap, Doku Onarımı',
+        baslangicSayfa: 37,
+        bitisSayfa: 72,
+        tamamlandi: true,
+        tamamlanmaTarihi: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+      const KitapBolumu(
+        id: 'b_ornek_3',
+        ad: 'Hemodinamik Bozukluklar, Tromboz ve Şok',
+        baslangicSayfa: 73,
+        bitisSayfa: 108,
+        tamamlandi: false,
+      ),
+      KitapBolumu(
+        id: 'b_ornek_4',
+        ad: 'İmmün Sistem Hastalıkları ve Otoimmünite',
+        baslangicSayfa: 109,
+        bitisSayfa: 154,
+        tamamlandi: false,
+        notlar: [
+          BolumNotu(
+            id: 'n_ornek_1',
+            metin: 'Tip 2 Aşırı Duyarlılık: Antikor (IgG/IgM) aracılıdır.\n'
+                'Örnekler: Goodpasture (tip 4 kollajen), Myastenia Gravis (ACh reseptörü), '
+                'Pemfigus Vulgaris (desmoglein-3), Graves (TSH reseptörü).\n'
+                '⚠️ Sınav Tuzağı: Serum hastalığı ve Arthus reaksiyonu Tip 3 immün kompleks hastalığıdır!',
+            olusturmaTarihi: DateTime.now().subtract(const Duration(hours: 4)),
+          ),
+        ],
+      ),
+      const KitapBolumu(
+        id: 'b_ornek_5',
+        ad: 'Neoplazi, Onkogenler ve Tümör Biyolojisi',
+        baslangicSayfa: 155,
+        bitisSayfa: 215,
+        tamamlandi: false,
+      ),
+      const KitapBolumu(
+        id: 'b_ornek_6',
+        ad: 'Genetik Hastalıklar ve Çevre Patolojisi',
+        baslangicSayfa: 216,
+        bitisSayfa: 260,
+        tamamlandi: false,
+      ),
+    ],
+  );
+}

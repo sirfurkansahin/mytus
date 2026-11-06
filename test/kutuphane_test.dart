@@ -207,5 +207,29 @@ void main() {
       expect(depo2.kitapBul('k_not')!.bolumler.first.notVar, isFalse);
       expect(depo2.kitapBul('k_not')!.bolumler.first.notSayisi, 0);
     });
+
+    test('ornekKitapUret ve ornekKitapYukle kütüphaneye hazır kitap ekler', () async {
+      final kayit = BellekKaydi();
+      final depo = PlanDeposu(kayit: kayit, kayitGecikmesi: Duration.zero);
+      await depo.yukle();
+
+      expect(depo.kitaplar, isEmpty);
+
+      await depo.ornekKitapYukle();
+      expect(depo.kitaplar.length, 1);
+
+      final ornek = depo.kitaplar.first;
+      expect(ornek.ad, 'TUSDATA Patoloji Konu Kitabı');
+      expect(ornek.dersAdi, 'Patoloji');
+      expect(ornek.toplamBolumSayisi, 6);
+      expect(ornek.tamamlananBolumSayisi, 2);
+      expect(ornek.yuzde, 33);
+      expect(ornek.siradakiBolum?.ad, 'Hemodinamik Bozukluklar, Tromboz ve Şok');
+      expect(ornek.toplamNotSayisi, 1);
+
+      // Tekrar çağrılırsa mükerrer eklemez
+      await depo.ornekKitapYukle();
+      expect(depo.kitaplar.length, 1);
+    });
   });
 }

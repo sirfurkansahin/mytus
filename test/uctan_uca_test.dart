@@ -320,37 +320,38 @@ void main() {
     await tester.tap(find.text('Kütüphane'));
     await tester.pumpAndSettle();
     expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
-    expect(find.text('Kütüphaneniz Henüz Boş'), findsOneWidget);
+    expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
 
     await tester.tap(find.text('Kitap Ekle'));
     await tester.pumpAndSettle();
     expect(find.text('Kütüphaneye Kitap Ekle'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField).first, 'Patoloji Konu Kitabı');
+    await tester.enterText(find.byType(TextField).first, 'Dahiliye Konu Kitabı');
     await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byType(TextField).at(2),
-      'Hücre Hasarı (s. 1-30)\nİltihap (s. 31-60)',
+      'Gastroenteroloji (s. 1-30)\nHematoloji (s. 31-60)',
     );
     await tester.pumpAndSettle();
 
     await tester.tap(find.textContaining('Kaydet'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Patoloji Konu Kitabı'), findsOneWidget);
-    expect(find.textContaining('Sırada: Hücre Hasarı'), findsOneWidget);
-    expect(depo.kitaplar.length, 1);
+    expect(find.text('Dahiliye Konu Kitabı'), findsOneWidget);
+    expect(find.textContaining('Sırada: Gastroenteroloji'), findsOneWidget);
+    expect(depo.kitaplar.length, 2);
 
-    await tester.tap(find.text('Patoloji Konu Kitabı'));
+    await tester.tap(find.text('Dahiliye Konu Kitabı'));
     await tester.pumpAndSettle();
     expect(find.text('BÖLÜMLER (2)'), findsOneWidget);
 
     await tester.tap(find.text('Çalıştım ✓'));
     await tester.pumpAndSettle();
 
-    expect(depo.kitaplar.first.tamamlananBolumSayisi, 1);
-    expect(depo.kitaplar.first.yuzde, 50);
+    final dahiliye = depo.kitaplar.firstWhere((k) => k.ad == 'Dahiliye Konu Kitabı');
+    expect(dahiliye.tamamlananBolumSayisi, 1);
+    expect(dahiliye.yuzde, 50);
 
     // Bölüm notları ekranını aç ve yeni not ekle
     await tester.tap(find.byTooltip('Bölüm Notları').first);

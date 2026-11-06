@@ -1,31 +1,29 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 6 Kasım 2026, Kütüphane Bölüm Notları ve Fotoğraf Ekleme özelliği eklendi (dal `model2/kutuphane-modulu`).
+Son guncelleme: 6 Kasım 2026, Kütüphaneye örnek TUSDATA Patoloji Konu Kitabı ve tek dokunuşla yükleme desteği eklendi (dal `model2/kutuphane-modulu`).
 
 ## Durum
-Kullanıcı direktifleri doğrultusunda Kütüphane modülüne bölüm notları alanı ve fotoğraf desteği eklendi:
-- **Bölüm Notları (`lib/features/kutuphane/bolum_notlari_ekrani.dart`):**
-  - Her bölümün içine birden fazla not kartı eklenebilir.
-  - İsteğe bağlı fotoğraf (kamera/galeri) + bilgi girişi/metin alanı. Sadece fotoğraf veya sadece metin de eklenebilir.
-  - Kartlarda fotoğraf önizlemesi, metin, eklenme tarihi, düzenleme ve silme butonları.
-  - `TamEkranResimEkrani`: Fotoğrafa dokunulduğunda tam ekran açılır ve iki parmakla serbest yakınlaştırma/uzaklaştırma (pinch-to-zoom) yapılabilir (`InteractiveViewer`).
-- **Resim Seçici Soyutlaması (`lib/features/kutuphane/resim_secici.dart`):**
-  - `ResimSecici` arayüzü, `CihazResimSecici` (`image_picker` ile kamera/galeri) ve `SahteResimSecici` (testler için sıfır bağımlılık).
-- **Veri Modelleri & Depo:**
-  - `BolumNotu`: id, metin, resimBase64, olusturmaTarihi.
-  - `KitapBolumu`: notlar listesi, `notSayisi`, `notVar`.
-  - `PlanDeposu`: `kitapBolumNotuEkle`, `kitapBolumNotuGuncelle`, `kitapBolumNotuSil`.
-- **Arayüz Entegrasyonu:**
-  - Bölüm kartlarında not rozeti (`📝 1 not`) ve doğrudan notları açan buton/dokunma alanı.
-  - "SIRADAKİ ÇALIŞILACAK BÖLÜM" odak kartında hızlı not butonu.
-  - Kütüphane genel kartında toplam not sayısı gösterimi.
-- **Testler ve CI Durumu:**
-  - `test/kutuphane_test.dart`: Model serileştirme ve depo not CRUD testleri.
-  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: Bölüm notları açma, metin girme, kaydetme, rozet görünüm ve uçtan uca responsive testleri.
-  - GitHub Actions CI üzerinde hem **APK derleme** (`42257411036`) hem de **Web/iPhone PWA dağıtımı** (`42257411076`) 0 hata ile yeşil geçti (`completed success`).
+Kullanıcı direktifleri doğrultusunda Kütüphane modülüne hazır ve zengin bir örnek kitap eklendi:
+- **Örnek Kitap İçeriği (`lib/features/kutuphane/modeller.dart`):**
+  - "TUSDATA Patoloji Konu Kitabı" (6 bölüm, toplam 260 sayfa).
+  - 1. Bölüm: Hücre Hasarı ve Adaptasyon Mekanizmaları (s. 1–36) [Tamamlandı ✓]
+  - 2. Bölüm: Akut ve Kronik İltihap (s. 37–72) [Tamamlandı ✓]
+  - 3. Bölüm: Hemodinamik Bozukluklar, Tromboz ve Şok (s. 73–108) [Sırada çalışılacak]
+  - 4. Bölüm: İmmün Sistem Hastalıkları ve Amiloidoz (s. 109–154) [1 Adet Klinik Spot Notlu: Tip 2 Aşırı Duyarlılık Goodpasture tuzağı]
+  - 5. Bölüm: Neoplazi ve Onkogenez (s. 155–215)
+  - 6. Bölüm: Genetik ve Pediyatrik Hastalıklar (s. 216–260)
+- **Depo ve Karşılama Entegrasyonu (`lib/features/dersler/plan_deposu.dart`):**
+  - İlk kurulumda (`karsilamayiTamamla`) ve eski veri yükseltmesinde (`_yukle`) kütüphaneye otomatik eklenir.
+  - `ornekKitapYukle()` metodu: mükerrer eklemeyi engeller, listeye ekler ve kaydeder.
+- **Arayüz Entegrasyonu (`lib/features/kutuphane/kutuphane_ekrani.dart`):**
+  - Kütüphane AppBar menüsünde `PopupMenuButton` ile "Örnek Kitap Yükle" aksiyonu.
+  - Kütüphane tamamen boşaldığında karşılama kartında "Örnek Kitap Yükle" butonu.
+- **Testler ve Doğrulama:**
+  - `test/kutuphane_test.dart`: `ornekKitapUret ve ornekKitapYukle kütüphaneye hazır kitap ekler` birim testi.
+  - `test/widget_test.dart` ve `test/uctan_uca_test.dart`: Başlangıçta örnek kitabın varlığı, bölümlerin listelenmesi, tamamlanma yüzdesi ve yeni kitap ekleme akışları.
 
 ## Siradaki adim
-- F.T. time modülü üzerinde yapılacak düzenlemeler ve yeni özellikler için kullanıcı direktifleri beklenecek.
+- Kullanıcının yeni direktifleri veya F.T. time modülü üzerinde yapılacak düzenlemeler.
 
 ## Bilinen sorunlar / riskler
 - Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.

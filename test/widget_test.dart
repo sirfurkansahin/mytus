@@ -629,7 +629,7 @@ void rehberTestleri() {
 
 
 void kutuphaneTestleri() {
-  testWidgets('Kütüphane sekmesi açılır, boş ekran ve kitap ekleme penceresi görünür',
+  testWidgets('Kütüphane sekmesi açılır, örnek kitap ve kitap ekleme penceresi görünür',
       (tester) async {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
@@ -642,7 +642,7 @@ void kutuphaneTestleri() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
-    expect(find.text('Kütüphaneniz Henüz Boş'), findsOneWidget);
+    expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
 
     await tester.tap(find.text('Kitap Ekle'));
     await tester.pumpAndSettle();

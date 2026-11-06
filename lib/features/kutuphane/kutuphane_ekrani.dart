@@ -38,6 +38,32 @@ class KutuphaneEkrani extends StatelessWidget {
               );
             },
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (val) {
+              if (val == 'ornek') {
+                depo.ornekKitapYukle();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Örnek Patoloji kitabı kütüphaneye yüklendi.'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'ornek',
+                child: Row(
+                  children: [
+                    Icon(Icons.auto_stories_outlined, size: 20),
+                    SizedBox(width: 8),
+                    Text('Örnek Kitap Yükle'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -193,15 +219,35 @@ class KutuphaneEkrani extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (_) => const KitapEkleDialogu(),
-                          );
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('İlk Kitabını Ekle'),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 10,
+                        runSpacing: 8,
+                        children: [
+                          FilledButton.icon(
+                            onPressed: () {
+                              depo.ornekKitapYukle();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Örnek Patoloji kitabı kütüphaneye yüklendi.'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.auto_stories_outlined),
+                            label: const Text('Örnek Kitap Yükle'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              showDialog<void>(
+                                context: context,
+                                builder: (_) => const KitapEkleDialogu(),
+                              );
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text('İlk Kitabını Ekle'),
+                          ),
+                        ],
                       ),
                     ],
                   ),

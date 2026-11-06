@@ -143,3 +143,4 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Fotoğraf Görüntüleme & Zoom | Eklenen fotoğrafa dokunulduğunda tam ekran açılır ve iki parmakla yakınlaştırma (pinch-to-zoom) yapılabilir (`InteractiveViewer`). |
 | Veri & Optimizasyon | Fotoğraflar okunabilirlik korunarak optimize edilir ve yerel JSON içinde Base64 olarak saklanır; böylece harici dosya kaybı riski olmadan yedeklenebilir. |
 | Test Soyutlaması | `ResimSecici` soyut arayüzü sayesinde testler `SahteResimSecici` ile çalışır; platform/kamera bağımlılığı testleri etkilemez. |
+| Örnek Kitap Desteği | İlk kurulumda veya kütüphane boşken/menüden tek dokunuşla yüklenebilen zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, 2 tamamlanmış bölüm ve örnek klinik not). |
