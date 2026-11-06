@@ -327,7 +327,10 @@ void ftTestleri() {
     await tester.pumpAndSettle();
     expect(depo.turSayisi, 3);
 
-    await tester.tap(find.text('Çalışma süresi'));
+    final calismaFinder = find.byWidgetPredicate((w) => w is Text && w.data != null && w.data!.endsWith('resi') && w.data!.length < 20);
+    await tester.scrollUntilVisible(calismaFinder, 100);
+    await tester.pumpAndSettle();
+    await tester.tap(calismaFinder);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), '40');
     await tester.tap(find.text('Kaydet'));
