@@ -123,3 +123,4 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Grup motivasyonu (Surum 2) | Iki secenek de olacak: haftalik siralama VE ortak haftalik hedef. Kullanici hangisini gorecegini secebilir. |
 | Gunluk limit | Iki sinir birlikte: gunde en fazla 4 YENI konu + en fazla 10 TEKRAR. (Eski "10 tekrar/gun" karari yeni konu siniriyla tamamlandi.) |
 | Bildirim sorunu | Planlamanin DISINDA. Kullanici ozel bir zamanda kendisi ilgilenecek. Yeni gorevlerde bu soruna bagimlilik kurulmaz. Sorun HANDOFF > Bilinen sorunlar'da kalir. |
+| Hata kodu esleme (S5) | Kullanici karari devretti (6 Kasim 2026), model karar verdi: A ve D -> Bilgi, B -> Yanlis biliyordum, C, E, F -> Dikkat-Sure. Neden: D (mantik/halka hatasi) neden-sonuc zincirinde eksik bilgiden kaynaklanir; dikkat veya sure sorunu degildir. Eski kayitlar silinmez, yalnizca gosterimde eslenir. |
