@@ -1,0 +1,119 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: kullanicilar
+// Document ID: {uid} (matches Firebase Auth UID)
+// Fields:
+//   - takmaAd: string (optional, <= 120 chars) - User display nickname
+//   - eposta: string (optional, <= 254 chars) - User email address (PII, owner-only)
+//   - kvkkOnayTarihi: timestamp or ISO string (optional, <= 64 chars) - KVKK consent timestamp
+//   - guncellemeZamani: timestamp, ISO string, or int (optional) - Last update timestamp
+//   - olusturmaZamani: timestamp, ISO string, or int (optional) - Account creation timestamp
+//
+// Subcollection: kullanicilar/{uid}/bolumler
+// Document ID: {bolumId} (<= 64 chars, e.g. 'plan', 'denemeler', 'defterler', 'kutuphane', 'ayarlar', 'odak')
+// Fields:
+//   - veri: string (required, <= 900,000 chars) - Serialized JSON data for the study section
+//   - guncellemeZamani: timestamp, ISO string, or int (optional) - Section update timestamp
+//   - surum: int, number, or string (optional, <= 32 chars) - Schema/data version
+//   - cihazId: string (optional, <= 128 chars) - Originating device identifier
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    function isValidOptionalTimestampOrString(field) {
+      return !(field in request.resource.data) ||
+             request.resource.data[field] is timestamp ||
+             request.resource.data[field] is int ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() <= 64);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidKullanici(data) {
+      return hasOnlyAllowedFields([
+               'takmaAd',
+               'eposta',
+               'kvkkOnayTarihi',
+               'guncellemeZamani',
+               'olusturmaZamani'
+             ]) &&
+             isValidOptionalString('takmaAd', 0, 120) &&
+             isValidOptionalString('eposta', 0, 254) &&
+             isValidOptionalTimestampOrString('kvkkOnayTarihi') &&
+             isValidOptionalTimestampOrString('guncellemeZamani') &&
+             isValidOptionalTimestampOrString('olusturmaZamani');
+    }
+
+    function isValidBolum(data, bolumId) {
+      return bolumId.size() >= 1 &&
+             bolumId.size() <= 64 &&
+             hasOnlyAllowedFields([
+               'veri',
+               'guncellemeZamani',
+               'surum',
+               'cihazId'
+             ]) &&
+             ('veri' in data) &&
+             data.veri is string &&
+             data.veri.size() <= 900000 &&
+             isValidOptionalTimestampOrString('guncellemeZamani') &&
+             (!('surum' in data) ||
+              data.surum is int ||
+              data.surum is float ||
+              (data.surum is string && data.surum.size() <= 32)) &&
+             isValidOptionalString('cihazId', 0, 128);
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /kullanicilar/{uid} {
+      allow get, list: if isOwner(uid);
+      allow create, update: if isOwner(uid) && isValidKullanici(request.resource.data);
+      allow delete: if isOwner(uid);
+
+      match /bolumler/{bolumId} {
+        allow get, list, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidBolum(request.resource.data, bolumId);
+      }
+    }
+
+    // Default deny on all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
