@@ -163,9 +163,9 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 | Giris yontemi | E-posta + sifre (Firebase Authentication). Profilde ayrica takma ad. Kullanici adiyla giris YOK. |
 | Sifre sifirlama | E-posta ile sifirlama baglantisi. |
 | Google girisi | Ilk asamada YOK, ileride eklenebilir. |
-| Fotograflar | Ilk asamada yalnizca cihazda kalir, buluta gitmez. Kalici bulut cozumu ileride aranacak. |
+| Fotograflar | Ilk asamada yalnizca cihazda kalir, buluta gitmez. Cikis yapildiginda fotograflar silinmez; cihazda o hesaba ozel alanda saklanir ve ayni hesapla tekrar girildiginde geri gelir. |
 | Firebase yapilandirmasi | Depoya yazilmaz; GitHub Actions gizli degiskenlerinde (Secrets) tutulur, derlemede `--dart-define` ile eklenir. |
-| Cikis yapinca | Cihazdaki veri silinir (bulutta durur). Gonderilemeyen degisiklik varsa once uyari verilir. |
+| Cikis yapinca | Cihazdaki calisma verisi silinir (bulutta durur), fotograflar hesaba ozel alanda korunur. Gonderilemeyen degisiklik varsa once uyari verilir. |
 | Bulut verisi | Firestore: `kullanicilar/{uid}` altinda bolumlere ayrilmis belgeler. Herkes yalnizca kendi verisini okur/yazar (guvenlik kurallari). |
 | Ilk giriste yerel veri | Cihazda veri var, bulut bos: buluta aktarilir. Ikisinde de varsa kullaniciya sorulur; secilmeyen taraf cihazda yedek olarak saklanir. |
 | Cakisma kurali | Bolum bazinda en son degistiren kazanir. |
