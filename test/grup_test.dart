@@ -206,8 +206,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Çalışma Grubu & Puan'), findsOneWidget);
+      expect(find.text('TUS Çalışma Grubu'), findsOneWidget);
+      expect(find.text('Davet Koduyla Katıl'), findsOneWidget);
       expect(find.text('Gruba Katıl'), findsOneWidget);
-      expect(find.text('Yeni Grup Oluştur'), findsOneWidget);
     });
   });
 }
