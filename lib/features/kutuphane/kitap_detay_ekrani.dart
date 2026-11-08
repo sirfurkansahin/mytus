@@ -103,6 +103,78 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
     );
   }
 
+  void _klasorDegistirDialogu(PlanDeposu depo, Kitap kitap) {
+    final denetci = TextEditingController(text: kitap.klasorAdi ?? '');
+    final mevcutKlasorler = depo.kitapKlasorleri;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Klasöre Taşı / Değiştir'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: denetci,
+                decoration: const InputDecoration(
+                  labelText: 'Klasör / Grup Adı',
+                  hintText: 'Örn: SpeeTUS (5. Baskı), Soru Bankaları',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.folder_outlined),
+                ),
+              ),
+              if (mevcutKlasorler.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                const Text(
+                  'Mevcut klasörlerden seç:',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    for (final kl in mevcutKlasorler)
+                      ActionChip(
+                        avatar: const Icon(Icons.folder_open, size: 15),
+                        label: Text(kl, style: const TextStyle(fontSize: 12)),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () {
+                          setDialogState(() => denetci.text = kl);
+                        },
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            if (kitap.klasoruVar)
+              TextButton(
+                onPressed: () {
+                  depo.kitapKlasoruDegistir(kitap.id, null);
+                  Navigator.of(ctx).pop();
+                },
+                child: const Text('Klasörden Çıkar'),
+              ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Vazgeç'),
+            ),
+            FilledButton(
+              onPressed: () {
+                depo.kitapKlasoruDegistir(kitap.id, denetci.text);
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Kaydet'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _kitapSilOnayi(PlanDeposu depo, Kitap kitap) {
     showDialog<void>(
       context: context,
@@ -174,9 +246,20 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
           ),
           PopupMenuButton<String>(
             onSelected: (val) {
+              if (val == 'klasor') _klasorDegistirDialogu(depo, kitap);
               if (val == 'sil') _kitapSilOnayi(depo, kitap);
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'klasor',
+                child: Row(
+                  children: [
+                    Icon(Icons.create_new_folder_outlined, size: 18),
+                    SizedBox(width: 8),
+                    Text('Klasöre Taşı / Değiştir'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'sil',
                 child: Row(
@@ -226,6 +309,39 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                           ),
                         ),
                       ),
+                      if (kitap.klasoruVar) ...[
+                        const SizedBox(width: 6),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () => _klasorDegistirDialogu(depo, kitap),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: tema.colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.folder_outlined,
+                                  size: 13,
+                                  color: tema.colorScheme.onSecondaryContainer,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  kitap.klasorAdi!,
+                                  style: TextStyle(
+                                    color: tema.colorScheme.onSecondaryContainer,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       if (kitap.toplamSayfa != null) ...[
                         const SizedBox(width: 8),
                         Expanded(

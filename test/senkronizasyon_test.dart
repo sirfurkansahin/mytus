@@ -158,5 +158,51 @@ void main() {
         expect(depoB.tumDersler.map((d) => d.ad), contains('Dahiliye'));
       },
     );
+
+    test(
+      'Kütüphane kitap klasörleme: klasör atama, yeniden adlandırma ve dağıtma çalışır',
+      () async {
+        final depo = PlanDeposu(
+          kayit: BellekKaydi(),
+          kayitGecikmesi: Duration.zero,
+        );
+        await depo.yukle();
+
+        await depo.kitapEkle(
+          Kitap(
+            id: 'k1',
+            ad: 'SpeeTUS Anatomi',
+            klasorAdi: 'SpeeTUS (5. Baskı)',
+            eklenmeTarihi: DateTime(2026, 11, 8),
+          ),
+        );
+        await depo.kitapEkle(
+          Kitap(
+            id: 'k2',
+            ad: 'SpeeTUS Fizyoloji',
+            eklenmeTarihi: DateTime(2026, 11, 8),
+          ),
+        );
+
+        expect(depo.kitapKlasorleri, ['SpeeTUS (5. Baskı)']);
+        expect(depo.kitapBul('k1')?.klasorEtiketi, 'SpeeTUS (5. Baskı)');
+        expect(depo.kitapBul('k2')?.klasorEtiketi, 'Diğer Kitaplar');
+
+        // k2 kitabını da aynı klasöre taşı.
+        await depo.kitapKlasoruDegistir('k2', 'SpeeTUS (5. Baskı)');
+        expect(depo.kitapBul('k2')?.klasorAdi, 'SpeeTUS (5. Baskı)');
+
+        // Klasörü yeniden adlandır.
+        await depo.klasorYenidenAdlandir('SpeeTUS (5. Baskı)', 'SpeeTUS Serisi');
+        expect(depo.kitapKlasorleri, ['SpeeTUS Serisi']);
+        expect(depo.kitapBul('k1')?.klasorAdi, 'SpeeTUS Serisi');
+        expect(depo.kitapBul('k2')?.klasorAdi, 'SpeeTUS Serisi');
+
+        // Klasörü dağıt (kitaplar silinmez, sadece klasörsüz olur).
+        await depo.klasorYenidenAdlandir('SpeeTUS Serisi', null);
+        expect(depo.kitapKlasorleri, isEmpty);
+        expect(depo.kitapBul('k1')?.klasoruVar, isFalse);
+      },
+    );
   });
 }

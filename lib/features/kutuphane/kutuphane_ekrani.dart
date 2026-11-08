@@ -4,20 +4,222 @@ import 'package:app/features/kutuphane/kitap_ekle_dialogu.dart';
 import 'package:app/features/kutuphane/modeller.dart';
 import 'package:flutter/material.dart';
 
-/// Kütüphane Modülü Ana Ekranı (Sürüm 1).
-/// Kitaplarım, genel tamamlama oranı ve içindekiler takibi.
-class KutuphaneEkrani extends StatelessWidget {
+/// Kütüphane Modülü Ana Ekranı:
+/// Klasörleme / gruplandırma, klasör filtre çipleri, genel tamamlama oranı ve içindekiler takibi.
+class KutuphaneEkrani extends StatefulWidget {
   const KutuphaneEkrani({super.key});
+
+  @override
+  State<KutuphaneEkrani> createState() => _KutuphaneEkraniState();
+}
+
+class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
+  static const String _tumuEtiketi = '__TUMU__';
+  static const String _digerEtiketi = 'Diğer Kitaplar';
+
+  String _seciliKlasor = _tumuEtiketi;
+  final Set<String> _kapaliKlasorler = {};
+
+  void _yeniKlasorOlusturDialogu(PlanDeposu depo) {
+    final adDenetci = TextEditingController();
+    final seciliKitapIdleri = <String>{};
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final tumKitaplar = depo.kitaplar;
+          return AlertDialog(
+            title: const Text('Klasör Oluştur / Kitapları Grupla'),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460, maxHeight: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: adDenetci,
+                    decoration: const InputDecoration(
+                      labelText: 'Klasör Adı *',
+                      hintText: 'Örn: SpeeTUS (5. Baskı), Soru Bankaları',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.create_new_folder_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Bu klasöre eklenecek kitapları seç:',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 6),
+                  if (tumKitaplar.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'Henüz kitap yok. Klasör adını yazıp yeni kitap ekleyebilirsin.',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    )
+                  else
+                    Flexible(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(ctx).colorScheme.outlineVariant,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: tumKitaplar.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (_, i) {
+                            final k = tumKitaplar[i];
+                            final secili = seciliKitapIdleri.contains(k.id);
+                            return CheckboxListTile(
+                              dense: true,
+                              value: secili,
+                              title: Text(
+                                k.ad,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: k.klasoruVar
+                                  ? Text(
+                                      'Mevcut klasör: ${k.klasorAdi}',
+                                      style: const TextStyle(fontSize: 11),
+                                    )
+                                  : null,
+                              onChanged: (v) {
+                                setDialogState(() {
+                                  if (v == true) {
+                                    seciliKitapIdleri.add(k.id);
+                                  } else {
+                                    seciliKitapIdleri.remove(k.id);
+                                  }
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Vazgeç'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final klasorAdi = adDenetci.text.trim();
+                  if (klasorAdi.isEmpty) return;
+                  if (seciliKitapIdleri.isEmpty && tumKitaplar.isEmpty) {
+                    Navigator.of(ctx).pop();
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) =>
+                          KitapEkleDialogu(varsayilanKlasor: klasorAdi),
+                    );
+                    return;
+                  }
+                  for (final id in seciliKitapIdleri) {
+                    await depo.kitapKlasoruDegistir(id, klasorAdi);
+                  }
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                  setState(() => _seciliKlasor = klasorAdi);
+                },
+                child: const Text('Kaydet'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _klasorYonetimDialogu(PlanDeposu depo, String klasorAdi) {
+    final denetci = TextEditingController(text: klasorAdi);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Klasörü Düzenle'),
+        content: TextField(
+          controller: denetci,
+          decoration: const InputDecoration(
+            labelText: 'Klasör Adı',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.folder_outlined),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await depo.klasorYenidenAdlandir(klasorAdi, null);
+              if (ctx.mounted) Navigator.of(ctx).pop();
+              if (_seciliKlasor == klasorAdi) {
+                setState(() => _seciliKlasor = _tumuEtiketi);
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            child: const Text('Klasörü Dağıt (Kitaplar Silinmez)'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final yeni = denetci.text.trim();
+              if (yeni.isNotEmpty && yeni != klasorAdi) {
+                await depo.klasorYenidenAdlandir(klasorAdi, yeni);
+                if (_seciliKlasor == klasorAdi) {
+                  setState(() => _seciliKlasor = yeni);
+                }
+              }
+              if (ctx.mounted) Navigator.of(ctx).pop();
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
     final kitaplar = depo.kitaplar;
+    final klasorler = depo.kitapKlasorleri;
+    final digerKitaplar = kitaplar.where((k) => !k.klasoruVar).toList();
+    final klasorlemeAktif = klasorler.isNotEmpty;
 
-    final toplamKitap = kitaplar.length;
-    final toplamBolum = kitaplar.fold<int>(0, (top, k) => top + k.toplamBolumSayisi);
-    final bitenBolum = kitaplar.fold<int>(0, (top, k) => top + k.tamamlananBolumSayisi);
+    // Seçili klasör artık mevcut değilse 'Tümü'ne dön.
+    final gecerliSecim = (_seciliKlasor == _tumuEtiketi ||
+            klasorler.contains(_seciliKlasor) ||
+            (_seciliKlasor == _digerEtiketi && digerKitaplar.isNotEmpty))
+        ? _seciliKlasor
+        : _tumuEtiketi;
+
+    // Üst özet kartı seçili klasöre (veya tümüne) göre hesaplanır.
+    final ozetKitaplar = gecerliSecim == _tumuEtiketi
+        ? kitaplar
+        : (gecerliSecim == _digerEtiketi
+            ? digerKitaplar
+            : kitaplar.where((k) => k.klasorAdi?.trim() == gecerliSecim).toList());
+
+    final toplamKitap = ozetKitaplar.length;
+    final toplamBolum =
+        ozetKitaplar.fold<int>(0, (top, k) => top + k.toplamBolumSayisi);
+    final bitenBolum =
+        ozetKitaplar.fold<int>(0, (top, k) => top + k.tamamlananBolumSayisi);
     final genelOran = toplamBolum > 0 ? (bitenBolum / toplamBolum) : 0.0;
     final genelYuzde = (genelOran * 100).round();
 
@@ -29,29 +231,52 @@ class KutuphaneEkrani extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            tooltip: 'Klasör Oluştur / Grupla',
+            icon: const Icon(Icons.create_new_folder_outlined),
+            onPressed: () => _yeniKlasorOlusturDialogu(depo),
+          ),
+          IconButton(
             tooltip: 'Yeni Kitap Ekle',
             icon: const Icon(Icons.add_circle_outline),
             onPressed: () {
               showDialog<void>(
                 context: context,
-                builder: (_) => const KitapEkleDialogu(),
+                builder: (_) => KitapEkleDialogu(
+                  varsayilanKlasor: gecerliSecim != _tumuEtiketi &&
+                          gecerliSecim != _digerEtiketi
+                      ? gecerliSecim
+                      : null,
+                ),
               );
             },
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (val) {
-              if (val == 'ornek') {
+              if (val == 'klasor') {
+                _yeniKlasorOlusturDialogu(depo);
+              } else if (val == 'ornek') {
                 depo.ornekKitapYukle();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Örnek Patoloji kitabı kütüphaneye yüklendi.'),
+                    content:
+                        Text('Örnek Patoloji kitabı kütüphaneye yüklendi.'),
                     duration: Duration(seconds: 2),
                   ),
                 );
               }
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'klasor',
+                child: Row(
+                  children: [
+                    Icon(Icons.create_new_folder_outlined, size: 20),
+                    SizedBox(width: 8),
+                    Text('Klasör Oluştur / Kitapları Grupla'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'ornek',
                 child: Row(
@@ -70,7 +295,12 @@ class KutuphaneEkrani extends StatelessWidget {
         onPressed: () {
           showDialog<void>(
             context: context,
-            builder: (_) => const KitapEkleDialogu(),
+            builder: (_) => KitapEkleDialogu(
+              varsayilanKlasor:
+                  gecerliSecim != _tumuEtiketi && gecerliSecim != _digerEtiketi
+                      ? gecerliSecim
+                      : null,
+            ),
           );
         },
         icon: const Icon(Icons.menu_book_outlined),
@@ -97,14 +327,18 @@ class KutuphaneEkrani extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.local_library_outlined,
+                        gecerliSecim == _tumuEtiketi
+                            ? Icons.local_library_outlined
+                            : Icons.folder_special_outlined,
                         color: tema.colorScheme.primary,
                         size: 22,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Kütüphane İlerlemesi',
+                          gecerliSecim == _tumuEtiketi
+                              ? 'Kütüphane İlerlemesi'
+                              : gecerliSecim,
                           style: tema.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                           ),
@@ -127,9 +361,12 @@ class KutuphaneEkrani extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: genelOran,
                       minHeight: 8,
-                      backgroundColor: tema.colorScheme.primary.withValues(alpha: 0.15),
+                      backgroundColor:
+                          tema.colorScheme.primary.withValues(alpha: 0.15),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        genelYuzde == 100 ? Colors.teal : tema.colorScheme.primary,
+                        genelYuzde == 100
+                            ? Colors.teal
+                            : tema.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -163,24 +400,62 @@ class KutuphaneEkrani extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
-
-          // Kitap Listesi Başlığı
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'KİTAPLARIM ($toplamKitap)',
-                style: tema.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: tema.colorScheme.primary,
-                  letterSpacing: 0.8,
+          // Klasör Filtre Çipleri
+          if (kitaplar.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ChoiceChip(
+                  avatar: const Icon(Icons.apps, size: 16),
+                  label: Text(
+                    'Tümü (${kitaplar.length})',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  selected: gecerliSecim == _tumuEtiketi,
+                  visualDensity: VisualDensity.compact,
+                  onSelected: (_) =>
+                      setState(() => _seciliKlasor = _tumuEtiketi),
                 ),
-              ),
-            ],
-          ),
+                for (final kl in klasorler)
+                  ChoiceChip(
+                    avatar: const Icon(Icons.folder_outlined, size: 16),
+                    label: Text(
+                      '$kl (${kitaplar.where((k) => k.klasorAdi?.trim() == kl).length})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    selected: gecerliSecim == kl,
+                    visualDensity: VisualDensity.compact,
+                    onSelected: (_) => setState(() => _seciliKlasor = kl),
+                  ),
+                if (klasorlemeAktif && digerKitaplar.isNotEmpty)
+                  ChoiceChip(
+                    avatar: const Icon(Icons.library_books_outlined, size: 16),
+                    label: Text(
+                      '$_digerEtiketi (${digerKitaplar.length})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    selected: gecerliSecim == _digerEtiketi,
+                    visualDensity: VisualDensity.compact,
+                    onSelected: (_) =>
+                        setState(() => _seciliKlasor = _digerEtiketi),
+                  ),
+                ActionChip(
+                  avatar: const Icon(Icons.create_new_folder_outlined, size: 16),
+                  label: const Text(
+                    '+ Klasör',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _yeniKlasorOlusturDialogu(depo),
+                ),
+              ],
+            ),
+          ],
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
 
           if (kitaplar.isEmpty) ...[
             const SizedBox(height: 30),
@@ -206,7 +481,8 @@ class KutuphaneEkrani extends StatelessWidget {
                       const SizedBox(height: 12),
                       const Text(
                         'Kütüphaneniz Henüz Boş',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                        style:
+                            TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -229,7 +505,9 @@ class KutuphaneEkrani extends StatelessWidget {
                               depo.ornekKitapYukle();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Örnek Patoloji kitabı kütüphaneye yüklendi.'),
+                                  content: Text(
+                                    'Örnek Patoloji kitabı kütüphaneye yüklendi.',
+                                  ),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
@@ -254,14 +532,174 @@ class KutuphaneEkrani extends StatelessWidget {
                 ),
               ),
             ),
+          ] else if (gecerliSecim == _tumuEtiketi && klasorlemeAktif) ...[
+            // Klasörler halinde açılır/kapanır görünüm
+            for (final kl in klasorler) ...[
+              _KlasorBolumu(
+                klasorAdi: kl,
+                kitaplar: kitaplar
+                    .where((k) => k.klasorAdi?.trim() == kl)
+                    .toList(),
+                acikMi: !_kapaliKlasorler.contains(kl),
+                onBaslikTikla: () {
+                  setState(() {
+                    if (_kapaliKlasorler.contains(kl)) {
+                      _kapaliKlasorler.remove(kl);
+                    } else {
+                      _kapaliKlasorler.add(kl);
+                    }
+                  });
+                },
+                onDuzenle: () => _klasorYonetimDialogu(depo, kl),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (digerKitaplar.isNotEmpty)
+              _KlasorBolumu(
+                klasorAdi: _digerEtiketi,
+                kitaplar: digerKitaplar,
+                acikMi: !_kapaliKlasorler.contains(_digerEtiketi),
+                onBaslikTikla: () {
+                  setState(() {
+                    if (_kapaliKlasorler.contains(_digerEtiketi)) {
+                      _kapaliKlasorler.remove(_digerEtiketi);
+                    } else {
+                      _kapaliKlasorler.add(_digerEtiketi);
+                    }
+                  });
+                },
+              ),
           ] else ...[
-            for (final k in kitaplar) ...[
+            // Tekil klasör seçiliyse veya hiç klasör yoksa düz liste
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    gecerliSecim == _tumuEtiketi
+                        ? 'KİTAPLARIM (${ozetKitaplar.length})'
+                        : '${gecerliSecim.toUpperCase()} (${ozetKitaplar.length})',
+                    style: tema.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: tema.colorScheme.primary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+                if (gecerliSecim != _tumuEtiketi &&
+                    gecerliSecim != _digerEtiketi)
+                  TextButton.icon(
+                    onPressed: () => _klasorYonetimDialogu(depo, gecerliSecim),
+                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    label: const Text('Klasörü Düzenle'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            for (final k in ozetKitaplar) ...[
               _KitapKarti(kitap: k),
               const SizedBox(height: 10),
             ],
           ],
         ],
       ),
+    );
+  }
+}
+
+class _KlasorBolumu extends StatelessWidget {
+  const _KlasorBolumu({
+    required this.klasorAdi,
+    required this.kitaplar,
+    required this.acikMi,
+    required this.onBaslikTikla,
+    this.onDuzenle,
+  });
+
+  final String klasorAdi;
+  final List<Kitap> kitaplar;
+  final bool acikMi;
+  final VoidCallback onBaslikTikla;
+  final VoidCallback? onDuzenle;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final toplamBolum =
+        kitaplar.fold<int>(0, (top, k) => top + k.toplamBolumSayisi);
+    final bitenBolum =
+        kitaplar.fold<int>(0, (top, k) => top + k.tamamlananBolumSayisi);
+    final yuzde =
+        toplamBolum > 0 ? ((bitenBolum / toplamBolum) * 100).round() : 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onBaslikTikla,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: tema.colorScheme.outlineVariant.withValues(alpha: 0.6),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  acikMi ? Icons.folder_open_rounded : Icons.folder_rounded,
+                  color: tema.colorScheme.primary,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        klasorAdi,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        '${kitaplar.length} kitap · $bitenBolum/$toplamBolum bölüm (%$yuzde)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: tema.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (onDuzenle != null)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Klasörü Düzenle',
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: onDuzenle,
+                  ),
+                Icon(
+                  acikMi ? Icons.expand_less : Icons.expand_more,
+                  color: tema.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (acikMi) ...[
+          const SizedBox(height: 8),
+          for (final k in kitaplar) ...[
+            _KitapKarti(kitap: k),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ],
     );
   }
 }
@@ -344,7 +782,10 @@ class _KitapKarti extends StatelessWidget {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: tema.colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(4),
@@ -358,6 +799,25 @@ class _KitapKarti extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            if (kitap.klasoruVar)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: tema.colorScheme.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '📁 ${kitap.klasorAdi}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: tema.colorScheme.onSecondaryContainer,
+                                  ),
+                                ),
+                              ),
                             if (kitap.toplamSayfa != null)
                               Text(
                                 '${kitap.toplamSayfa} sayfa',
@@ -409,7 +869,8 @@ class _KitapKarti extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: kitap.ilerlemeOrani,
                   minHeight: 5,
-                  backgroundColor: tema.colorScheme.primary.withValues(alpha: 0.1),
+                  backgroundColor:
+                      tema.colorScheme.primary.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation<Color>(
                     bitti ? Colors.teal : tema.colorScheme.primary,
                   ),

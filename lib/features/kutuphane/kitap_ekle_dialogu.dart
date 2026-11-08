@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 /// Yeni kitap ekleme diyaloğu (tek tek veya toplu içindekiler yapıştırma).
 class KitapEkleDialogu extends StatefulWidget {
-  const KitapEkleDialogu({super.key});
+  const KitapEkleDialogu({super.key, this.varsayilanKlasor});
+
+  final String? varsayilanKlasor;
 
   @override
   State<KitapEkleDialogu> createState() => _KitapEkleDialoguState();
@@ -12,6 +14,7 @@ class KitapEkleDialogu extends StatefulWidget {
 
 class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
   final _adDenetci = TextEditingController();
+  late final TextEditingController _klasorDenetci;
   final _sayfaDenetci = TextEditingController();
   final _topluMetinDenetci = TextEditingController();
 
@@ -26,8 +29,15 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
   int _girisTuru = 0; // 0: Toplu Yapıştır, 1: Tek Tek Ekle
 
   @override
+  void initState() {
+    super.initState();
+    _klasorDenetci = TextEditingController(text: widget.varsayilanKlasor ?? '');
+  }
+
+  @override
   void dispose() {
     _adDenetci.dispose();
+    _klasorDenetci.dispose();
     _sayfaDenetci.dispose();
     _topluMetinDenetci.dispose();
     _tekBolumAdDenetci.dispose();
@@ -76,12 +86,14 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
     }
 
     final toplamSayfa = int.tryParse(_sayfaDenetci.text.trim());
+    final klasor = _klasorDenetci.text.trim();
 
     final yeniKitap = Kitap(
       id: 'k_${DateTime.now().microsecondsSinceEpoch}',
       ad: ad,
       dersId: _seciliDersId,
       dersAdi: _seciliDersAdi ?? 'Genel',
+      klasorAdi: klasor.isEmpty ? null : klasor,
       toplamSayfa: toplamSayfa,
       eklenmeTarihi: DateTime.now(),
       bolumler: bolumler,
@@ -144,6 +156,35 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
                         prefixIcon: Icon(Icons.book_outlined),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _klasorDenetci,
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'Klasör / Grup (isteğe bağlı)',
+                        hintText: 'Örn: SpeeTUS (5. Baskı), Soru Bankaları',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.folder_outlined),
+                      ),
+                    ),
+                    if (depo.kitapKlasorleri.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          for (final kl in depo.kitapKlasorleri)
+                            ActionChip(
+                              avatar: const Icon(Icons.folder_open, size: 15),
+                              label: Text(kl, style: const TextStyle(fontSize: 12)),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                setState(() => _klasorDenetci.text = kl);
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     Row(
                       children: [

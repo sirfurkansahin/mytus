@@ -1245,6 +1245,50 @@ class PlanDeposu extends ChangeNotifier {
 
   List<Kitap> get kitaplar => List.unmodifiable(_kitaplar);
 
+  /// Mevcut kitaplarda tanımlı olan benzersiz klasör adlarını sırasıyla döner.
+  List<String> get kitapKlasorleri {
+    final gorulen = <String>{};
+    final sonuc = <String>[];
+    for (final k in _kitaplar) {
+      final ad = k.klasorAdi?.trim();
+      if (ad != null && ad.isNotEmpty && gorulen.add(ad)) {
+        sonuc.add(ad);
+      }
+    }
+    return sonuc;
+  }
+
+  /// Tek bir kitabın klasörünü değiştirir (null veya boş ise klasörden çıkarır).
+  Future<void> kitapKlasoruDegistir(String kitapId, String? yeniKlasor) async {
+    final idx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (idx == -1) return;
+    final temiz = yeniKlasor?.trim();
+    _kitaplar[idx] = (temiz == null || temiz.isEmpty)
+        ? _kitaplar[idx].kopya(klasoruTemizle: true)
+        : _kitaplar[idx].kopya(klasorAdi: temiz);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Bir klasörün adını tüm kitaplarda yeniden adlandırır veya klasörü kaldırır.
+  Future<void> klasorYenidenAdlandir(String eskiAd, String? yeniAd) async {
+    final temizEski = eskiAd.trim();
+    final temizYeni = yeniAd?.trim();
+    var degistiMi = false;
+    for (var i = 0; i < _kitaplar.length; i++) {
+      if (_kitaplar[i].klasorAdi?.trim() == temizEski) {
+        _kitaplar[i] = (temizYeni == null || temizYeni.isEmpty)
+            ? _kitaplar[i].kopya(klasoruTemizle: true)
+            : _kitaplar[i].kopya(klasorAdi: temizYeni);
+        degistiMi = true;
+      }
+    }
+    if (degistiMi) {
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
   Kitap? kitapBul(String id) {
     for (final k in _kitaplar) {
       if (k.id == id) return k;

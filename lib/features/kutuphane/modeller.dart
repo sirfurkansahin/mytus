@@ -145,6 +145,7 @@ class Kitap {
     required this.ad,
     this.dersId,
     this.dersAdi,
+    this.klasorAdi,
     this.toplamSayfa,
     required this.eklenmeTarihi,
     this.bolumler = const [],
@@ -154,9 +155,18 @@ class Kitap {
   final String ad;
   final int? dersId;
   final String? dersAdi;
+  final String? klasorAdi;
   final int? toplamSayfa;
   final DateTime eklenmeTarihi;
   final List<KitapBolumu> bolumler;
+
+  /// Klasör atanmamışsa 'Diğer Kitaplar' etiketi döner.
+  String get klasorEtiketi {
+    final temiz = klasorAdi?.trim();
+    return (temiz != null && temiz.isNotEmpty) ? temiz : 'Diğer Kitaplar';
+  }
+
+  bool get klasoruVar => klasorAdi != null && klasorAdi!.trim().isNotEmpty;
 
   int get toplamBolumSayisi => bolumler.length;
 
@@ -189,6 +199,8 @@ class Kitap {
     String? ad,
     int? dersId,
     String? dersAdi,
+    String? klasorAdi,
+    bool klasoruTemizle = false,
     int? toplamSayfa,
     DateTime? eklenmeTarihi,
     List<KitapBolumu>? bolumler,
@@ -198,6 +210,7 @@ class Kitap {
       ad: ad ?? this.ad,
       dersId: dersId ?? this.dersId,
       dersAdi: dersAdi ?? this.dersAdi,
+      klasorAdi: klasoruTemizle ? null : (klasorAdi ?? this.klasorAdi),
       toplamSayfa: toplamSayfa ?? this.toplamSayfa,
       eklenmeTarihi: eklenmeTarihi ?? this.eklenmeTarihi,
       bolumler: bolumler ?? this.bolumler,
@@ -209,6 +222,8 @@ class Kitap {
         'ad': ad,
         if (dersId != null) 'dersId': dersId,
         if (dersAdi != null) 'dersAdi': dersAdi,
+        if (klasorAdi != null && klasorAdi!.trim().isNotEmpty)
+          'klasorAdi': klasorAdi!.trim(),
         if (toplamSayfa != null) 'toplamSayfa': toplamSayfa,
         'eklenmeTarihi': eklenmeTarihi.toIso8601String(),
         'bolumler': [for (final b in bolumler) b.toJson()],
@@ -216,11 +231,15 @@ class Kitap {
 
   factory Kitap.fromJson(Map<String, dynamic> json) {
     final rawBolumler = json['bolumler'] as List<dynamic>? ?? [];
+    final hamKlasor = json['klasorAdi'] as String?;
     return Kitap(
       id: json['id'] as String? ?? '',
       ad: json['ad'] as String? ?? '',
       dersId: json['dersId'] as int?,
       dersAdi: json['dersAdi'] as String?,
+      klasorAdi: (hamKlasor != null && hamKlasor.trim().isNotEmpty)
+          ? hamKlasor.trim()
+          : null,
       toplamSayfa: json['toplamSayfa'] as int?,
       eklenmeTarihi: json['eklenmeTarihi'] != null
           ? DateTime.tryParse(json['eklenmeTarihi'] as String) ?? DateTime.now()
