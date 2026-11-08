@@ -1,23 +1,42 @@
 import 'package:app/app/ana_iskelet.dart';
+import 'package:app/core/firebase_ayarlari.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/auth/giris_ekrani.dart';
+import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/karsilama/karsilama_ekrani.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
-  runApp(const MyTusApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  KimlikServisi? kimlikServisi;
+  if (FirebaseAyarlari.yapilandirildiMi) {
+    try {
+      await Firebase.initializeApp(options: FirebaseAyarlari.webSecenekleri);
+      kimlikServisi = FirebaseKimlikServisi();
+    } catch (_) {
+      kimlikServisi = null;
+    }
+  }
+  runApp(MyTusApp(kimlikServisi: kimlikServisi));
 }
 
 class MyTusApp extends StatefulWidget {
-  /// [deposu] ve [ftNative] yalnızca testler içindir; verilmezse telefondaki dosya
-  /// ve gerçek Android köprüsü kullanılır.
-  const MyTusApp({super.key, this.deposu, this.ftNative = const FtNative()});
+  /// [deposu], [ftNative] ve [kimlikServisi] testlerde dışarıdan verilebilir.
+  const MyTusApp({
+    super.key,
+    this.deposu,
+    this.ftNative = const FtNative(),
+    this.kimlikServisi,
+  });
 
   final PlanDeposu? deposu;
   final FtNative ftNative;
+  final KimlikServisi? kimlikServisi;
 
   @override
   State<MyTusApp> createState() => _MyTusAppState();
@@ -82,10 +101,17 @@ class _MyTusAppState extends State<MyTusApp> {
           locale: const Locale('tr', 'TR'),
           supportedLocales: const [Locale('tr', 'TR')],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          builder: (context, child) => DepoKapsami(
-            deposu: _deposu,
-            child: child ?? const SizedBox.shrink(),
-          ),
+          builder: (context, child) {
+            Widget icerik = DepoKapsami(
+              deposu: _deposu,
+              child: child ?? const SizedBox.shrink(),
+            );
+            final kimlik = widget.kimlikServisi;
+            if (kimlik != null) {
+              icerik = KimlikKapsami(servis: kimlik, child: icerik);
+            }
+            return icerik;
+          },
           home: _AcilisKapisi(ftNative: widget.ftNative),
         );
       },
@@ -93,7 +119,8 @@ class _MyTusAppState extends State<MyTusApp> {
   }
 }
 
-/// Verinin durumuna göre doğru ekranı açar: yükleniyor, hata, karşılama veya ana ekran.
+/// Verinin ve oturumun durumuna göre doğru ekranı açar:
+/// yükleniyor, giriş ekranı (oturum yoksa), hata, karşılama veya ana ekran.
 class _AcilisKapisi extends StatelessWidget {
   const _AcilisKapisi({required this.ftNative});
 
@@ -101,6 +128,16 @@ class _AcilisKapisi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kimlik = KimlikKapsami.belki(context);
+    if (kimlik != null) {
+      if (!kimlik.hazirMi) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+      if (kimlik.aktifKullanici == null) {
+        return const GirisEkrani();
+      }
+    }
+
     final depo = DepoKapsami.of(context);
     switch (depo.durum) {
       case YuklemeDurumu.yukleniyor:

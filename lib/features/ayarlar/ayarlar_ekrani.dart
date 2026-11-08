@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
+import 'package:app/features/auth/hesap_karti.dart';
+import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
 import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
@@ -178,6 +180,10 @@ class AyarlarEkrani extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
         children: [
+          if (KimlikKapsami.belki(context)?.aktifKullanici != null) ...[
+            _baslik(context, 'HESAP VE BULUT'),
+            const HesapKarti(),
+          ],
           _baslik(context, 'PLAN'),
           AyarSatiri(
             baslik: 'Sınav tarihi',

@@ -1,4 +1,9 @@
+import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
+import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ft_time/ft_native.dart';
+import 'package:app/main.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -73,5 +78,58 @@ void main() {
         contains('hatalı'),
       );
     });
+
+    testWidgets(
+      'oturum yokken GirisEkrani açılır, kayıt olunca uygulamaya geçer',
+      (tester) async {
+        final depo = PlanDeposu(kayit: BellekKaydi());
+        await depo.yukle();
+        final kimlik = SahteKimlikServisi();
+
+        await tester.pumpWidget(
+          MyTusApp(
+            deposu: depo,
+            ftNative: const SahteNative(),
+            kimlikServisi: kimlik,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Başlangıçta giriş ekranı görünür.
+        expect(find.text('Hesabına Giriş Yap'), findsOneWidget);
+
+        // Kayıt Ol sekmesine geç.
+        await tester.tap(find.text('Kayıt Ol'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const ValueKey('giris_takma_ad')),
+          'Dr. Furkan',
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('giris_eposta')),
+          'furkan@mytus.com',
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('giris_sifre')),
+          '123456',
+        );
+
+        // KVKK onayını işaretlemeden gönderince uyarı verir.
+        await tester.tap(find.byKey(const ValueKey('giris_onay_butonu')));
+        await tester.pumpAndSettle();
+        expect(find.textContaining('KVKK'), findsWidgets);
+
+        // KVKK kutusunu işaretle ve kayıt ol.
+        await tester.tap(find.byKey(const ValueKey('giris_kvkk_onay')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('giris_onay_butonu')));
+        await tester.pumpAndSettle();
+
+        // Oturum açıldı, Karşılama ekranına geçildi.
+        expect(kimlik.aktifKullanici?.eposta, 'furkan@mytus.com');
+        expect(find.text('Çalışma planını kuralım'), findsOneWidget);
+      },
+    );
   });
 }

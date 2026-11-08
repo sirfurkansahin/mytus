@@ -348,3 +348,24 @@ class SahteKimlikServisi extends KimlikServisi {
     notifyListeners();
   }
 }
+
+/// Ekranların [KimlikServisi]'ne ulaşmasını sağlar; oturum değişince ekranlar yenilenir.
+class KimlikKapsami extends InheritedNotifier<KimlikServisi> {
+  const KimlikKapsami({
+    super.key,
+    required KimlikServisi servis,
+    required super.child,
+  }) : super(notifier: servis);
+
+  static KimlikServisi? belki(BuildContext context) {
+    final kapsam = context.dependOnInheritedWidgetOfExactType<KimlikKapsami>();
+    return kapsam?.notifier;
+  }
+
+  static KimlikServisi of(BuildContext context) {
+    final kapsam = context.dependOnInheritedWidgetOfExactType<KimlikKapsami>();
+    assert(kapsam != null, 'KimlikKapsami bulunamadı');
+    return kapsam!.notifier!;
+  }
+}
+
