@@ -40,6 +40,7 @@ class PlanDeposu extends ChangeNotifier {
   bool kayitHatasi = false;
 
   DateTime? sinavTarihi;
+  String? aktifGrupId;
   bool karsilamaTamam = false;
   MufredatTuru mufredatTuru = MufredatTuru.speetus;
   TemaSecimi temaSecimi = TemaSecimi.sistem;
@@ -154,6 +155,7 @@ class PlanDeposu extends ChangeNotifier {
 
       final tarih = veri['sinavTarihi'];
       sinavTarihi = tarih is String ? tarihCoz(tarih) : null;
+      aktifGrupId = veri['aktifGrupId'] as String?;
       karsilamaTamam = veri['karsilamaTamam'] == true;
       final temaAdi = veri['temaSecimi'];
       temaSecimi = TemaSecimi.values.firstWhere(
@@ -330,6 +332,7 @@ class PlanDeposu extends ChangeNotifier {
         'sonId': _sonId,
         'karsilamaTamam': karsilamaTamam,
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
+        'aktifGrupId': aktifGrupId,
         'temaSecimi': temaSecimi.name,
         'mufredatTuru': mufredatTuru.name,
         'dersler': [for (final d in _dersler) d.toJson()],
@@ -830,6 +833,7 @@ class PlanDeposu extends ChangeNotifier {
     _hedefYatisSaati = '23:30';
     _hedefKalkisSaati = '07:30';
     sinavTarihi = resmiSinavTarihi;
+    aktifGrupId = null;
     karsilamaTamam = false;
     turSayisi = 3;
     gunlukTekrarSiniri = 10;
@@ -921,6 +925,42 @@ class PlanDeposu extends ChangeNotifier {
   int puanHafta(DateTime gun) {
     final bas = gunEkle(gunBasi(gun), -(gun.weekday - 1));
     return puanAraligi(bas, gunEkle(bas, 7));
+  }
+
+  /// Aktif çalışma grubu kimliğini ayarlar ve kaydeder.
+  void aktifGrupAyarla(String? grupId) {
+    if (aktifGrupId == grupId) return;
+    aktifGrupId = grupId;
+    _degisti();
+  }
+
+  /// Grup Puanlama Modeli (Seçenek C: Konu ve Soru Modeli):
+  /// Pazartesi başlangıçlı o hafta tamamlanan konu sayısı.
+  int haftalikTamamlananKonuSayisi(DateTime gun) {
+    final bas = haftaBasi(gun);
+    final son = gunEkle(bas, 7);
+    var sayi = 0;
+    for (final c in tumCalismalar()) {
+      if (c.tamam && !c.tarih.isBefore(bas) && c.tarih.isBefore(son)) {
+        sayi++;
+      }
+    }
+    return sayi;
+  }
+
+  /// Pazartesi başlangıçlı o hafta çözülen toplam soru sayısı.
+  int haftalikCozulenSoruSayisi(DateTime gun) {
+    final bas = haftaBasi(gun);
+    var toplam = 0;
+    for (var i = 0; i < 7; i++) {
+      toplam += soruSayisiGun(gunEkle(bas, i));
+    }
+    return toplam;
+  }
+
+  /// Haftalık Grup Puanı = (10 * Konu) + (1 * Soru).
+  int haftalikGrupPuani(DateTime gun) {
+    return (haftalikTamamlananKonuSayisi(gun) * 10) + haftalikCozulenSoruSayisi(gun);
   }
 
   /// Odak sonrası "Çalıştım" onayı: konunun bekleyen en erken yerleştirmesini
