@@ -22,7 +22,8 @@ Kullanıcı talebi doğrultusunda Frontend Tasarım Araştırma Raporu ve Uygula
   - Mevcut testlerin tüm buton tooltip'leri (`Çalıştım`, `Ayarlar`, `İlerleme`, vb.) ve arama metinleri (`Bugünün planı`, `Sınava...`) %100 korundu.
 
 ## Siradaki adim
-- Kullanıcı onayıyla dalı (`claude/frontend-tasarim-uygulama`) GitHub'a gönderip Actions'ta derleme ve canlı yayına alma (`https://sirfurkansahin.github.io/mytus/`).
+- Frontend tasarım iyileştirmeleri başarıyla derlendi, tüm testlerden geçti ve GitHub Pages üzerinde canlıya alındı (`https://sirfurkansahin.github.io/mytus/`).
+- Çoklu cihazda canlı kullanım ve arayüz ergonomisi geri bildirimlerinin alınması.
 
 ## Bilinen sorunlar / riskler
 - Kütüphane fotoğrafları kullanıcı kararıyla ilk aşamada yalnızca eklendiği cihazda hesaba özel olarak saklanır; başka cihazdan girildiğinde not metinleri görünür.
