@@ -117,14 +117,22 @@ void main() {
         );
 
         // KVKK onayını işaretlemeden gönderince uyarı verir.
-        await tester.tap(find.byKey(const ValueKey('giris_onay_butonu')));
+        final onayButonu = find.byKey(const ValueKey('giris_onay_butonu'));
+        await tester.ensureVisible(onayButonu);
+        await tester.pumpAndSettle();
+        await tester.tap(onayButonu);
         await tester.pumpAndSettle();
         expect(find.textContaining('KVKK'), findsWidgets);
 
         // KVKK kutusunu işaretle ve kayıt ol.
-        await tester.tap(find.byKey(const ValueKey('giris_kvkk_onay')));
+        final kvkkKutusu = find.byKey(const ValueKey('giris_kvkk_onay'));
+        await tester.ensureVisible(kvkkKutusu);
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const ValueKey('giris_onay_butonu')));
+        await tester.tap(kvkkKutusu);
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(onayButonu);
+        await tester.pumpAndSettle();
+        await tester.tap(onayButonu);
         await tester.pumpAndSettle();
 
         // Oturum açıldı, Karşılama ekranına geçildi.
