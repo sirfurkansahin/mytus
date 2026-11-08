@@ -1,10 +1,10 @@
-import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/auth/kimlik_servisi.dart';
+import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/grup/grup_ekrani.dart';
 import 'package:app/features/grup/grup_servisi.dart';
 import 'package:app/features/grup/modeller.dart';
-import 'package:app/features/auth/kimlik_servisi.dart';
-import 'package:app/features/grup/grup_ekrani.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,14 +23,14 @@ void main() {
     });
 
     test('GrupUyesi puan hesabı (Seçenek C: 1 Konu = 10 Puan, 1 Soru = 1 Puan)', () {
-      const u = GrupUyesi(
+      final u = GrupUyesi(
         uid: 'user1',
         takmaAd: 'Dr. Ahmet',
         haftaBaslangici: '2026-11-02',
         konuSayisi: 3,
         soruSayisi: 85,
         sonDers: 'Farmakoloji',
-        guncellemeTarihi: null ?? DateTime(2026, 11, 8),
+        guncellemeTarihi: DateTime(2026, 11, 8),
       );
 
       // (3 * 10) + 85 = 115
@@ -147,12 +147,12 @@ void main() {
 
   group('PlanDeposu Haftalık Grup Puanı ve Konu/Soru Entegrasyonu', () {
     test('Haftalık tamamlanan konu ve çözülen soru doğru puanlanır', () async {
-      final kayit = const BellekKaydi();
+      final kayit = BellekKaydi();
       final depo = PlanDeposu(kayit: kayit);
       await depo.yukle();
 
       final bugun = DateTime.now();
-      final ders = depo.dersEkle('Farmakoloji', null)!;
+      final ders = depo.dersEkle('Farmakoloji', DersGrubu.temel)!;
       final k1 = depo.konuEkle(ders.id, 'Antibiyotikler')!;
       final k2 = depo.konuEkle(ders.id, 'Otonom')!;
 
@@ -175,9 +175,11 @@ void main() {
       depo.aktifGrupAyarla('grup_test_123');
       expect(depo.aktifGrupId, 'grup_test_123');
     });
+  });
 
+  group('GrupEkrani Widget Testleri', () {
     testWidgets('GrupEkrani boş durum ve arayüz elemanları görüntülenir', (tester) async {
-      final kayit = const BellekKaydi();
+      final kayit = BellekKaydi();
       final depo = PlanDeposu(kayit: kayit);
       await depo.yukle();
 
@@ -194,7 +196,7 @@ void main() {
         KimlikKapsami(
           servis: kimlik,
           child: DepoKapsami(
-            depo: depo,
+            deposu: depo,
             child: MaterialApp(
               home: GrupEkrani(servis: servis),
             ),
@@ -203,7 +205,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Çalışma Grubu & Puan Tablosu'), findsOneWidget);
+      expect(find.text('Çalışma Grubu & Puan'), findsOneWidget);
       expect(find.text('Gruba Katıl'), findsOneWidget);
       expect(find.text('Yeni Grup Oluştur'), findsOneWidget);
     });

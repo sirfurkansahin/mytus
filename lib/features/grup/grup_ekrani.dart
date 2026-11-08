@@ -1,5 +1,4 @@
 import 'package:app/core/renkler.dart';
-import 'package:app/core/tarih.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/grup/grup_servisi.dart';
@@ -211,7 +210,6 @@ class _GrupEkraniState extends State<GrupEkrani> {
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
-    final tema = Theme.of(context);
     final kimlik = KimlikKapsami.belki(context);
     final uid = kimlik?.aktifKullanici?.uid ?? 'yerel_kullanici';
     final takmaAd = kimlik?.aktifKullanici?.takmaAd ?? 'Meslektaşımız';
