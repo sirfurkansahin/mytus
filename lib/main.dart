@@ -119,18 +119,57 @@ class _MyTusAppState extends State<MyTusApp> {
           // Ana renk mor (onaylı tasarım). Tema kullanıcı tercihini veya telefonun ayarını izler.
           theme: ThemeData(
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: morAna).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: morAna,
+              surface: acikZemin,
+            ).copyWith(
               primary: morAna,
               onPrimary: Colors.white,
             ),
             scaffoldBackgroundColor: acikZemin,
+            cardTheme: CardTheme(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+              ),
+              color: Colors.white,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              height: 64,
+              elevation: 0,
+              indicatorColor: morAna.withValues(alpha: 0.12),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.padded,
           ),
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: morAna,
               brightness: Brightness.dark,
+              surface: koyuZemin,
+            ).copyWith(
+              primary: const Color(0xFF9D8DF1),
+              onPrimary: Colors.white,
             ),
+            scaffoldBackgroundColor: koyuZemin,
+            cardTheme: CardTheme(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+              color: koyuKartYuzeyi,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              height: 64,
+              elevation: 0,
+              backgroundColor: koyuZemin,
+              indicatorColor: morAna.withValues(alpha: 0.3),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.padded,
           ),
           themeMode: _temaModu(_deposu.temaSecimi),
           locale: const Locale('tr', 'TR'),
