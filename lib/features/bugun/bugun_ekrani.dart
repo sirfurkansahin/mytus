@@ -486,13 +486,13 @@ class BugunEkrani extends StatelessWidget {
                       )
                     else if (siradakiTekrar != null)
                       FilledButton.tonalIcon(
-                        onPressed: () => depo.tekrarYap(
+                        onPressed: () => depo.tekrarYapildi(
                           siradakiTekrar.calismaId,
-                          siradakiTekrar.tekrarNo,
+                          siradakiTekrar.no,
                           bugun,
                         ),
                         icon: const Icon(Icons.refresh_rounded, size: 20),
-                        label: Text('R${siradakiTekrar.tekrarNo} Tekrarını Tamamla'),
+                        label: Text('R${siradakiTekrar.no} Tekrarını Tamamla'),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size.fromHeight(44),
                           shape: RoundedRectangleBorder(

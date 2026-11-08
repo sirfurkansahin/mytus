@@ -127,7 +127,7 @@ class _MyTusAppState extends State<MyTusApp> {
               onPrimary: Colors.white,
             ),
             scaffoldBackgroundColor: acikZemin,
-            cardTheme: CardTheme(
+            cardTheme: CardThemeData(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -154,7 +154,7 @@ class _MyTusAppState extends State<MyTusApp> {
               onPrimary: Colors.white,
             ),
             scaffoldBackgroundColor: koyuZemin,
-            cardTheme: CardTheme(
+            cardTheme: CardThemeData(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
