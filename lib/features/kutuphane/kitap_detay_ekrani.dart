@@ -594,10 +594,18 @@ class _BolumKarti extends StatelessWidget {
       child: ListTile(
         onTap: onNotlar,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        leading: Checkbox(
-          value: tamam,
-          activeColor: Colors.teal,
-          onChanged: (val) => onDegisti(val ?? false),
+        leading: SizedBox(
+          width: 44,
+          height: 44,
+          child: Center(
+            child: Checkbox(
+              value: tamam,
+              activeColor: Colors.teal,
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              onChanged: (val) => onDegisti(val ?? false),
+            ),
+          ),
         ),
         title: Text(
           bolum.ad,
@@ -624,18 +632,26 @@ class _BolumKarti extends StatelessWidget {
                     ),
                   if (bolum.notVar)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
                         color: tema.colorScheme.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.edit_note, size: 13, color: tema.colorScheme.primary),
-                          const SizedBox(width: 2),
+                          Icon(
+                            bolum.notlar.any((n) => n.resimVar)
+                                ? Icons.photo_camera_outlined
+                                : Icons.edit_note,
+                            size: 13,
+                            color: tema.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 3),
                           Text(
-                            '${bolum.notSayisi} not',
+                            bolum.notlar.any((n) => n.resimVar)
+                                ? '${bolum.notSayisi} not 📷'
+                                : '${bolum.notSayisi} not',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
