@@ -1,9 +1,9 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 8 Kasım 2026, Kullanıcı Girişi (Firebase Auth) ve Bulut Eşitlemesi (Cloud Firestore) entegre edildi (dal `claude/hesap-bulut`).
+Son guncelleme: 8 Kasım 2026, SpeeTUS video anlatım süreleri ve kütüphane klasörlendirme özelliği eklendi (dal `claude/hesap-bulut`).
 
 ## Durum
-Kullanıcı kararı doğrultusunda MY TUS Web Mobil (PWA) uygulamasına kullanıcı hesabı ve bulut eşitleme altyapısı eklendi:
+Kullanıcı kararı doğrultusunda MY TUS Web Mobil (PWA) uygulamasına kullanıcı hesabı, bulut eşitleme altyapısı, kütüphane klasörlendirme ve SpeeTUS video anlatım süreleri eklendi:
 - **Firebase Altyapısı ve Güvenlik (`mytus-3527d`):**
   - `MY TUS Web` uygulaması oluşturuldu, E-posta/Şifre girişi etkinleştirildi ve `sirfurkansahin.github.io` yetkili alan adlarına eklendi.
   - Cloud Firestore (`eur3` - Avrupa) veritabanı ve yalnızca kullanıcının kendi verisini (`kullanicilar/{uid}`) okuyup yazabildiği `firestore.rules` kuralları canlıya alındı.
@@ -15,6 +15,11 @@ Kullanıcı kararı doğrultusunda MY TUS Web Mobil (PWA) uygulamasına kullanı
 - **Çevrimdışı Öncelikli Bulut Eşitleme (`lib/features/senkronizasyon/`):**
   - `BolumAyirici`: Veriyi 1 MB sınırına takılmaması için 6 mantıksal bölüme (`ayarlar`, `plan`, `odak`, `denemeler`, `defterler`, `kutuphane`) ayırır; kütüphane fotoğraflarını buluta göndermeyip cihazda hesaba özel (`mytus_photos_{uid}`) saklar.
   - `BulutSenkronServisi`: Her değişikliği önce yerel hafızaya yazar, yalnızca değişen bölümleri Firestore'a eşitler, ilk girişte mevcut yerel verileri yeni bulut hesabına aktarır (göç) ve başka cihazlardan gelen güncellemeleri anında uygular.
+- **Kütüphane Klasörlendirme (`lib/features/kutuphane/`):**
+  - `KaynakKitap` modeline `klasorAdi` alanı eklendi; Kütüphane ekranında klasör filtre çipleri ve açılır/kapanır klasör grupları oluşturuldu.
+- **Dersler ve Video Anlatım Süreleri (`lib/features/dersler/`):**
+  - `speetusDersler` listesi 19 kategori ve 266 ayrı video konusu (branş, video numarası, konu adı ve `00:55:01` biçiminde video süresiyle) olarak güncellendi.
+  - `speetusDersSureleri` ile her ders paketinin toplam video sayısı ve süresi (`19 video • 13 saat` vb.) Dersler ve Ders Detay ekranlarında gösterildi.
 - **Testler:**
   - `test/kimlik_servisi_test.dart` ve `test/senkronizasyon_test.dart` eklendi; mevcut testlerin (`MyTusApp(deposu: ...)`) geriye dönük uyumluluğu korundu.
 

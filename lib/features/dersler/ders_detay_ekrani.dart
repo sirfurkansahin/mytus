@@ -1,4 +1,5 @@
 import 'package:app/features/dersler/dialoglar.dart';
+import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/konu_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +84,7 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
       // Ders silindi (sayfa kapanırken kısa süre görünür).
       return Scaffold(appBar: AppBar());
     }
+    final dersSuresi = speetusDersSureleri[ders.ad];
     final tumKonular = depo.konular(ders.id);
     final calisilanSayisi =
         tumKonular.where((k) => depo.konuCalisildi(k.id)).length;
@@ -144,6 +146,7 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   ChoiceChip(
                     label: Text('Tümü (${tumKonular.length})'),
@@ -162,6 +165,12 @@ class _DersDetayEkraniState extends State<DersDetayEkrani> {
                     onSelected: (_) =>
                         setState(() => _filtre = _KonuFiltre.calisilan),
                   ),
+                  if (dersSuresi != null)
+                    Chip(
+                      avatar: const Icon(Icons.play_circle_outline, size: 16),
+                      label: Text(dersSuresi),
+                      visualDensity: VisualDensity.compact,
+                    ),
                 ],
               ),
             ),
