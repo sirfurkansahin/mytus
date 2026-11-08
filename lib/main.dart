@@ -7,6 +7,8 @@ import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/karsilama/karsilama_ekrani.dart';
+import 'package:app/features/senkronizasyon/bulut_kaynagi.dart';
+import 'package:app/features/senkronizasyon/bulut_senkron_servisi.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -14,29 +16,42 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   KimlikServisi? kimlikServisi;
+  BulutSenkronServisi? senkronServisi;
   if (FirebaseAyarlari.yapilandirildiMi) {
     try {
       await Firebase.initializeApp(options: FirebaseAyarlari.webSecenekleri);
       kimlikServisi = FirebaseKimlikServisi();
+      senkronServisi = BulutSenkronServisi(
+        yerelKayit: const DosyaKaydi(),
+        bulutKaynagi: FirestoreBulutKaynagi(),
+      );
     } catch (_) {
       kimlikServisi = null;
+      senkronServisi = null;
     }
   }
-  runApp(MyTusApp(kimlikServisi: kimlikServisi));
+  runApp(
+    MyTusApp(
+      kimlikServisi: kimlikServisi,
+      senkronServisi: senkronServisi,
+    ),
+  );
 }
 
 class MyTusApp extends StatefulWidget {
-  /// [deposu], [ftNative] ve [kimlikServisi] testlerde dışarıdan verilebilir.
+  /// [deposu], [ftNative], [kimlikServisi] ve [senkronServisi] testlerde dışarıdan verilebilir.
   const MyTusApp({
     super.key,
     this.deposu,
     this.ftNative = const FtNative(),
     this.kimlikServisi,
+    this.senkronServisi,
   });
 
   final PlanDeposu? deposu;
   final FtNative ftNative;
   final KimlikServisi? kimlikServisi;
+  final BulutSenkronServisi? senkronServisi;
 
   @override
   State<MyTusApp> createState() => _MyTusAppState();
@@ -44,18 +59,38 @@ class MyTusApp extends StatefulWidget {
 
 class _MyTusAppState extends State<MyTusApp> {
   late final PlanDeposu _deposu;
+  String? _sonOturumUid;
 
   @override
   void initState() {
     super.initState();
-    _deposu = widget.deposu ?? PlanDeposu(kayit: const DosyaKaydi());
+    final senkron = widget.senkronServisi;
+    _deposu = widget.deposu ??
+        PlanDeposu(kayit: senkron ?? const DosyaKaydi());
+    senkron?.depoBagla(_deposu);
     if (_deposu.durum == YuklemeDurumu.yukleniyor) {
       _deposu.yukle();
+    }
+    widget.kimlikServisi?.addListener(_oturumDegisti);
+    _oturumDegisti();
+  }
+
+  void _oturumDegisti() {
+    final kimlik = widget.kimlikServisi;
+    final senkron = widget.senkronServisi;
+    if (kimlik == null || senkron == null || !kimlik.hazirMi) return;
+    final aktif = kimlik.aktifKullanici;
+    if (aktif != null && aktif.uid != _sonOturumUid) {
+      _sonOturumUid = aktif.uid;
+      senkron.oturumAcildi(aktif);
+    } else if (aktif == null && _sonOturumUid != null) {
+      _sonOturumUid = null;
     }
   }
 
   @override
   void dispose() {
+    widget.kimlikServisi?.removeListener(_oturumDegisti);
     if (widget.deposu == null) {
       _deposu.dispose();
     }
@@ -106,6 +141,10 @@ class _MyTusAppState extends State<MyTusApp> {
               deposu: _deposu,
               child: child ?? const SizedBox.shrink(),
             );
+            final senkron = widget.senkronServisi;
+            if (senkron != null) {
+              icerik = SenkronKapsami(servis: senkron, child: icerik);
+            }
             final kimlik = widget.kimlikServisi;
             if (kimlik != null) {
               icerik = KimlikKapsami(servis: kimlik, child: icerik);

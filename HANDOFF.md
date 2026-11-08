@@ -1,27 +1,28 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 6 Kasım 2026, APK derlemesi kaldırıldı, Web Mobil Uygulama (PWA) mimarisine geçildi (dal `model2/web-mobil-gecis`).
+Son guncelleme: 8 Kasım 2026, Kullanıcı Girişi (Firebase Auth) ve Bulut Eşitlemesi (Cloud Firestore) entegre edildi (dal `claude/hesap-bulut`).
 
 ## Durum
-Kullanıcı kararı doğrultusunda projenin platform ve dağıtım stratejisi güncellendi:
-- **APK Derlemesi Kaldırıldı:**
-  - `.github/workflows/build-apk.yml` iş akışı silindi. Android APK derleme ve Firebase App Distribution adımları emekliye ayrıldı.
-  - Proje artık gereksiz Android derleme bekleme sürelerinden arındırıldı.
-- **Web Mobil Uygulama (PWA) Ana Mimarisi:**
-  - Tüm cihazlarda (iPhone iOS / Safari ve Android / Chrome) tam ekran, tarayıcı çubuğu olmadan yerel mobil uygulama gibi çalışır.
-  - Dağıtım ve canlı adres: `https://sirfurkansahin.github.io/mytus/`
-  - `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesini tek seferde çalıştırıp doğrudan yayına alır.
-- **Kütüphane Modülü & Örnek Kitap:**
-  - Zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, tamamlananlar ve klinik spot notuyla) aktif.
-  - Kütüphane kartlarında metin taşması engellendi (`Wrap`).
-- **Belgeler:**
-  - `AGENTS.md` ve `DECISIONS.md` Web Mobil odaklı olarak güncellendi.
+Kullanıcı kararı doğrultusunda MY TUS Web Mobil (PWA) uygulamasına kullanıcı hesabı ve bulut eşitleme altyapısı eklendi:
+- **Firebase Altyapısı ve Güvenlik (`mytus-3527d`):**
+  - `MY TUS Web` uygulaması oluşturuldu, E-posta/Şifre girişi etkinleştirildi ve `sirfurkansahin.github.io` yetkili alan adlarına eklendi.
+  - Cloud Firestore (`eur3` - Avrupa) veritabanı ve yalnızca kullanıcının kendi verisini (`kullanicilar/{uid}`) okuyup yazabildiği `firestore.rules` kuralları canlıya alındı.
+  - Firebase yapılandırma anahtarları GitHub Actions gizli değişkenlerine (`Secrets`) kaydedildi ve `.github/workflows/deploy-web.yml` içinde `--dart-define` ile bağlandı.
+- **Kimlik Doğrulama (`lib/features/auth/`):**
+  - `KimlikServisi`, `FirebaseKimlikServisi` ve testler için `SahteKimlikServisi` eklendi.
+  - İlk açılışta oturum yoksa `GirisEkrani` (Giriş Yap, Kayıt Ol + Takma Ad + KVKK onay kutusu, Şifremi Unuttum) açılır; girişten sonra oturum açık kalır.
+  - Ayarlar ekranına `HesapKarti` eklendi (oturum durumu, Çıkış Yap, KVKK Aydınlatma, Hesabımı ve Verilerimi Sil).
+- **Çevrimdışı Öncelikli Bulut Eşitleme (`lib/features/senkronizasyon/`):**
+  - `BolumAyirici`: Veriyi 1 MB sınırına takılmaması için 6 mantıksal bölüme (`ayarlar`, `plan`, `odak`, `denemeler`, `defterler`, `kutuphane`) ayırır; kütüphane fotoğraflarını buluta göndermeyip cihazda hesaba özel (`mytus_photos_{uid}`) saklar.
+  - `BulutSenkronServisi`: Her değişikliği önce yerel hafızaya yazar, yalnızca değişen bölümleri Firestore'a eşitler, ilk girişte mevcut yerel verileri yeni bulut hesabına aktarır (göç) ve başka cihazlardan gelen güncellemeleri anında uygular.
+- **Testler:**
+  - `test/kimlik_servisi_test.dart` ve `test/senkronizasyon_test.dart` eklendi; mevcut testlerin (`MyTusApp(deposu: ...)`) geriye dönük uyumluluğu korundu.
 
 ## Siradaki adim
-- F.T. time modülü üzerinde yapılacak düzenlemeler veya kullanıcının sıradaki istekleri.
+- Çoklu cihazda canlı kullanım geri bildirimleri veya ileride fotoğraflar için bulut depolama çözümü.
 
 ## Bilinen sorunlar / riskler
-- Bildirim sorunu (sayaç bitişinde sistem bildirimi) kullanıcının talebiyle kapsam dışı bırakılmıştır.
+- Kütüphane fotoğrafları kullanıcı kararıyla ilk aşamada yalnızca eklendiği cihazda hesaba özel olarak saklanır; başka cihazdan girildiğinde not metinleri görünür.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

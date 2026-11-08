@@ -10,6 +10,15 @@ abstract class VeriKaydi {
 
   /// Metni yazar (eskisinin yerine geçer).
   Future<void> yaz(String icerik);
+
+  /// İsteğe bağlı anahtarlı yerel okuma (ör. hesaba özel fotoğraflar veya yedekler).
+  Future<String?> anahtarliOku(String anahtar) async => null;
+
+  /// İsteğe bağlı anahtarlı yerel yazma.
+  Future<void> anahtarliYaz(String anahtar, String icerik) async {}
+
+  /// İsteğe bağlı anahtarlı yerel silme.
+  Future<void> anahtarliSil(String anahtar) async {}
 }
 
 /// Telefondaki dosyaya (Android tarafı: MainActivity.kt) veya tarayıcı yerel hafızasına (Web) yazar.
@@ -36,6 +45,28 @@ class DosyaKaydi implements VeriKaydi {
     }
     await _kanal.invokeMethod<Object>('write', {'content': icerik});
   }
+
+  @override
+  Future<String?> anahtarliOku(String anahtar) async {
+    if (kIsWeb) {
+      return webDepoOku(anahtar);
+    }
+    return null;
+  }
+
+  @override
+  Future<void> anahtarliYaz(String anahtar, String icerik) async {
+    if (kIsWeb) {
+      webDepoYaz(icerik, anahtar);
+    }
+  }
+
+  @override
+  Future<void> anahtarliSil(String anahtar) async {
+    if (kIsWeb) {
+      webDepoSil(anahtar);
+    }
+  }
 }
 
 /// Testler için bellekte tutan kayıt.
@@ -45,6 +76,7 @@ class BellekKaydi implements VeriKaydi {
   String? icerik;
   bool okumaHatasi;
   int yazmaSayisi = 0;
+  final Map<String, String> ekAnahtarlar = {};
 
   @override
   Future<String?> oku() async {
@@ -56,5 +88,18 @@ class BellekKaydi implements VeriKaydi {
   Future<void> yaz(String icerik) async {
     this.icerik = icerik;
     yazmaSayisi++;
+  }
+
+  @override
+  Future<String?> anahtarliOku(String anahtar) async => ekAnahtarlar[anahtar];
+
+  @override
+  Future<void> anahtarliYaz(String anahtar, String deger) async {
+    ekAnahtarlar[anahtar] = deger;
+  }
+
+  @override
+  Future<void> anahtarliSil(String anahtar) async {
+    ekAnahtarlar.remove(anahtar);
   }
 }

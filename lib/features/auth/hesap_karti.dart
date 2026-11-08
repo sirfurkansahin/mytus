@@ -2,6 +2,7 @@ import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/auth/kvkk_dialogu.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/senkronizasyon/bulut_senkron_servisi.dart';
 import 'package:flutter/material.dart';
 
 /// Ayarlar ekranında gösterilen Hesap ve Bulut yönetimi kartı.
@@ -15,18 +16,36 @@ class HesapKarti extends StatefulWidget {
 class _HesapKartiState extends State<HesapKarti> {
   bool _islemSuruyor = false;
 
+  String _durumEtiketi(SenkronDurumu? durum) {
+    switch (durum) {
+      case SenkronDurumu.gonderiliyor:
+        return 'Buluta eşitleniyor...';
+      case SenkronDurumu.bekleyenDegisiklikVar:
+        return 'Bekleyen değişiklikler var · Birkaç sn içinde eşitlenecek';
+      case SenkronDurumu.cevrimdisi:
+        return 'Çevrimdışı · İnternet gelince otomatik eşitlenecek';
+      case SenkronDurumu.esitlendi:
+      case null:
+        return 'Bulut eşitleme aktif · Tüm veriler güncel';
+    }
+  }
+
   Future<void> _cikisYap(
     BuildContext context,
     KimlikServisi kimlik,
     PlanDeposu depo,
+    BulutSenkronServisi? senkron,
   ) async {
+    final bekleyenUyarisi = (senkron != null && senkron.bekleyenVarMi)
+        ? '\n\n⚠️ Dikkat: Henüz buluta gönderilmemiş değişikliklerin var. İnternet bağlantın yoksa çıkış yapmadan önce bağlantını kontrol et.'
+        : '';
     final onay = await onayDialogu(
       context,
       baslik: 'Oturum kapatılsın mı?',
       metin:
           'Çalışma verilerin bulutta güvenle saklanıyor. Bu cihazdaki çalışma '
           'verileri temizlenecek, ancak eklediğin kitap fotoğrafları hesabına '
-          'özel olarak bu cihazda korunacak ve tekrar giriş yaptığında geri gelecek.',
+          'özel olarak bu cihazda korunacak ve tekrar giriş yaptığında geri gelecek.$bekleyenUyarisi',
       eylem: 'Çıkış Yap',
     );
     if (!onay || !context.mounted) return;
@@ -34,6 +53,11 @@ class _HesapKartiState extends State<HesapKarti> {
     setState(() => _islemSuruyor = true);
     try {
       await depo.hemenKaydet();
+      if (senkron != null) {
+        await senkron.oturumKapatildi(hesabiTamamenSil: false);
+      } else {
+        await depo.tumVerileriSifirla();
+      }
       await kimlik.cikisYap();
       if (!context.mounted) return;
       Navigator.of(context).popUntil((r) => r.isFirst);
@@ -46,6 +70,7 @@ class _HesapKartiState extends State<HesapKarti> {
     BuildContext context,
     KimlikServisi kimlik,
     PlanDeposu depo,
+    BulutSenkronServisi? senkron,
   ) async {
     final onay = await onayDialogu(
       context,
@@ -59,7 +84,11 @@ class _HesapKartiState extends State<HesapKarti> {
 
     setState(() => _islemSuruyor = true);
     try {
-      await depo.tumVerileriSifirla();
+      if (senkron != null) {
+        await senkron.oturumKapatildi(hesabiTamamenSil: true);
+      } else {
+        await depo.tumVerileriSifirla();
+      }
       await kimlik.hesabiSil();
       if (!context.mounted) return;
       Navigator.of(context).popUntil((r) => r.isFirst);
@@ -81,6 +110,7 @@ class _HesapKartiState extends State<HesapKarti> {
       return const SizedBox.shrink();
     }
     final depo = DepoKapsami.of(context);
+    final senkron = SenkronKapsami.belki(context);
     final tema = Theme.of(context);
     final baslikYazi = (kullanici.takmaAd != null &&
             kullanici.takmaAd!.trim().isNotEmpty)
@@ -101,7 +131,7 @@ class _HesapKartiState extends State<HesapKarti> {
               CircleAvatar(
                 backgroundColor: tema.colorScheme.primaryContainer,
                 foregroundColor: tema.colorScheme.onPrimaryContainer,
-                child: const Icon(Icons.person_outline_rounded),
+                child: const Icon(Icons.cloud_done_outlined),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -116,7 +146,7 @@ class _HesapKartiState extends State<HesapKarti> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Bulut eşitleme aktif · Oturum açık',
+                      _durumEtiketi(senkron?.durum),
                       style: tema.textTheme.bodySmall?.copyWith(
                         color: tema.colorScheme.onSurfaceVariant,
                       ),
@@ -135,7 +165,7 @@ class _HesapKartiState extends State<HesapKarti> {
                 key: const ValueKey('hesap_cikis_butonu'),
                 onPressed: _islemSuruyor
                     ? null
-                    : () => _cikisYap(context, kimlik, depo),
+                    : () => _cikisYap(context, kimlik, depo, senkron),
                 icon: const Icon(Icons.logout_rounded, size: 18),
                 label: const Text('Çıkış Yap'),
               ),
@@ -148,7 +178,7 @@ class _HesapKartiState extends State<HesapKarti> {
                 key: const ValueKey('hesap_sil_butonu'),
                 onPressed: _islemSuruyor
                     ? null
-                    : () => _hesabiSil(context, kimlik, depo),
+                    : () => _hesabiSil(context, kimlik, depo, senkron),
                 style: TextButton.styleFrom(
                   foregroundColor: tema.colorScheme.error,
                 ),
