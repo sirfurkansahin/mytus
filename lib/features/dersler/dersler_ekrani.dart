@@ -169,7 +169,6 @@ class _DersKarti extends StatelessWidget {
     final toplam = depo.konuSayisi(ders.id);
     final calisilan = depo.calisilanSayisi(ders.id);
     final dersSuresi = speetusDersSureleri[ders.ad];
-    final yuzde = toplam == 0 ? 0 : ((calisilan / toplam) * 100).round();
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -195,28 +194,18 @@ class _DersKarti extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 2,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        ders.ad,
-                        style: tema.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (toplam > 0 && calisilan == toplam) ...[
-                        const SizedBox(width: 6),
-                        const Icon(Icons.check_circle, size: 16, color: Colors.teal),
-                      ],
-                    ],
+                  Text(
+                    ders.ad,
+                    style: tema.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   Text(
                     dersSuresi != null
-                        ? '$dersSuresi · %$yuzde ($calisilan/$toplam)'
-                        : '$toplam konu · %$yuzde ($calisilan/$toplam)',
+                        ? '$dersSuresi · $calisilan/$toplam çalışıldı'
+                        : '$toplam konu · $calisilan çalışıldı',
                     style: tema.textTheme.bodySmall?.copyWith(
                       color: tema.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
