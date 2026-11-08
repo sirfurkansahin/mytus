@@ -1,10 +1,11 @@
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
-import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'yardimci.dart';
 
 void main() {
   group('SahteKimlikServisi ve hata mesajları', () {
@@ -89,7 +90,7 @@ void main() {
         await tester.pumpWidget(
           MyTusApp(
             deposu: depo,
-            ftNative: const SahteNative(),
+            ftNative: SahteNative(),
             kimlikServisi: kimlik,
           ),
         );
