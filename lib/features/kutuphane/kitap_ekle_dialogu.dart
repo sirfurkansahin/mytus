@@ -157,35 +157,6 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    TextField(
-                      controller: _klasorDenetci,
-                      onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(
-                        labelText: 'Klasör / Grup (isteğe bağlı)',
-                        hintText: 'Örn: SpeeTUS (5. Baskı), Soru Bankaları',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.folder_outlined),
-                      ),
-                    ),
-                    if (depo.kitapKlasorleri.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
-                        children: [
-                          for (final kl in depo.kitapKlasorleri)
-                            ActionChip(
-                              avatar: const Icon(Icons.folder_open, size: 15),
-                              label: Text(kl, style: const TextStyle(fontSize: 12)),
-                              visualDensity: VisualDensity.compact,
-                              onPressed: () {
-                                setState(() => _klasorDenetci.text = kl);
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
@@ -401,6 +372,36 @@ class _KitapEkleDialoguState extends State<KitapEkleDialogu> {
                             },
                           ),
                         ),
+                    ],
+                    const SizedBox(height: 14),
+                    TextField(
+                      key: const ValueKey('kitap_ekle_klasor'),
+                      controller: _klasorDenetci,
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'Klasör / Grup (isteğe bağlı)',
+                        hintText: 'Örn: SpeeTUS (5. Baskı), Soru Bankaları',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.folder_outlined),
+                      ),
+                    ),
+                    if (depo.kitapKlasorleri.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          for (final kl in depo.kitapKlasorleri)
+                            ActionChip(
+                              avatar: const Icon(Icons.folder_open, size: 15),
+                              label: Text(kl, style: const TextStyle(fontSize: 12)),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                setState(() => _klasorDenetci.text = kl);
+                              },
+                            ),
+                        ],
+                      ),
                     ],
                   ],
                 ),
