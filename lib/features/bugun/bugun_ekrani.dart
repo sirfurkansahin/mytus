@@ -1,4 +1,4 @@
-﻿import 'package:app/core/gizli_ozellikler.dart';
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/features/ft_time/ft_sayac_ekrani.dart';
@@ -378,57 +378,75 @@ class BugunEkrani extends StatelessWidget {
             ),
           ),
           if (siradakiKonu != null) ...[
-            const SizedBox(height: 12),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
+            const SizedBox(height: 14),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    tema.colorScheme.primary.withValues(alpha: 0.12),
+                    tema.colorScheme.primary.withValues(alpha: 0.04),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
                   color: tema.colorScheme.primary.withValues(alpha: 0.35),
                   width: 1.5,
                 ),
               ),
-              color: tema.colorScheme.primary.withValues(alpha: 0.06),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.bolt_rounded, color: tema.colorScheme.primary, size: 20),
-                        const SizedBox(width: 6),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: tema.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
+                            SizedBox(width: 4),
+                            Text(
+                              'SIRADAKİ GÖREV',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      if (siradakiDers != null)
                         Text(
-                          'SIRADAKİ GÖREV',
+                          siradakiDers.ad,
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
                             color: tema.colorScheme.primary,
-                            letterSpacing: 0.8,
                           ),
                         ),
-                        const Spacer(),
-                        if (siradakiDers != null)
-                          Text(
-                            siradakiDers.ad,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: tema.colorScheme.primary,
-                            ),
-                          ),
-                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    siradakiKonu.ad,
+                    style: tema.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      siradakiKonu.ad,
-                      style: tema.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    if (ftTimeAcik) ...[
-                      const SizedBox(height: 12),
-                      FilledButton.icon(
+                  ),
+                  if (ftTimeAcik) ...[
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
                       onPressed: () {
                         final o = depo.oturumBaslat(
                           toplamDongu: depo.ftAyar.donguSayisi,
@@ -444,7 +462,7 @@ class BugunEkrani extends StatelessWidget {
                         );
                       },
                       icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                      label: Text('BAŞLA (${depo.ftAyar.calismaDk} dk Odak)'),
+                      label: Text('BAŞLA ( dk Odak)'),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
@@ -452,9 +470,76 @@ class BugunEkrani extends StatelessWidget {
                         ),
                       ),
                     ),
-                    ],
+                  ] else ...[
+                    const SizedBox(height: 12),
+                    if (siradakiCalisma != null)
+                      FilledButton.tonalIcon(
+                        onPressed: () => depo.calistim(siradakiCalisma.id, bugun),
+                        icon: const Icon(Icons.check_circle_outline, size: 20),
+                        label: const Text('Çalışıldı İşaretle'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      )
+                    else if (siradakiTekrar != null)
+                      FilledButton.tonalIcon(
+                        onPressed: () => depo.tekrarYap(
+                          siradakiTekrar.calismaId,
+                          siradakiTekrar.tekrarNo,
+                          bugun,
+                        ),
+                        icon: const Icon(Icons.refresh_rounded, size: 20),
+                        label: Text('R${siradakiTekrar.tekrarNo} Tekrarını Tamamla'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                   ],
+                ],
+              ),
+            ),
+          ] else if (toplamGorev > 0 && yapilanGorev == toplamGorev) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.green.withValues(alpha: 0.35),
                 ),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.task_alt_rounded, color: Colors.green, size: 26),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tebrikler! Günün tüm görevleri tamamlandı.',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                            color: Colors.green,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Zihnini dinlendir, akşam uyumadan önce R0 tekrarını unutma.',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -604,14 +689,27 @@ class BugunEkrani extends StatelessWidget {
                 ),
               ],
             ),
-            for (final c in gecikenCalismalar) ...[
-              CalismaSatiri(calisma: c, bugun: bugun, planliGunuGoster: true),
-              const SizedBox(height: 8),
-            ],
-            for (final t in gecikenTekrarlar) ...[
-              TekrarSatiri(tekrar: t, bugun: bugun, tarihiGoster: true),
-              const SizedBox(height: 8),
-            ],
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                children: [
+                  for (final c in gecikenCalismalar) ...[
+                    CalismaSatiri(calisma: c, bugun: bugun, planliGunuGoster: true),
+                    if (c != gecikenCalismalar.last || gecikenTekrarlar.isNotEmpty)
+                      const SizedBox(height: 8),
+                  ],
+                  for (final t in gecikenTekrarlar) ...[
+                    TekrarSatiri(tekrar: t, bugun: bugun, tarihiGoster: true),
+                    if (t != gecikenTekrarlar.last) const SizedBox(height: 8),
+                  ],
+                ],
+              ),
+            ),
           ],
           if (bugunCalismalari.isNotEmpty) ...[
             BolumBasligi(
