@@ -10,6 +10,7 @@ import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/defterler/defterler_ekrani.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/grup/grup_ekrani.dart';
 import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/rehber/rehber_ekrani.dart';
@@ -164,6 +165,14 @@ class BugunEkrani extends StatelessWidget {
                     icon: const Icon(Icons.bar_chart_rounded),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(builder: (_) => const IlerlemeEkrani()),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Çalışma Grubu & Puan',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.groups_outlined),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const GrupEkrani()),
                     ),
                   ),
                   IconButton(

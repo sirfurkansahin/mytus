@@ -170,3 +170,13 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 | Ilk giriste yerel veri | Cihazda veri var, bulut bos: buluta aktarilir. Ikisinde de varsa kullaniciya sorulur; secilmeyen taraf cihazda yedek olarak saklanir. |
 | Cakisma kurali | Bolum bazinda en son degistiren kazanir. |
 | Analytics | Bu ise dahil degil. |
+
+## Çalışma Grubu ve Haftalık Puan Tablosu (8 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Grup Modeli | 2-10 kişilik arkadaş/çalışma grubu. 6 karakterlik davet koduyla (`davetKoduUret()`, kafa karıştırmayan harf/sayılar) katılma. |
+| Puanlama Modeli | **Seçenek C (Konu ve Soru Modeli):** 1 Çözülen Soru = 1 Puan, 1 Tamamlanan Konu = 10 Puan. Süre sayılmaksızın hesaplanır. |
+| Puanlama Periyodu | Haftalık periyot (Pazartesi 00:00 - Pazar 23:59). Her hafta başında sıralama ve hedef sıfırdan başlar. |
+| Gizlilik Kuralı | Kişisel notlar, defterler ve detaylı çalışma içerikleri ASLA grupta paylaşılmaz; grupta yalnızca takma ad, haftalık puan, çözülen soru ve biten konu sayısı görünür. |
+| Ortak Hedef Modu | Grubun ortak haftalık soru ve konu hedefine göre kümülatif ilerleme çubuğu ve yüzde hesabı (`GrupHedefDurumu`). |
+| Güvenlik Kuralları | Cloud Firestore Security Rules (`firestore.rules`): `gruplar/{grupId}`, `gruplar/{grupId}/uyeler/{uid}`, `davetKodlari/{kod}` koleksiyonları sıkı tip denetimi ve yetkilendirmeyle korundu. |

@@ -1,32 +1,50 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 8 Kasım 2026, Frontend Tasarım ve UI/UX İyileştirme Planı tamamlandı (dal `claude/frontend-tasarim-uygulama`).
+Son guncelleme: 8 Kasım 2026, Seçenek 1: Çalışma Grubu ve Haftalık Puan Tablosu (Sürüm 2) tamamlandı (dal `claude/calisma-grubu-puan`).
 
 ## Durum
-Kullanıcı talebi doğrultusunda Frontend Tasarım Araştırma Raporu ve Uygulama Planı oluşturuldu, 4 adım sırasıyla hayata geçirildi:
-- **Adım 1: Renk, Tema ve Nöbet Gece Modu (`lib/core/renkler.dart`, `lib/main.dart`):**
-  - Açık temada göz kamaşmasını önleyen lavanta kağıt zemin (`#F8F7FC`).
-  - Koyu temada nöbet tutan hekimlerin gözünü dinlendiren derin mor-gece paleti (`#0F0C20` ve `#1A1633`).
-  - 16 dp tutarlı yuvarlak köşeli kart teması ve mobilde dokunmayı kolaylaştıran 48 dp hedef standardı (`MaterialTapTargetSize.padded`).
-- **Adım 2: Bugün Ekranı Kahraman Odak Kartı ve Ergonomi (`lib/features/bugun/bugun_ekrani.dart`):**
-  - En üste hekimin o an odaklanması gereken işi tek bakışta gösteren "Sıradaki Görev" (Hero Action Card) yerleştirildi.
-  - Kart içine doğrudan "Çalışıldı İşaretle" veya "R Tekrarını Tamamla" hızlı aksiyon butonları eklendi.
-  - Günlük tüm hedefler bittiğinde stres yaratmayan "Günün tüm görevleri tamamlandı - zihnini dinlendirebilirsin" başarı kartı bağlandı.
-  - Geciken konular ve tekrarlar görsel olarak tek bir uyarı kümesi içine alındı.
-- **Adım 3: Kütüphane Ergonomisi ve Bölüm Listesi (`lib/features/kutuphane/kitap_detay_ekrani.dart`):**
-  - Bölüm listesinde parmakla basmayı zahmetsiz kılan 44x44 dp dokunma alanına sahip Checkbox yapısı oluşturuldu.
-  - Fotoğraflı ders notlarını metin notlarından ayıran kamera rozeti (`📷`) ve mikro görsel sayaç eklendi.
-- **Adım 4: Dersler İlerleme Göstergeleri (`lib/features/dersler/dersler_ekrani.dart`):**
-  - Ders kartlarına tek bakışta anlaşılan yüzde tamamlama oranları (`%45`) ve biten dersler için zümrüt yeşili onay rozeti eklendi.
-- **Geriye Dönük Uyumluluk:**
-  - Mevcut testlerin tüm buton tooltip'leri (`Çalıştım`, `Ayarlar`, `İlerleme`, vb.) ve arama metinleri (`Bugünün planı`, `Sınava...`) %100 korundu.
+Kullanıcının "Seçenek 1 (Çalışma Grubu ve Haftalık Puan Tablosu)" ve "Seçenek C (1 Soru = 1 Puan, 1 Konu = 10 Puan)" tercihi doğrultusunda geliştirme tamamlandı:
+
+1. **Veri Modelleri (`lib/features/grup/modeller.dart`):**
+   - `Grup`: Grup adı, 6 karakterlik davet kodu, kurucu UID'si, ortak konu ve soru hedefleri.
+   - `GrupUyesi`: Üye UID, takma ad, hafta başlangıcı (Pazartesi), konu sayısı, soru sayısı, toplam puan ((konu * 10) + soru), son ders ve güncelleme tarihi.
+   - `GrupHedefDurumu`: Ortak hedef yüzdesi ve ilerleme oranları.
+   - `davetKoduUret()`: O, 0, I, 1 gibi karışıklık yaratan karakterlerden arındırılmış 6 haneli rastgele kod üretimi.
+
+2. **Servis Mimarisi (`lib/features/grup/grup_servisi.dart`):**
+   - `GrupServisi` soyut arayüzü.
+   - Bellekte ve testlerde çalışan `SahteGrupServisi`.
+   - Gerçek zamanlı Firestore akışlarını (`snapshots()`) ve batch işlemlerini yöneten `FirestoreGrupServisi`.
+
+3. **Plan ve Puan Entegrasyonu (`lib/features/dersler/plan_deposu.dart`):**
+   - `haftalikTamamlananKonuSayisi(gun)`
+   - `haftalikCozulenSoruSayisi(gun)`
+   - `haftalikGrupPuani(gun)`: `(tamamlananKonu * 10) + cozulenSoru`
+   - `aktifGrupId` ve `aktifGrupAyarla(grupId)`: Kullanıcının yerel planında ve ayarlarında aktif grup ID'si tutulur.
+
+4. **Kullanıcı Arayüzü (`lib/features/grup/grup_ekrani.dart`):**
+   - Boş Durum: 6 haneli kodla mevcut bir gruba katılma veya hedef konu/soru belirleyerek yeni grup oluşturma.
+   - Aktif Grup Durumu: Grup adı, davet kodu panoya kopyalama/paylaşma, 2-10 kişilik haftalık sıralama (altın, gümüş, bronz madalyalar, puan rozetleri) ve ortak hedef modu (kümülatif ilerleme çubuğu).
+   - Menüden gruptan ayrılma onayı.
+
+5. **Gezinme Bağlantıları:**
+   - `BugunEkrani`: Üst aksiyon satırına `Çalışma Grubu & Puan` simge butonu eklendi.
+   - `AyarlarEkrani`: `ÇALIŞMA GRUBU` başlığı altında durum kartı eklendi.
+
+6. **Cloud Firestore Güvenlik Kuralları (`firestore.rules`):**
+   - `firestore-rules-author` uzman alt ajanı tarafından oluşturuldu.
+   - `gruplar/{grupId}`, `gruplar/{grupId}/uyeler/{uid}`, `davetKodlari/{kod}` yolları korundu.
+   - Kişisel notlar gizli tutuldu; `firebase-tools deploy --dry-run` başarıyla test edildi.
+
+7. **Testler (`test/grup_test.dart`):**
+   - Model, kod üretimi, SahteGrupServisi akış, PlanDeposu haftalık puan hesabı ve GrupEkrani widget testleri yazıldı.
 
 ## Siradaki adim
-- Frontend tasarım iyileştirmeleri başarıyla derlendi, tüm testlerden geçti ve GitHub Pages üzerinde canlıya alındı (`https://sirfurkansahin.github.io/mytus/`).
-- Çoklu cihazda canlı kullanım ve arayüz ergonomisi geri bildirimlerinin alınması.
+- GitHub Actions CI derlemesi ve testlerinin izlenmesi.
+- Başarılı derleme sonrası ana dala (`main`) birleştirme veya kullanıcı incelemesi.
 
 ## Bilinen sorunlar / riskler
-- Kütüphane fotoğrafları kullanıcı kararıyla ilk aşamada yalnızca eklendiği cihazda hesaba özel olarak saklanır; başka cihazdan girildiğinde not metinleri görünür.
+- Yok. Firebase Spark ücretsiz plan sınırlarına (Cloud Functions/Storage kullanılmadan istemci taraflı hesap) %100 uyumludur.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

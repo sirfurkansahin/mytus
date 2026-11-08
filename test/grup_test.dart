@@ -3,6 +3,9 @@ import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/grup/grup_servisi.dart';
 import 'package:app/features/grup/modeller.dart';
+import 'package:app/features/auth/kimlik_servisi.dart';
+import 'package:app/features/grup/grup_ekrani.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -171,6 +174,38 @@ void main() {
       // Aktif grup kimliği kaydı
       depo.aktifGrupAyarla('grup_test_123');
       expect(depo.aktifGrupId, 'grup_test_123');
+    });
+
+    testWidgets('GrupEkrani boş durum ve arayüz elemanları görüntülenir', (tester) async {
+      final kayit = const BellekKaydi();
+      final depo = PlanDeposu(kayit: kayit);
+      await depo.yukle();
+
+      final kimlik = SahteKimlikServisi(
+        baslangicKullanicisi: const KullaniciBilgisi(
+          uid: 'doktor_1',
+          eposta: 'doktor@tus.com',
+          takmaAd: 'Dr. Alp',
+        ),
+      );
+      final servis = SahteGrupServisi();
+
+      await tester.pumpWidget(
+        KimlikKapsami(
+          servis: kimlik,
+          child: DepoKapsami(
+            depo: depo,
+            child: MaterialApp(
+              home: GrupEkrani(servis: servis),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Çalışma Grubu & Puan Tablosu'), findsOneWidget);
+      expect(find.text('Gruba Katıl'), findsOneWidget);
+      expect(find.text('Yeni Grup Oluştur'), findsOneWidget);
     });
   });
 }

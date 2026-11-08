@@ -5,21 +5,53 @@ rules_version = '2';
 // ===============================================================
 //
 // Collection: kullanicilar
-// Document ID: {uid} (matches Firebase Auth UID)
+// Document ID: {uid} (Firebase Auth UID ile eşleşir)
 // Fields:
-//   - takmaAd: string (optional, <= 120 chars) - User display nickname
-//   - eposta: string (optional, <= 254 chars) - User email address (PII, owner-only)
-//   - kvkkOnayTarihi: timestamp or ISO string (optional, <= 64 chars) - KVKK consent timestamp
-//   - guncellemeZamani: timestamp, ISO string, or int (optional) - Last update timestamp
-//   - olusturmaZamani: timestamp, ISO string, or int (optional) - Account creation timestamp
+//   - takmaAd: string (optional, <= 120 chars) - Kullanıcı rumuzu
+//   - eposta: string (optional, <= 254 chars) - E-posta adresi (PII, yalnızca sahibi okur/yazar)
+//   - kvkkOnayTarihi: timestamp, ISO string veya int (optional, <= 64 chars) - KVKK onay zamanı
+//   - guncellemeZamani: timestamp, ISO string veya int (optional, <= 64 chars) - Son güncelleme zamanı
+//   - olusturmaZamani: timestamp, ISO string veya int (optional, <= 64 chars) - Hesap oluşturma zamanı
+//   - aktifGrupId: string (optional, <= 64 chars) - Kullanıcının aktif çalışma grubu ID'si
 //
 // Subcollection: kullanicilar/{uid}/bolumler
-// Document ID: {bolumId} (<= 64 chars, e.g. 'plan', 'denemeler', 'defterler', 'kutuphane', 'ayarlar', 'odak')
+// Document ID: {bolumId} (<= 64 chars, örn. 'plan', 'denemeler', 'defterler', 'kutuphane', 'ayarlar', 'odak')
 // Fields:
-//   - veri: string (required, <= 900,000 chars) - Serialized JSON data for the study section
-//   - guncellemeZamani: timestamp, ISO string, or int (optional) - Section update timestamp
-//   - surum: int, number, or string (optional, <= 32 chars) - Schema/data version
-//   - cihazId: string (optional, <= 128 chars) - Originating device identifier
+//   - veri: string (required, <= 900,000 chars) - Çalışma bölümü JSON verisi
+//   - guncellemeZamani: timestamp, ISO string veya int (optional, <= 64 chars) - Bölüm güncelleme zamanı
+//   - surum: int, float veya string (optional, <= 32 chars) - Şema sürümü
+//   - cihazId: string (optional, <= 128 chars) - Değişikliği yapan cihaz kimliği
+//
+// Collection: gruplar
+// Document ID: {grupId} (<= 64 chars, otomatik veya oluşturulan grup kimliği)
+// Fields:
+//   - ad: string (required, 1 - 60 chars) - Çalışma grubu adı
+//   - davetKodu: string (required, tam 6 chars) - 6 haneli benzersiz davet kodu (örn. TUS84X)
+//   - olusturanUid: string (required, 1 - 128 chars, immutable) - Grubu kuran kullanıcının UID'si
+//   - olusturmaTarihi: timestamp, ISO string veya int (required, <= 64 chars, immutable) - Kurulma tarihi
+//   - hedefKonu: int (required, 1 - 500) - Grubun haftalık ortak konu hedefi
+//   - hedefSoru: int (required, 1 - 10000) - Grubun haftalık ortak soru hedefi
+//   - id: string (optional, <= 64 chars) - Grup doküman ID'si
+//
+// Subcollection: gruplar/{grupId}/uyeler
+// Document ID: {uid} (Üyenin Firebase Auth UID'si ile eşleşir)
+// Fields:
+//   - uid: string (required, doc ID ve request.auth.uid ile eşleşir, immutable)
+//   - takmaAd: string (required, 1 - 120 chars) - Üyenin grupta görünen rumuzu
+//   - haftaBaslangici: string (required, tam 10 chars, örn. '2026-11-02') - Puanlama haftası
+//   - konuSayisi: int (required, >= 0, <= 100000) - O hafta tamamlanan konu sayısı
+//   - soruSayisi: int (required, >= 0, <= 1000000) - O hafta çözülen soru sayısı
+//   - puan: int (required, >= 0, <= 10000000) - Toplam puan ((konu * 10) + soru)
+//   - sonDers: string (optional, <= 80 chars) - Son çalışılan ders adı
+//   - guncellemeTarihi: timestamp, ISO string veya int (required, <= 64 chars) - Son aktivite zamanı
+//
+// Collection: davetKodlari
+// Document ID: {kod} (Tam 6 karakterlik davet kodu)
+// Fields:
+//   - grupId: string (required, 1 - 64 chars) - Eşleşen çalışma grubunun kimliği
+//   - grupAdi: string (required, 1 - 60 chars) - Çalışma grubunun adı
+//   - olusturanUid: string (required, matches request.auth.uid, immutable) - Kodu üreten kurucu
+//   - olusturmaTarihi: timestamp, ISO string veya int (required, <= 64 chars) - Kod üretilme zamanı
 //
 // ===============================================================
 
@@ -38,23 +70,47 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == uid;
     }
 
-    function hasOnlyAllowedFields(fields) {
-      return request.resource.data.keys().hasOnly(fields);
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
     }
 
     function isValidOptionalString(field, minLen, maxLen) {
       return !(field in request.resource.data) ||
+             request.resource.data[field] == null ||
              (request.resource.data[field] is string &&
               request.resource.data[field].size() >= minLen &&
               request.resource.data[field].size() <= maxLen);
     }
 
-    function isValidOptionalTimestampOrString(field) {
+    function isValidOptionalTimestampOrDate(field) {
       return !(field in request.resource.data) ||
+             request.resource.data[field] == null ||
              request.resource.data[field] is timestamp ||
              request.resource.data[field] is int ||
              (request.resource.data[field] is string &&
               request.resource.data[field].size() <= 64);
+    }
+
+    function isValidTimestampOrDate(field) {
+      return (field in request.resource.data) &&
+             (request.resource.data[field] is timestamp ||
+              request.resource.data[field] is int ||
+              (request.resource.data[field] is string &&
+               request.resource.data[field].size() <= 64));
+    }
+
+    function isGrupKurucusu(grupId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/gruplar/$(grupId)) &&
+             get(/databases/$(database)/documents/gruplar/$(grupId)).data.olusturanUid == request.auth.uid;
     }
 
     // ===============================================================
@@ -62,24 +118,26 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidKullanici(data) {
-      return hasOnlyAllowedFields([
+      return hasOnlyAllowedFields(data, [
                'takmaAd',
                'eposta',
                'kvkkOnayTarihi',
                'guncellemeZamani',
-               'olusturmaZamani'
+               'olusturmaZamani',
+               'aktifGrupId'
              ]) &&
              isValidOptionalString('takmaAd', 0, 120) &&
              isValidOptionalString('eposta', 0, 254) &&
-             isValidOptionalTimestampOrString('kvkkOnayTarihi') &&
-             isValidOptionalTimestampOrString('guncellemeZamani') &&
-             isValidOptionalTimestampOrString('olusturmaZamani');
+             isValidOptionalTimestampOrDate('kvkkOnayTarihi') &&
+             isValidOptionalTimestampOrDate('guncellemeZamani') &&
+             isValidOptionalTimestampOrDate('olusturmaZamani') &&
+             isValidOptionalString('aktifGrupId', 0, 64);
     }
 
     function isValidBolum(data, bolumId) {
       return bolumId.size() >= 1 &&
              bolumId.size() <= 64 &&
-             hasOnlyAllowedFields([
+             hasOnlyAllowedFields(data, [
                'veri',
                'guncellemeZamani',
                'surum',
@@ -88,7 +146,7 @@ service cloud.firestore {
              ('veri' in data) &&
              data.veri is string &&
              data.veri.size() <= 900000 &&
-             isValidOptionalTimestampOrString('guncellemeZamani') &&
+             isValidOptionalTimestampOrDate('guncellemeZamani') &&
              (!('surum' in data) ||
               data.surum is int ||
               data.surum is float ||
@@ -96,10 +154,112 @@ service cloud.firestore {
              isValidOptionalString('cihazId', 0, 128);
     }
 
+    function isValidGrup(data) {
+      return hasOnlyAllowedFields(data, [
+               'ad',
+               'davetKodu',
+               'olusturanUid',
+               'olusturmaTarihi',
+               'hedefKonu',
+               'hedefSoru',
+               'id'
+             ]) &&
+             hasRequiredFields(data, [
+               'ad',
+               'davetKodu',
+               'olusturanUid',
+               'olusturmaTarihi',
+               'hedefKonu',
+               'hedefSoru'
+             ]) &&
+             data.ad is string &&
+             data.ad.size() >= 1 &&
+             data.ad.size() <= 60 &&
+             data.davetKodu is string &&
+             data.davetKodu.size() == 6 &&
+             data.olusturanUid is string &&
+             data.olusturanUid.size() >= 1 &&
+             data.olusturanUid.size() <= 128 &&
+             isValidTimestampOrDate('olusturmaTarihi') &&
+             data.hedefKonu is int &&
+             data.hedefKonu >= 1 &&
+             data.hedefKonu <= 500 &&
+             data.hedefSoru is int &&
+             data.hedefSoru >= 1 &&
+             data.hedefSoru <= 10000 &&
+             isValidOptionalString('id', 0, 64);
+    }
+
+    function isValidGrupUyesi(data, uid) {
+      return hasOnlyAllowedFields(data, [
+               'uid',
+               'takmaAd',
+               'haftaBaslangici',
+               'konuSayisi',
+               'soruSayisi',
+               'puan',
+               'sonDers',
+               'guncellemeTarihi'
+             ]) &&
+             hasRequiredFields(data, [
+               'uid',
+               'takmaAd',
+               'haftaBaslangici',
+               'konuSayisi',
+               'soruSayisi',
+               'puan',
+               'guncellemeTarihi'
+             ]) &&
+             data.uid is string &&
+             data.uid == uid &&
+             data.uid == request.auth.uid &&
+             data.takmaAd is string &&
+             data.takmaAd.size() >= 1 &&
+             data.takmaAd.size() <= 120 &&
+             data.haftaBaslangici is string &&
+             data.haftaBaslangici.size() == 10 &&
+             data.konuSayisi is int &&
+             data.konuSayisi >= 0 &&
+             data.konuSayisi <= 100000 &&
+             data.soruSayisi is int &&
+             data.soruSayisi >= 0 &&
+             data.soruSayisi <= 1000000 &&
+             data.puan is int &&
+             data.puan >= 0 &&
+             data.puan <= 10000000 &&
+             isValidOptionalString('sonDers', 0, 80) &&
+             isValidTimestampOrDate('guncellemeTarihi');
+    }
+
+    function isValidDavetKodu(data) {
+      return hasOnlyAllowedFields(data, [
+               'grupId',
+               'grupAdi',
+               'olusturanUid',
+               'olusturmaTarihi'
+             ]) &&
+             hasRequiredFields(data, [
+               'grupId',
+               'grupAdi',
+               'olusturanUid',
+               'olusturmaTarihi'
+             ]) &&
+             data.grupId is string &&
+             data.grupId.size() >= 1 &&
+             data.grupId.size() <= 64 &&
+             data.grupAdi is string &&
+             data.grupAdi.size() >= 1 &&
+             data.grupAdi.size() <= 60 &&
+             data.olusturanUid is string &&
+             data.olusturanUid == request.auth.uid &&
+             isValidTimestampOrDate('olusturmaTarihi');
+    }
+
     // ===============================================================
     // Collection Rules
     // ===============================================================
 
+    // Kullanıcı profil ve şahsi çalışma bölümleri
     match /kullanicilar/{uid} {
       allow get, list: if isOwner(uid);
       allow create, update: if isOwner(uid) && isValidKullanici(request.resource.data);
@@ -111,7 +271,64 @@ service cloud.firestore {
       }
     }
 
-    // Default deny on all other paths
+    // Çalışma grupları
+    match /gruplar/{grupId} {
+      // Tüm oturum açmış kullanıcılar grupları ve detaylarını okuyabilir
+      allow get, list: if isAuthenticated();
+
+      // Grubu oluşturan kişi kurucu UID'siyle eşleşmelidir
+      allow create: if isAuthenticated() &&
+                       request.resource.data.olusturanUid == request.auth.uid &&
+                       isValidGrup(request.resource.data);
+
+      // Yalnızca grubun kurucusu güncelleyebilir; kurucu UID, davet kodu ve oluşturma tarihi sabittir
+      allow update: if isAuthenticated() &&
+                       resource.data.olusturanUid == request.auth.uid &&
+                       request.resource.data.olusturanUid == resource.data.olusturanUid &&
+                       request.resource.data.davetKodu == resource.data.davetKodu &&
+                       areImmutableFieldsUnchanged(['olusturanUid', 'davetKodu', 'olusturmaTarihi']) &&
+                       (!('id' in resource.data) || request.resource.data.id == resource.data.id) &&
+                       isValidGrup(request.resource.data);
+
+      // Yalnızca kurucu grubu silebilir
+      allow delete: if isAuthenticated() && resource.data.olusturanUid == request.auth.uid;
+
+      // Grup üyeleri ve haftalık puan tablosu
+      match /uyeler/{uid} {
+        // Tüm grup üyeleri puan tablosunu görebilir
+        allow get, list: if isAuthenticated();
+
+        // Yalnızca kullanıcının kendisi kendi üye/puan kaydını oluşturabilir veya güncelleyebilir
+        allow create, update: if isAuthenticated() &&
+                                 request.auth.uid == uid &&
+                                 isValidGrupUyesi(request.resource.data, uid);
+
+        // Kullanıcının kendisi (ayrılma) veya grup kurucusu üyelik kaydını silebilir
+        allow delete: if isAuthenticated() &&
+                         (request.auth.uid == uid || isGrupKurucusu(grupId));
+      }
+    }
+
+    // 6 haneli davet kodları dizini
+    match /davetKodlari/{kod} {
+      // Katılmak için tekil kod sorgulanabilir, ancak toplu listeleme (list) yasaktır
+      allow get: if isAuthenticated();
+      allow list: if false;
+
+      // Yalnızca kurucu kendi UID'si ile 6 haneli davet kodu oluşturabilir
+      allow create: if isAuthenticated() &&
+                       kod.size() == 6 &&
+                       request.resource.data.olusturanUid == request.auth.uid &&
+                       isValidDavetKodu(request.resource.data);
+
+      // Davet kodları değiştirilemez
+      allow update: if false;
+
+      // Yalnızca kodu oluşturan kurucu silebilir
+      allow delete: if isAuthenticated() && resource.data.olusturanUid == request.auth.uid;
+    }
+
+    // Kalan tüm doküman yolları için varsayılan ret (Default Deny)
     match /{document=**} {
       allow read, write: if false;
     }

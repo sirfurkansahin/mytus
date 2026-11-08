@@ -13,6 +13,7 @@ import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/grup/grup_ekrani.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/ft_time/ft_test_screen.dart';
 import 'package:app/features/ft_time/pil_rehberi.dart';
@@ -184,6 +185,17 @@ class AyarlarEkrani extends StatelessWidget {
             _baslik(context, 'HESAP VE BULUT'),
             const HesapKarti(),
           ],
+          _baslik(context, 'ÇALIŞMA GRUBU'),
+          AyarSatiri(
+            baslik: 'Çalışma Grubu & Puan Tablosu',
+            altYazi: depo.aktifGrupId != null
+                ? 'Aktif bir gruptasın. Puan durumunu ve hedefleri gör.'
+                : 'Arkadaşlarınla 2-10 kişilik grup kur veya davet koduyla katıl',
+            deger: depo.aktifGrupId != null ? 'Grup Aktif' : 'Katıl',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const GrupEkrani()),
+            ),
+          ),
           _baslik(context, 'PLAN'),
           AyarSatiri(
             baslik: 'Sınav tarihi',
