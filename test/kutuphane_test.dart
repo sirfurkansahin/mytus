@@ -337,7 +337,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Apoptoz kaspaz bağımlıdır.'), findsOneWidget);
-      expect(find.text('Tüm Notları Yönet'), findsOneWidget);
+      expect(find.text('Tüm Notları ve Fotoğrafları Yönet'), findsOneWidget);
     });
 
     testWidgets('KutuphaneEkrani içinde kitap arama çubuğu çalışır', (tester) async {
