@@ -180,3 +180,12 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 | Gizlilik Kuralı | Kişisel notlar, defterler ve detaylı çalışma içerikleri ASLA grupta paylaşılmaz; grupta yalnızca takma ad, haftalık puan, çözülen soru ve biten konu sayısı görünür. |
 | Ortak Hedef Modu | Grubun ortak haftalık soru ve konu hedefine göre kümülatif ilerleme çubuğu ve yüzde hesabı (`GrupHedefDurumu`). |
 | Güvenlik Kuralları | Cloud Firestore Security Rules (`firestore.rules`): `gruplar/{grupId}`, `gruplar/{grupId}/uyeler/{uid}`, `davetKodlari/{kod}` koleksiyonları sıkı tip denetimi ve yetkilendirmeyle korundu. |
+
+## Kütüphane Modülü İyileştirmeleri (8 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Kitap İçi Arama & Filtre | `KitapDetayEkrani` içine anlık başlık ve sayfa araması eklendi. Canlı filtre çipleri: Tümü, Kalanlar, Bitenler ve Notlular (`notluBolumSayisi`). |
+| Hızlı Not Alt Penceresi | Bölüm kartından tam ekrana gitmeye gerek kalmadan alttan açılan modal alt pencere (`DraggableScrollableSheet`) ile notları okuma, silme ve tek dokunuşla yeni not ekleme ergonomisi sağlandı. |
+| Kütüphane Kitap Arama | `KutuphaneEkrani` ana sayfasında kitap adı, ders adı veya klasör adına göre anlık filtreleme ve temizleme çubuğu bağlandı. |
+| Dokunmatik Alan Standardı | Bölüm listelerinde en az 44x44 dp dokunma alanı ve `MaterialTapTargetSize.padded` kuralı uygulandı. |
+

@@ -175,6 +175,8 @@ class Kitap {
 
   int get kalanBolumSayisi => toplamBolumSayisi - tamamlananBolumSayisi;
 
+  int get notluBolumSayisi => bolumler.where((b) => b.notVar).length;
+
   int get toplamNotSayisi => bolumler.fold(0, (toplam, b) => toplam + b.notSayisi);
 
   double get ilerlemeOrani {

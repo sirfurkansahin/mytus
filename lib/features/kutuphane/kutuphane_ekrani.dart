@@ -20,6 +20,14 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
 
   String _seciliKlasor = _tumuEtiketi;
   final Set<String> _kapaliKlasorler = {};
+  final _kitapAramaDenetci = TextEditingController();
+  String _kitapAramaMetni = '';
+
+  @override
+  void dispose() {
+    _kitapAramaDenetci.dispose();
+    super.dispose();
+  }
 
   Future<void> _hazirKlasorIndir(PlanDeposu depo, HazirKlasor klasor) async {
     final eklenen = await depo.hazirKlasorYukle(klasor.id);
@@ -371,6 +379,17 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
     final genelOran = toplamBolum > 0 ? (bitenBolum / toplamBolum) : 0.0;
     final genelYuzde = (genelOran * 100).round();
 
+    final arananKitaplar = _kitapAramaMetni.isNotEmpty
+        ? kitaplar.where((k) {
+            final adUyusur = k.ad.toLowerCase().contains(_kitapAramaMetni);
+            final dersUyusur =
+                k.dersAdi?.toLowerCase().contains(_kitapAramaMetni) == true;
+            final klasorUyusur =
+                k.klasorAdi?.toLowerCase().contains(_kitapAramaMetni) == true;
+            return adUyusur || dersUyusur || klasorUyusur;
+          }).toList()
+        : const <Kitap>[];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -564,6 +583,45 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
               ),
             ),
           ),
+
+          // Kitap Arama Çubuğu
+          if (kitaplar.length >= 2)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: TextField(
+                controller: _kitapAramaDenetci,
+                decoration: InputDecoration(
+                  hintText: 'Kitap veya ders ara (örn: Patoloji, SpeeTUS)...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _kitapAramaMetni.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            _kitapAramaDenetci.clear();
+                            setState(() => _kitapAramaMetni = '');
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(color: tema.colorScheme.outlineVariant),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: tema.colorScheme.outlineVariant
+                          .withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+                onChanged: (val) =>
+                    setState(() => _kitapAramaMetni = val.trim().toLowerCase()),
+              ),
+            ),
 
           // Klasör Filtre Çipleri
           if (kitaplar.isNotEmpty) ...[
@@ -781,6 +839,57 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
                 ),
               ),
             ),
+          ] else if (_kitapAramaMetni.isNotEmpty) ...[
+            // Arama sonuçları
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'ARAMA SONUÇLARI (${arananKitaplar.length})',
+                    style: tema.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: tema.colorScheme.primary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _kitapAramaDenetci.clear();
+                    setState(() => _kitapAramaMetni = '');
+                  },
+                  child: const Text('Aramayı Temizle'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (arananKitaplar.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 36),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.search_off_rounded,
+                        size: 40,
+                        color: tema.colorScheme.outline,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '"$_kitapAramaMetni" ile eşleşen kitap bulunamadı.',
+                        style: TextStyle(
+                          color: tema.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              for (final k in arananKitaplar) ...[
+                _KitapKarti(kitap: k),
+                const SizedBox(height: 10),
+              ],
           ] else if (gecerliSecim == _tumuEtiketi && klasorlemeAktif) ...[
             // Klasörler halinde açılır/kapanır görünüm
             for (final kl in klasorler) ...[

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/kutuphane/bolum_notlari_ekrani.dart';
 import 'package:app/features/kutuphane/modeller.dart';
@@ -14,12 +17,15 @@ class KitapDetayEkrani extends StatefulWidget {
 }
 
 class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
-  int _filtre = 0; // 0: Tümü, 1: Kalanlar, 2: Bitenler
+  int _filtre = 0; // 0: Tümü, 1: Kalanlar, 2: Bitenler, 3: Notlular
   final _yeniBolumDenetci = TextEditingController();
+  final _aramaDenetci = TextEditingController();
+  String _aramaMetni = '';
 
   @override
   void dispose() {
     _yeniBolumDenetci.dispose();
+    _aramaDenetci.dispose();
     super.dispose();
   }
 
@@ -214,6 +220,164 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
     );
   }
 
+  void _bolumHizliNotPenceresi(PlanDeposu depo, Kitap kitap, KitapBolumu bolum) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final tema = Theme.of(ctx);
+        final guncelKitap = depo.kitapBul(kitap.id) ?? kitap;
+        final guncelBolum = guncelKitap.bolumler.firstWhere(
+          (b) => b.id == bolum.id,
+          orElse: () => bolum,
+        );
+        final notlar = guncelBolum.notlar;
+
+        return DraggableScrollableSheet(
+          initialChildSize: notlar.isEmpty ? 0.38 : 0.65,
+          minChildSize: 0.28,
+          maxChildSize: 0.92,
+          expand: false,
+          builder: (ctx, scrollController) => Column(
+            children: [
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 10, bottom: 8),
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: tema.colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            guncelBolum.ad,
+                            style: tema.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            guncelBolum.sayfaAraligiMetni.isNotEmpty
+                                ? '${guncelBolum.sayfaAraligiMetni} · ${notlar.length} Not'
+                                : '${notlar.length} Not',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: tema.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('Not Ekle'),
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        showDialog<void>(
+                          context: context,
+                          builder: (_) => NotDuzenleDialogu(
+                            kitapId: kitap.id,
+                            bolumId: bolum.id,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: notlar.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.note_alt_outlined,
+                                size: 44,
+                                color: tema.colorScheme.primary.withValues(alpha: 0.6),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'Bu bölüme henüz not eklenmedi',
+                                style: TextStyle(fontWeight: FontWeight.w700),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Klinik ipucu, vaka özeti veya kitap fotoğrafı ekleyebilirsiniz.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: tema.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                        itemCount: notlar.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (ctx, i) {
+                          final not = notlar[i];
+                          return _HizliNotKarti(
+                            not: not,
+                            onSil: () {
+                              depo.kitapBolumNotuSil(kitap.id, bolum.id, not.id);
+                              Navigator.of(ctx).pop();
+                            },
+                            onTamSayfa: () {
+                              Navigator.of(ctx).pop();
+                              _bolumNotlariniAc(bolum.id);
+                            },
+                          );
+                        },
+                      ),
+              ),
+              if (notlar.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: const Text('Tüm Notları ve Fotoğrafları Yönet'),
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      _bolumNotlariniAc(bolum.id);
+                    },
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
@@ -230,8 +394,15 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
     final siradaki = kitap.siradakiBolum;
 
     final filtrelenmis = kitap.bolumler.where((b) {
-      if (_filtre == 1) return !b.tamamlandi;
-      if (_filtre == 2) return b.tamamlandi;
+      if (_filtre == 1 && b.tamamlandi) return false;
+      if (_filtre == 2 && !b.tamamlandi) return false;
+      if (_filtre == 3 && !b.notVar) return false;
+
+      if (_aramaMetni.isNotEmpty) {
+        final adEslesir = b.ad.toLowerCase().contains(_aramaMetni);
+        final sayfaEslesir = b.sayfaAraligiMetni.toLowerCase().contains(_aramaMetni);
+        if (!adEslesir && !sayfaEslesir) return false;
+      }
       return true;
     }).toList();
 
@@ -451,7 +622,7 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                             size: 22,
                           ),
                           tooltip: 'Bölüm Notları (${siradaki.notSayisi})',
-                          onPressed: () => _bolumNotlariniAc(siradaki.id),
+                          onPressed: () => _bolumHizliNotPenceresi(depo, kitap, siradaki),
                         ),
                         FilledButton.tonal(
                           style: FilledButton.styleFrom(
@@ -477,7 +648,39 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
             ),
           ],
 
-          const SizedBox(height: 16),
+          // Bölüm Arama Çubuğu
+          Padding(
+            padding: const EdgeInsets.only(top: 14, bottom: 8),
+            child: TextField(
+              controller: _aramaDenetci,
+              decoration: InputDecoration(
+                hintText: 'Bölüm veya sayfa ara (örn: Kalp, 45)...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: _aramaMetni.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () {
+                          _aramaDenetci.clear();
+                          setState(() => _aramaMetni = '');
+                        },
+                      )
+                    : null,
+                filled: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: tema.colorScheme.outlineVariant),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: tema.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              onChanged: (val) => setState(() => _aramaMetni = val.trim().toLowerCase()),
+            ),
+          ),
 
           // Filtreler
           Wrap(
@@ -498,23 +701,43 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                 spacing: 6,
                 children: [
                   ChoiceChip(
-                    label: const Text('Tümü', style: TextStyle(fontSize: 12)),
+                    label: Text(
+                      'Tümü (${kitap.toplamBolumSayisi})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     selected: _filtre == 0,
                     onSelected: (_) => setState(() => _filtre = 0),
                     visualDensity: VisualDensity.compact,
                   ),
                   ChoiceChip(
-                    label: const Text('Kalanlar', style: TextStyle(fontSize: 12)),
+                    label: Text(
+                      'Kalanlar (${kitap.kalanBolumSayisi})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     selected: _filtre == 1,
                     onSelected: (_) => setState(() => _filtre = 1),
                     visualDensity: VisualDensity.compact,
                   ),
                   ChoiceChip(
-                    label: const Text('Bitenler', style: TextStyle(fontSize: 12)),
+                    label: Text(
+                      'Bitenler (${kitap.tamamlananBolumSayisi})',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                     selected: _filtre == 2,
                     onSelected: (_) => setState(() => _filtre = 2),
                     visualDensity: VisualDensity.compact,
                   ),
+                  if (kitap.notluBolumSayisi > 0)
+                    ChoiceChip(
+                      avatar: const Icon(Icons.note_alt_outlined, size: 14),
+                      label: Text(
+                        'Notlular (${kitap.notluBolumSayisi})',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      selected: _filtre == 3,
+                      onSelected: (_) => setState(() => _filtre = 3),
+                      visualDensity: VisualDensity.compact,
+                    ),
                 ],
               ),
             ],
@@ -530,10 +753,15 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
               ),
             )
           else if (filtrelenmis.isEmpty)
-            const Center(
+            Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 30),
-                child: Text('Bu filtreye uygun bölüm bulunamadı.'),
+                padding: const EdgeInsets.symmetric(vertical: 30),
+                child: Text(
+                  _aramaMetni.isNotEmpty
+                      ? '"$_aramaMetni" ile eşleşen bölüm bulunamadı.'
+                      : 'Bu filtreye uygun bölüm bulunamadı.',
+                  style: TextStyle(color: tema.colorScheme.onSurfaceVariant),
+                ),
               ),
             )
           else
@@ -544,7 +772,7 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                 onDegisti: (tamam) {
                   depo.kitapBolumDurumuDegistir(kitap.id, filtrelenmis[i].id, tamam);
                 },
-                onNotlar: () => _bolumNotlariniAc(filtrelenmis[i].id),
+                onNotlar: () => _bolumHizliNotPenceresi(depo, kitap, filtrelenmis[i]),
                 onSil: () {
                   final guncel = List<KitapBolumu>.from(kitap.bolumler)
                     ..removeWhere((b) => b.id == filtrelenmis[i].id);
@@ -681,6 +909,88 @@ class _BolumKarti extends StatelessWidget {
               color: tema.colorScheme.outline,
               tooltip: 'Bölümü Sil',
               onPressed: onSil,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HizliNotKarti extends StatelessWidget {
+  const _HizliNotKarti({
+    required this.not,
+    required this.onSil,
+    required this.onTamSayfa,
+  });
+
+  final BolumNotu not;
+  final VoidCallback onSil;
+  final VoidCallback onTamSayfa;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    Uint8List? resimBytes;
+    if (not.resimVar) {
+      try {
+        resimBytes = base64Decode(not.resimBase64!);
+      } catch (_) {
+        resimBytes = null;
+      }
+    }
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: tema.colorScheme.outlineVariant.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (resimBytes != null)
+              GestureDetector(
+                onTap: onTamSayfa,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 160),
+                    width: double.infinity,
+                    color: tema.colorScheme.surfaceContainerHighest,
+                    child: Image.memory(
+                      resimBytes,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            if (resimBytes != null && not.metinVar) const SizedBox(height: 8),
+            if (not.metinVar)
+              Text(
+                not.metin,
+                style: const TextStyle(fontSize: 13, height: 1.4),
+              ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${not.olusturmaTarihi.day}.${not.olusturmaTarihi.month}.${not.olusturmaTarihi.year}',
+                  style: TextStyle(fontSize: 11, color: tema.colorScheme.outline),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                  tooltip: 'Notu Sil',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onSil,
+                ),
+              ],
             ),
           ],
         ),

@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/kutuphane/kitap_detay_ekrani.dart';
+import 'package:app/features/kutuphane/kutuphane_ekrani.dart';
 import 'package:app/features/kutuphane/modeller.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -69,6 +72,33 @@ void main() {
       expect(hepsiTamam.yuzde, 100);
       expect(hepsiTamam.tamamlandi, isTrue);
       expect(hepsiTamam.siradakiBolum, isNull);
+    });
+
+    test('Kitap.notluBolumSayisi ve not filtresi hesabı', () {
+      final bolumler = [
+        KitapBolumu(
+          id: 'b1',
+          ad: 'Bölüm 1',
+          notlar: [
+            BolumNotu(
+              id: 'n1',
+              metin: 'Önemli not',
+              olusturmaTarihi: DateTime.now(),
+            ),
+          ],
+        ),
+        const KitapBolumu(id: 'b2', ad: 'Bölüm 2'),
+      ];
+
+      final kitap = Kitap(
+        id: 'k1',
+        ad: 'Dahiliye',
+        eklenmeTarihi: DateTime.now(),
+        bolumler: bolumler,
+      );
+
+      expect(kitap.notluBolumSayisi, 1);
+      expect(kitap.toplamNotSayisi, 1);
     });
 
     test('Kitap ve KitapBolumu JSON serileştirme döngüsü', () {
@@ -230,6 +260,123 @@ void main() {
       // Tekrar çağrılırsa mükerrer eklemez
       await depo.ornekKitapYukle();
       expect(depo.kitaplar.length, 1);
+    });
+  });
+
+  group('Kütüphane Ergonomisi ve Arama Widget Testleri', () {
+    testWidgets('KitapDetayEkrani içinde bölüm arama ve Notlular filtresi çalışır', (tester) async {
+      final kayit = BellekKaydi();
+      final depo = PlanDeposu(kayit: kayit, kayitGecikmesi: Duration.zero);
+      await depo.yukle();
+
+      final kitap = Kitap(
+        id: 'k_test',
+        ad: 'Patoloji Kitabı',
+        eklenmeTarihi: DateTime.now(),
+        bolumler: [
+          KitapBolumu(
+            id: 'b1',
+            ad: 'Hücre Hasarı ve Nekroz',
+            baslangicSayfa: 1,
+            bitisSayfa: 20,
+            notlar: [
+              BolumNotu(
+                id: 'n1',
+                metin: 'Apoptoz kaspaz bağımlıdır.',
+                olusturmaTarihi: DateTime.now(),
+              ),
+            ],
+          ),
+          const KitapBolumu(
+            id: 'b2',
+            ad: 'İltihap ve Doku Onarımı',
+            baslangicSayfa: 21,
+            bitisSayfa: 50,
+          ),
+        ],
+      );
+      await depo.kitapEkle(kitap);
+
+      await tester.pumpWidget(
+        DepoKapsami(
+          deposu: depo,
+          child: const MaterialApp(
+            home: KitapDetayEkrani(kitapId: 'k_test'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hücre Hasarı ve Nekroz'), findsOneWidget);
+      expect(find.text('İltihap ve Doku Onarımı'), findsOneWidget);
+
+      // Arama kutusuna "iltihap" yaz
+      await tester.enterText(find.byType(TextField).first, 'iltihap');
+      await tester.pumpAndSettle();
+
+      expect(find.text('İltihap ve Doku Onarımı'), findsOneWidget);
+      expect(find.text('Hücre Hasarı ve Nekroz'), findsNothing);
+
+      // Aramayı temizle
+      await tester.tap(find.byIcon(Icons.clear));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hücre Hasarı ve Nekroz'), findsOneWidget);
+      expect(find.text('İltihap ve Doku Onarımı'), findsOneWidget);
+
+      // Notlular filtresini seç
+      await tester.tap(find.text('Notlular (1)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hücre Hasarı ve Nekroz'), findsOneWidget);
+      expect(find.text('İltihap ve Doku Onarımı'), findsNothing);
+    });
+
+    testWidgets('KutuphaneEkrani içinde kitap arama çubuğu çalışır', (tester) async {
+      final kayit = BellekKaydi();
+      final depo = PlanDeposu(kayit: kayit, kayitGecikmesi: Duration.zero);
+      await depo.yukle();
+
+      await depo.kitapEkle(
+        Kitap(
+          id: 'k1',
+          ad: 'SpeeTUS Farmakoloji',
+          dersAdi: 'Farmakoloji',
+          klasorAdi: 'SpeeTUS (5. Baskı)',
+          eklenmeTarihi: DateTime.now(),
+        ),
+      );
+      await depo.kitapEkle(
+        Kitap(
+          id: 'k2',
+          ad: 'TUSDATA Patoloji',
+          dersAdi: 'Patoloji',
+          klasorAdi: 'TUSDATA',
+          eklenmeTarihi: DateTime.now(),
+        ),
+      );
+
+      await tester.pumpWidget(
+        DepoKapsami(
+          deposu: depo,
+          child: const MaterialApp(
+            home: KutuphaneEkrani(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
+
+      // Arama çubuğuna "Farma" yaz
+      final aramaInput = find.byType(TextField);
+      expect(aramaInput, findsOneWidget);
+      await tester.enterText(aramaInput, 'Farma');
+      await tester.pumpAndSettle();
+
+      expect(find.text('ARAMA SONUÇLARI (1)'), findsOneWidget);
+      expect(find.text('SpeeTUS Farmakoloji'), findsOneWidget);
+      expect(find.text('TUSDATA Patoloji'), findsNothing);
     });
   });
 }
