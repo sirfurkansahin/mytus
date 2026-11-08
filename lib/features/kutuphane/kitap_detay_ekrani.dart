@@ -564,8 +564,8 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
             ),
           ),
 
-          // Sıradaki Bölüm Kartı
-          if (siradaki != null) ...[
+          // Sıradaki Bölüm Kartı (arama yapılmıyorken ve tümü filtresindeyken)
+          if (siradaki != null && _aramaMetni.isEmpty && _filtre == 0) ...[
             const SizedBox(height: 12),
             Card(
               elevation: 0,
@@ -772,7 +772,8 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                 onDegisti: (tamam) {
                   depo.kitapBolumDurumuDegistir(kitap.id, filtrelenmis[i].id, tamam);
                 },
-                onNotlar: () => _bolumHizliNotPenceresi(depo, kitap, filtrelenmis[i]),
+                onNotlar: () => _bolumNotlariniAc(filtrelenmis[i].id),
+                onHizliNot: () => _bolumHizliNotPenceresi(depo, kitap, filtrelenmis[i]),
                 onSil: () {
                   final guncel = List<KitapBolumu>.from(kitap.bolumler)
                     ..removeWhere((b) => b.id == filtrelenmis[i].id);
@@ -793,6 +794,7 @@ class _BolumKarti extends StatelessWidget {
     required this.bolum,
     required this.onDegisti,
     required this.onNotlar,
+    required this.onHizliNot,
     required this.onSil,
   });
 
@@ -800,6 +802,7 @@ class _BolumKarti extends StatelessWidget {
   final KitapBolumu bolum;
   final ValueChanged<bool> onDegisti;
   final VoidCallback onNotlar;
+  final VoidCallback onHizliNot;
   final VoidCallback onSil;
 
   @override
@@ -820,7 +823,7 @@ class _BolumKarti extends StatelessWidget {
       ),
       color: tamam ? Colors.teal.withValues(alpha: 0.04) : null,
       child: ListTile(
-        onTap: onNotlar,
+        onTap: onHizliNot,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
         leading: SizedBox(
           width: 44,

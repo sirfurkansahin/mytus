@@ -307,7 +307,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Hücre Hasarı ve Nekroz'), findsOneWidget);
+      // Başlangıçta "Hücre Hasarı" hem Sıradaki Çalışma kartında hem liste satırında görünür
+      expect(find.text('Hücre Hasarı ve Nekroz'), findsNWidgets(2));
       expect(find.text('İltihap ve Doku Onarımı'), findsOneWidget);
 
       // Arama kutusuna "iltihap" yaz
@@ -321,15 +322,22 @@ void main() {
       await tester.tap(find.byIcon(Icons.clear));
       await tester.pumpAndSettle();
 
-      expect(find.text('Hücre Hasarı ve Nekroz'), findsOneWidget);
+      expect(find.text('Hücre Hasarı ve Nekroz'), findsNWidgets(2));
       expect(find.text('İltihap ve Doku Onarımı'), findsOneWidget);
 
-      // Notlular filtresini seç
+      // Notlular filtresini seç (filtre seçildiğinde sıradaki kartı gizlenir, sadece 1 tane Hücre Hasarı kalır)
       await tester.tap(find.text('Notlular (1)'));
       await tester.pumpAndSettle();
 
       expect(find.text('Hücre Hasarı ve Nekroz'), findsOneWidget);
       expect(find.text('İltihap ve Doku Onarımı'), findsNothing);
+
+      // Bölüm satırına dokunulduğunda ergonomik hızlı not alt penceresi (BottomSheet) açılır
+      await tester.tap(find.text('Hücre Hasarı ve Nekroz'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Apoptoz kaspaz bağımlıdır.'), findsOneWidget);
+      expect(find.text('Tüm Notları Yönet'), findsOneWidget);
     });
 
     testWidgets('KutuphaneEkrani içinde kitap arama çubuğu çalışır', (tester) async {
