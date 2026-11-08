@@ -1,4 +1,5 @@
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/kutuphane/hazir_klasorler.dart';
 import 'package:app/features/kutuphane/kitap_detay_ekrani.dart';
 import 'package:app/features/kutuphane/kitap_ekle_dialogu.dart';
 import 'package:app/features/kutuphane/modeller.dart';
@@ -19,6 +20,153 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
 
   String _seciliKlasor = _tumuEtiketi;
   final Set<String> _kapaliKlasorler = {};
+
+  Future<void> _hazirKlasorIndir(PlanDeposu depo, HazirKlasor klasor) async {
+    final eklenen = await depo.hazirKlasorYukle(klasor.id);
+    if (!mounted) return;
+    setState(() => _seciliKlasor = klasor.ad);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          eklenen > 0
+              ? '${klasor.ad} ($eklenen kitap) hesabınıza indirildi.'
+              : '${klasor.ad} zaten kütüphanenizde mevcut.',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _hazirKlasorlerDialogu(PlanDeposu depo) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final tema = Theme.of(ctx);
+          return AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.cloud_download_outlined),
+                SizedBox(width: 8),
+                Expanded(child: Text('Hazır Kitap Klasörleri')),
+              ],
+            ),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'İstediğiniz hazır klasörü seçip tek dokunuşla tüm kitapları ve içindekiler bölümlerini hesabınıza indirebilirsiniz:',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: tema.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  for (var i = 0; i < hazirKutuphaneKlasorleri.length; i++) ...[
+                    Builder(
+                      builder: (_) {
+                        final kl = hazirKutuphaneKlasorleri[i];
+                        final yuklu = depo.hazirKlasorYukluMu(kl.id);
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: tema.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: yuklu
+                                  ? Colors.teal.withValues(alpha: 0.4)
+                                  : tema.colorScheme.outlineVariant,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    yuklu
+                                        ? Icons.folder_special_rounded
+                                        : Icons.folder_copy_outlined,
+                                    color: yuklu
+                                        ? Colors.teal
+                                        : tema.colorScheme.primary,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '${i + 1} - ${kl.ad}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${kl.kitapSayisi} Kitap · ${kl.toplamBolumSayisi} Bölüm — ${kl.aciklama}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: tema.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: yuklu
+                                    ? const Chip(
+                                        avatar: Icon(
+                                          Icons.check_circle,
+                                          color: Colors.teal,
+                                          size: 16,
+                                        ),
+                                        label: Text(
+                                          'Hesapta Mevcut',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                        visualDensity: VisualDensity.compact,
+                                      )
+                                    : FilledButton.tonalIcon(
+                                        onPressed: () async {
+                                          await _hazirKlasorIndir(depo, kl);
+                                          if (ctx.mounted) {
+                                            setDialogState(() {});
+                                          }
+                                        },
+                                        icon: const Icon(
+                                          Icons.download_rounded,
+                                          size: 18,
+                                        ),
+                                        label: const Text('Hesabıma İndir'),
+                                      ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Kapat'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
   void _yeniKlasorOlusturDialogu(PlanDeposu depo) {
     final adDenetci = TextEditingController();
@@ -231,6 +379,11 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Hazır Klasörler',
+            icon: const Icon(Icons.cloud_download_outlined),
+            onPressed: () => _hazirKlasorlerDialogu(depo),
+          ),
+          IconButton(
             tooltip: 'Klasör Oluştur / Grupla',
             icon: const Icon(Icons.create_new_folder_outlined),
             onPressed: () => _yeniKlasorOlusturDialogu(depo),
@@ -253,7 +406,9 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (val) {
-              if (val == 'klasor') {
+              if (val == 'hazir') {
+                _hazirKlasorlerDialogu(depo);
+              } else if (val == 'klasor') {
                 _yeniKlasorOlusturDialogu(depo);
               } else if (val == 'ornek') {
                 depo.ornekKitapYukle();
@@ -267,6 +422,16 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
               }
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'hazir',
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, size: 20),
+                    SizedBox(width: 8),
+                    Text('Hazır Kitap Klasörleri'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'klasor',
                 child: Row(
@@ -456,6 +621,90 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
           ],
 
           const SizedBox(height: 14),
+
+          // Yeni veya eksik klasörü olan kullanıcılara hazır klasör öneri kartı
+          if (hazirKutuphaneKlasorleri
+              .any((kl) => !depo.hazirKlasorYukluMu(kl.id))) ...[
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: tema.colorScheme.secondary.withValues(alpha: 0.35),
+                ),
+              ),
+              color: tema.colorScheme.secondaryContainer.withValues(alpha: 0.25),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.cloud_download_outlined,
+                          size: 18,
+                          color: tema.colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Hazır Klasörler — İstediğini Seç, Hesabına İndir',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: tema.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (var i = 0;
+                            i < hazirKutuphaneKlasorleri.length;
+                            i++)
+                          Builder(
+                            builder: (_) {
+                              final kl = hazirKutuphaneKlasorleri[i];
+                              final yuklu = depo.hazirKlasorYukluMu(kl.id);
+                              return ActionChip(
+                                avatar: Icon(
+                                  yuklu
+                                      ? Icons.check_circle
+                                      : Icons.download_rounded,
+                                  size: 16,
+                                  color: yuklu
+                                      ? Colors.teal
+                                      : tema.colorScheme.primary,
+                                ),
+                                label: Text(
+                                  yuklu
+                                      ? '${i + 1} - ${kl.ad} (İndirildi)'
+                                      : '${i + 1} - ${kl.ad} (${kl.kitapSayisi} Kitap)',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: yuklu
+                                    ? () => setState(() => _seciliKlasor = kl.ad)
+                                    : () => _hazirKlasorIndir(depo, kl),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
 
           if (kitaplar.isEmpty) ...[
             const SizedBox(height: 30),

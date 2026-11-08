@@ -9,6 +9,7 @@ import 'package:app/features/defterler/hazir_skorlar.dart';
 import 'package:app/features/defterler/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
+import 'package:app/features/kutuphane/hazir_klasorler.dart';
 import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/takvim/calisma.dart';
@@ -1324,6 +1325,49 @@ class PlanDeposu extends ChangeNotifier {
     _kitaplar.insert(0, ornek);
     _degisti();
     await hemenKaydet();
+  }
+
+  /// Belirtilen hazır klasörün tüm kitapları kütüphanede mevcut mu?
+  bool hazirKlasorYukluMu(String klasorId) {
+    HazirKlasor? hedef;
+    for (final kl in hazirKutuphaneKlasorleri) {
+      if (kl.id == klasorId) {
+        hedef = kl;
+        break;
+      }
+    }
+    if (hedef == null) return false;
+    final ornekler = hedef.kitaplarUret();
+    if (ornekler.isEmpty) return false;
+    final mevcutIdler = _kitaplar.map((k) => k.id).toSet();
+    return ornekler.every((ok) => mevcutIdler.contains(ok.id));
+  }
+
+  /// Seçilen hazır klasördeki kitapları (daha önce eklenmemiş olanları) kütüphaneye indirir/ekler.
+  /// Eklenen yeni kitap sayısını döner.
+  Future<int> hazirKlasorYukle(String klasorId) async {
+    HazirKlasor? hedef;
+    for (final kl in hazirKutuphaneKlasorleri) {
+      if (kl.id == klasorId) {
+        hedef = kl;
+        break;
+      }
+    }
+    if (hedef == null) return 0;
+    final yeniKitaplar = hedef.kitaplarUret();
+    final mevcutIdler = _kitaplar.map((k) => k.id).toSet();
+    var eklenen = 0;
+    for (final kitap in yeniKitaplar) {
+      if (!mevcutIdler.contains(kitap.id)) {
+        _kitaplar.add(kitap);
+        eklenen++;
+      }
+    }
+    if (eklenen > 0) {
+      _degisti();
+      await hemenKaydet();
+    }
+    return eklenen;
   }
 
   Future<void> kitapBolumDurumuDegistir(

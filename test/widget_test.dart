@@ -629,7 +629,7 @@ void rehberTestleri() {
 
 
 void kutuphaneTestleri() {
-  testWidgets('Kütüphane sekmesi açılır, örnek kitap ve kitap ekleme penceresi görünür',
+  testWidgets('Kütüphane sekmesi açılır, hazır klasörler önerilir ve kitap ekleme penceresi görünür',
       (tester) async {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
@@ -643,6 +643,9 @@ void kutuphaneTestleri() {
 
     expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
     expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
+    expect(find.textContaining('Hazır Klasörler'), findsOneWidget);
+    expect(find.textContaining('1 - SpeeTUS (5. Baskı)'), findsOneWidget);
+    expect(find.textContaining('2 - TUSDATA Konu Anlatım'), findsOneWidget);
 
     await tester.tap(find.text('Kitap Ekle'));
     await tester.pumpAndSettle();
