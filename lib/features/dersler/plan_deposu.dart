@@ -708,7 +708,9 @@ class PlanDeposu extends ChangeNotifier {
       final ders = dersBul(dersId);
       if (ders != null) {
         final yeni = konuEkle(dersId, '${ders.ad} - Genel Çalışma');
-        liste = [yeni];
+        if (yeni != null) {
+          liste = [yeni];
+        }
       }
     }
     return liste;

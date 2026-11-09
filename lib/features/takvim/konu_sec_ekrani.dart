@@ -255,7 +255,7 @@ class _KonuSecEkraniState extends State<KonuSecEkrani>
                 subtitle: Text(
                   konular.isEmpty
                       ? 'Genel çalışma konusu oluşturulacak'
-                      : '${konular.length} konu · $kalanSayisi kalan (${tamamlananSayisi} çalışıldı)',
+                      : '${konular.length} konu · $kalanSayisi kalan ($tamamlananSayisi çalışıldı)',
                   style: TextStyle(
                     fontSize: 12,
                     color: tema.colorScheme.onSurfaceVariant,
