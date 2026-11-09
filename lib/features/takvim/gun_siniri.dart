@@ -6,16 +6,22 @@ import 'package:flutter/material.dart';
 Future<bool> yeniKonuSiniriOnayi(
   BuildContext context,
   PlanDeposu depo,
-  DateTime gun,
-) async {
-  if (!depo.gunDolu(gun)) return true;
+  DateTime gun, {
+  int eklenecekSayi = 1,
+}) async {
+  final mevcut = depo.gundekiKonuSayisi(gun);
+  if (mevcut + eklenecekSayi <= depo.gunlukYeniKonuSiniri) return true;
   final sonuc = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Bu gün dolu görünüyor'),
       content: Text(
-        'Bu güne zaten ${depo.gundekiKonuSayisi(gun)} konu yerleştirdin '
-        '(önerilen en çok ${depo.gunlukYeniKonuSiniri}). Yine de eklensin mi?',
+        eklenecekSayi > 1
+            ? 'Bu günde zaten $mevcut konu planlı '
+                '(önerilen günlük sınır ${depo.gunlukYeniKonuSiniri}). '
+                '$eklenecekSayi yeni konu daha eklensin mi?'
+            : 'Bu güne zaten $mevcut konu yerleştirdin '
+                '(önerilen en çok ${depo.gunlukYeniKonuSiniri}). Yine de eklensin mi?',
       ),
       actions: [
         TextButton(

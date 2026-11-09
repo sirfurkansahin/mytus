@@ -684,6 +684,36 @@ class PlanDeposu extends ChangeNotifier {
     return c;
   }
 
+  /// Birden çok konuyu tek seferde bir güne yerleştirir.
+  List<Calisma> calismalariEkle(Iterable<int> konuIdleri, DateTime gun) {
+    final eklenenler = <Calisma>[];
+    final g = gunBasi(gun);
+    for (final id in konuIdleri) {
+      if (konuBul(id) == null) continue;
+      final c = Calisma(id: _yeniId(), konuId: id, tarih: g);
+      _calismalar.add(c);
+      eklenenler.add(c);
+    }
+    if (eklenenler.isNotEmpty) {
+      _degisti();
+    }
+    return eklenenler;
+  }
+
+  /// Bir derse ait tüm konuları döndürür. Eğer derste hiç konu yoksa
+  /// otomatik bir genel çalışma konusu oluşturur.
+  List<Konu> dersinKonulariniGetirVeyaOlustur(int dersId) {
+    var liste = konular(dersId);
+    if (liste.isEmpty) {
+      final ders = dersBul(dersId);
+      if (ders != null) {
+        final yeni = konuEkle(dersId, '${ders.ad} - Genel Çalışma');
+        liste = [yeni];
+      }
+    }
+    return liste;
+  }
+
   void calismaSil(int id) {
     _calismalar.removeWhere((c) => c.id == id);
     _degisti();

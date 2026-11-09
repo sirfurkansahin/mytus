@@ -39,22 +39,46 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
     });
   }
 
-  Future<void> _konuYerlestir(PlanDeposu depo) async {
-    final konuId = await Navigator.of(context).push<int>(
-      MaterialPageRoute<int>(builder: (_) => const KonuSecEkrani()),
+  Future<void> _konuYerlestir(PlanDeposu depo, {int baslangicSekmesi = 0}) async {
+    final secim = await Navigator.of(context).push<dynamic>(
+      MaterialPageRoute<dynamic>(
+        builder: (_) => KonuSecEkrani(baslangicSekmesi: baslangicSekmesi),
+      ),
     );
-    if (!mounted || konuId == null) return;
-    if (!await yeniKonuSiniriOnayi(context, depo, _secili) || !mounted) return;
-    final c = depo.calismaEkle(konuId, _secili);
-    if (c == null) return;
-    final konu = depo.konuBul(konuId);
+    if (!mounted || secim == null) return;
+    final List<int> konuIdleri = (secim is List<int>)
+        ? secim
+        : (secim is int ? [secim] : <int>[]);
+    if (konuIdleri.isEmpty) return;
+
+    if (!await yeniKonuSiniriOnayi(
+          context,
+          depo,
+          _secili,
+          eklenecekSayi: konuIdleri.length,
+        ) ||
+        !mounted) {
+      return;
+    }
+
+    final eklenenler = depo.calismalariEkle(konuIdleri, _secili);
+    if (eklenenler.isEmpty) return;
+
+    final dersAdlari = konuIdleri
+        .map((kId) => depo.konuBul(kId)?.dersId)
+        .whereType<int>()
+        .map((dId) => depo.dersBul(dId)?.ad)
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    final mesaj = konuIdleri.length == 1
+        ? '"${depo.konuBul(konuIdleri.first)?.ad ?? 'Konu'}" ${tarihKisa(_secili)} gününe yerleştirildi.'
+        : '${konuIdleri.length} konu (${dersAdlari.join(', ')}) ${tarihKisa(_secili)} gününe yerleştirildi.';
+
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('"${konu?.ad ?? 'Konu'}" ${tarihKisa(_secili)} gününe yerleştirildi.'),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(mesaj)));
   }
 
   Widget _ayIzgarasi({
@@ -349,9 +373,25 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              FilledButton.tonal(
-                onPressed: yerlestirilebilir ? () => _konuYerlestir(depo) : null,
-                child: const Text('+ Konu yerleştir'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: yerlestirilebilir ? () => _konuYerlestir(depo) : null,
+                    child: const Text('+ Konu yerleştir'),
+                  ),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.library_add_check_outlined, size: 18),
+                    label: const Text('+ Çoklu Ders Ekle'),
+                    onPressed: yerlestirilebilir
+                        ? () => _konuYerlestir(depo, baslangicSekmesi: 1)
+                        : null,
+                  ),
+                ],
               ),
             ],
           ),

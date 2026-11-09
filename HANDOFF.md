@@ -1,38 +1,35 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 8 Kasım 2026, 1. Modül: Kütüphane ve Kitap Bölümleri İyileştirmeleri tamamlandı (dal `claude/modul-kutuphane`).
+Son guncelleme: 9 Kasım 2026, Takvime Çoklu Ders Ekleme ve Kütüphane Hazır Klasör Kartının Kaldırılması geliştirildi (dal `claude/takvim-kutuphane-gelistirme`).
 
 ## Durum
-Kullanıcının "modülleri sıra sıra güncellemeye başlayalım" onayı doğrultusunda ilk modül olan **Kütüphane ve Kitap Bölümleri** başarıyla tamamlandı ve GitHub Actions üzerinde (Çalışma ID: 42490228146) tüm statik analiz, birim/widget testleri geçerek Web Mobil (PWA) olarak başarıyla yayınlandı:
+Kullanıcının "takvime ders ekleme fonksiyonunu geliştir. tek seferde birden çok ders eklensin. kütüphane modülünde klasör indirme butonunu ekrandan kaldır. çok yer kaplıyor" talebi doğrultusunda geliştirmeler yapıldı:
 
-1. **Kitap Detay Ekranı (`lib/features/kutuphane/kitap_detay_ekrani.dart`):**
-   - **Canlı Arama Çubuğu:** Bölüm adı ve sayfa aralığına göre anında arama ve temizleme butonu.
-   - **Notlular Filtresi:** "Tümü", "Kalanlar", "Bitenler" filtrelerine ek olarak hekimin sadece not aldığı bölümleri izole eden `Notlular (${kitap.notluBolumSayisi})` çipi.
-   - **Hızlı Not Alt Penceresi (Bottom Sheet Ergonomisi):** Tam ekrana gitmeden alttan açılan modal pencerede (`_bolumHizliNotPenceresi`) mevcut notların ve fotoğrafların hızlı önizlemesi, yeni not ekleme ve silme.
-   - **Genişletilmiş Dokunmatik Alan:** 44x44 dp dokunma alanı ve `MaterialTapTargetSize.padded` ile rahat kullanım.
-   - **Geriye Dönük Uyumluluk:** Doğrudan notlar ekranına giden ikon butonu ve filtreleme sırasında odak dağıtmayan akıllı arayüz korundu.
+1. **Kütüphane Ekranı Temizliği (`lib/features/kutuphane/kutuphane_ekrani.dart`):**
+   - Ekranda dikeyde çok yer kaplayan `Hazır Klasörler — İstediğini Seç, Hesabına İndir` kartı gövdeden kaldırıldı.
+   - Hazır klasörlere erişim AppBar bulut indirme ikonu ve açılır menü üzerinden eksiksiz korundu.
+   - `test/widget_test.dart` içindeki kütüphane testi güncellendi.
 
-2. **Kütüphane Ana Ekranı (`lib/features/kutuphane/kutuphane_ekrani.dart`):**
-   - **Kitap Arama:** Kütüphanedeki tüm kitaplar arasında isme, derse veya klasöre göre hızlı arama. Arama sonuçları temiz bir listede eşleşen kitapları klasör rozetiyle birlikte gösterir.
-   - Arama temizlendiğinde klasik klasör ve hazır paket görünümüne kesintisiz geçiş.
+2. **Takvime Çoklu Ders ve Konu Ekleme:**
+   - **Plan Deposu (`lib/features/dersler/plan_deposu.dart`):** `calismalariEkle(Iterable<int> konuIdleri, DateTime gun)` ve `dersinKonulariniGetirVeyaOlustur(int dersId)` fonksiyonları eklendi.
+   - **Günlük Sınır Onayı (`lib/features/takvim/gun_siniri.dart`):** `yeniKonuSiniriOnayi` fonksiyonuna `eklenecekSayi` parametresi eklendi; çoklu eklemede tek bir bilgilendirme penceresiyle toplam sayı soruluyor.
+   - **Konu ve Ders Seçim Ekranı (`lib/features/takvim/konu_sec_ekrani.dart`):**
+     - İki sekmeli modern arayüz: 1) "Konular" (tekil/çoklu konu seçimi ve arama), 2) "Dersler (Toplu Ekle)" (Temel ve Klinik bilimler bazında tek dokunuşla tüm dersi veya birden çok dersi seçme).
+     - Hızlı seçim çipleri: "Tüm Temel Bilimler", "Tüm Klinik Bilimler", "Seçimi Temizle".
+     - Altta ergonomik başparmak alanı (Thumb Zone) seçim çubuğu: `${seciliDersSayisi} ders · ${seciliKonuSayisi} konu seçildi` ve `Takvime Ekle` butonu.
+     - Tek konuya dokunulduğunda doğrudan yerleştirme (önceki hızlı akış) bozulmadan korundu.
+   - **Takvim Ekranı (`lib/features/takvim/takvim_ekrani.dart`):** Gün görünümüne `+ Çoklu Ders Ekle` butonu eklendi, `_konuYerlestir` fonksiyonu çoklu seçimleri ve ders adları özetli SnackBar bildirimini destekleyecek şekilde güncellendi.
 
-3. **Veri Modelleri (`lib/features/kutuphane/modeller.dart`):**
-   - `Kitap.notluBolumSayisi` hesaplayıcısı eklendi.
-
-4. **Testler (`test/kutuphane_test.dart`):**
-   - `Kitap.notluBolumSayisi` birim testi.
-   - `KitapDetayEkrani` bölüm arama, "Notlular" filtre ve BottomSheet önizleme widget testleri.
-   - `KutuphaneEkrani` kitap arama çubuğu ve sonuç listesi widget testi.
+3. **Testler (`test/calisma_deposu_test.dart`, `test/widget_test.dart`):**
+   - `calismalariEkle` ve `dersinKonulariniGetirVeyaOlustur` birim testleri eklendi.
+   - Takvimden `+ Çoklu Ders Ekle` butonuyla birden çok dersin tek seferde takvime yerleştirilmesi widget testi eklendi.
 
 ## Siradaki adim
-- 2. Modül: **Dersler & Konular** geliştirmesine geçilmesi (`claude/modul-dersler` dalı).
-  - Sarmal müfredatta hızlı filtreler (Tümü / Kalanlar / Bitenler),
-  - Konu bazında hızlı arama,
-  - Konu kartı üzerinde aralıklı tekrar zinciri (R0-R4) ilerleme halkaları veya rozetleri,
-  - Tek dokunuşla konu tamamlama ve ergonomik soru sayısı / not girme penceresi.
+- GitHub Actions CI derlemesi ve testlerinin çalıştırılması.
+- Modül 2: **Dersler & Konular** geliştirmesine devam edilmesi.
 
 ## Bilinen sorunlar / riskler
-- Yok. Geriye dönük uyumluluk ve mevcut widget testleri (`Kütüphane İlerlemesi`, `Kütüphaneye Kitap Ekle`) korunmuştur.
+- Yok. Mevcut tekil konu yerleştirme, Pomodoro F.T. time konu seçimi ve widget testleri geriye dönük tam uyumludur.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

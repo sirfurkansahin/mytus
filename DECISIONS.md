@@ -188,4 +188,14 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 | Hızlı Not Alt Penceresi | Bölüm kartından tam ekrana gitmeye gerek kalmadan alttan açılan modal alt pencere (`DraggableScrollableSheet`) ile notları okuma, silme ve tek dokunuşla yeni not ekleme ergonomisi sağlandı. |
 | Kütüphane Kitap Arama | `KutuphaneEkrani` ana sayfasında kitap adı, ders adı veya klasör adına göre anlık filtreleme ve temizleme çubuğu bağlandı. |
 | Dokunmatik Alan Standardı | Bölüm listelerinde en az 44x44 dp dokunma alanı ve `MaterialTapTargetSize.padded` kuralı uygulandı. |
+| Hazır Klasör Kartının Kaldırılması | Kütüphane ekranında dikeyde çok yer kaplayan "Hazır Klasörler — İstediğini Seç, Hesabına İndir" kartı ekrandan kaldırıldı (9 Kasım 2026). Hazır klasörlere erişim AppBar bulut indirme ikonu ve açılır menü üzerinden korundu. |
+
+## Takvim Çoklu Ders Ekleme (9 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Çoklu Ders & Konu Ekleme | Hekimlerin tek seferde birden çok dersi veya konuyu takvime yerleştirebilmesi sağlandı. Takvim gün görünümüne `+ Çoklu Ders Ekle` butonu eklendi. |
+| Seçim Modeli | `KonuSecEkrani` iki sekmeli yapıya kavuşturuldu: 1) "Konular" (tekil/çoklu konu seçimi ve anlık arama), 2) "Dersler (Toplu Ekle)" (Temel ve Klinik bilimler bazında tek dokunuşla tüm dersi veya birden çok dersi toplu seçme). |
+| Geriye Dönük Uyumluluk | Tek bir konuya doğrudan dokunulduğunda anında tekil yerleştirme davranışı korunarak tüm testler ve hızlı kullanım akışı muhafaza edildi. |
+| Günlük Sınır Bildirimi | Birden çok konu veya ders eklendiğinde önerilen günlük limit kontrol edilerek tek bir onay penceresinde kullanıcıya toplam sayı bildirilir. |
+
 

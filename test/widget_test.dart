@@ -183,6 +183,47 @@ void takvimTestleri() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('Takvimde çoklu ders ekleme butonuyla birden çok ders tek seferde takvime eklenir',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Takvim'));
+    await tester.pumpAndSettle();
+
+    // "+ Çoklu Ders Ekle" butonuna dokunulur
+    expect(find.text('+ Çoklu Ders Ekle'), findsOneWidget);
+    await tester.tap(find.text('+ Çoklu Ders Ekle'));
+    await tester.pumpAndSettle();
+
+    // "Dersler (Toplu Ekle)" sekmesi açık olmalı
+    expect(find.text('Dersler (Toplu Ekle)'), findsOneWidget);
+
+    // Listeden iki farklı derse dokunarak seç
+    final dersler = depo.tumDersler;
+    final d1 = dersler[0];
+    final d2 = dersler[1];
+
+    await tester.tap(find.text(d1.ad));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(d2.ad));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Takvime Ekle'), findsOneWidget);
+    await tester.tap(find.text('Takvime Ekle'));
+    await tester.pumpAndSettle();
+
+    // Takvime eklenmiş olmalı
+    final eklenenKonular = depo.calismalarGun(gunBasi(DateTime.now()));
+    expect(eklenenKonular.length, greaterThanOrEqualTo(2));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('Konu ekranında tekrar planı görünür', (tester) async {
     final depo = await doluDepo(tester);
     final ilkDers = depo.tumDersler.first;
@@ -643,9 +684,15 @@ void kutuphaneTestleri() {
 
     expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
     expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
-    expect(find.textContaining('Hazır Klasörler'), findsOneWidget);
+
+    // Hazır klasörler AppBar butonuyla açılır (ekrandan yer kaplayan kart kaldırılmıştır)
+    await tester.tap(find.byTooltip('Hazır Klasörler'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Hazır Kitap Klasörleri'), findsOneWidget);
     expect(find.textContaining('1 - SpeeTUS (5. Baskı)'), findsOneWidget);
     expect(find.textContaining('2 - TUSDATA Konu Anlatım'), findsOneWidget);
+    await tester.tap(find.text('Kapat'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Kitap Ekle'));
     await tester.pumpAndSettle();
