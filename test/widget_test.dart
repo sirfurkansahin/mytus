@@ -218,6 +218,12 @@ void takvimTestleri() {
     await tester.tap(find.text('Takvime Ekle'));
     await tester.pumpAndSettle();
 
+    // Günlük yeni konu sınırı onay penceresi çıkarsa onaylanır
+    if (find.text('Yine de ekle').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Yine de ekle'));
+      await tester.pumpAndSettle();
+    }
+
     // Takvime eklenmiş olmalı
     final eklenenKonular = depo.calismalarGun(gunBasi(DateTime.now()));
     expect(eklenenKonular.length, greaterThanOrEqualTo(2));
