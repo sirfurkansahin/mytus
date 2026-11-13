@@ -1,4 +1,5 @@
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/auth/giris_ekrani.dart';
 import 'package:app/features/auth/hesap_karti.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
