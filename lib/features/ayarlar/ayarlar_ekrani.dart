@@ -183,13 +183,20 @@ class AyarlarEkrani extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
         children: [
-          if (kimlik != null) ...[
-            _baslik(context, 'HESAP VE BULUT'),
-            if (kimlik.aktifKullanici != null)
-              const HesapKarti()
-            else
-              const _BulutaBaglanKarti(),
-          ],
+          if (kimlik != null)
+            ListenableBuilder(
+              listenable: kimlik,
+              builder: (context, _) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _baslik(context, 'HESAP VE BULUT'),
+                  if (kimlik.aktifKullanici != null)
+                    const HesapKarti()
+                  else
+                    const _BulutaBaglanKarti(),
+                ],
+              ),
+            ),
           _baslik(context, 'ÇALIŞMA GRUBU'),
           AyarSatiri(
             baslik: 'Çalışma Grubu & Puan Tablosu',
