@@ -23,12 +23,15 @@ Kullanıcının "sırayla hepsini uygula" talimatı ve netleştirdiği kararlar 
    - Tekrar erteleme, gecikme kayması, telafi planı hesaplama ve uygulama birim testleri eklendi.
    - Bölüm notu etiketleri ve kitap sayfa tahmini testleri eklendi.
 
+## CI ve Canlı Dağıtım Doğrulaması
+- **GitHub Actions İş Akışı (Run 43468985212):** Kod analizi (`flutter analyze`), tüm birim/widget/uçtan uca testler (`flutter test`) ve Web derlemesi başarıyla tamamlandı (yeşil).
+- **Canlı Yayın:** Web Mobil (PWA) sürümü `https://sirfurkansahin.github.io/mytus/` adresinde güncellendi.
+
 ## Siradaki adim
-- Yapılan değişikliklerin `git commit` ile kaydedilmesi.
-- GitHub Actions CI derlemesi ve testlerinin çalıştırılması.
+- Kullanıcının talebine göre sonraki modül geliştirmelerine geçilmesi (F.T. Time sayacı, Denemeler veya Kullanıcı Hesabı / Bulut).
 
 ## Bilinen sorunlar / riskler
-- Yok. Mevcut veri yapılarıyla tam geriye dönük uyumludur.
+- Yok. Mevcut veri yapılarıyla tam geriye dönük uyumludur. Küçük ekran taşmaları Wrap düzeniyle güvenceye alınmıştır.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.
