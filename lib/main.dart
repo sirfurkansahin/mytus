@@ -60,6 +60,7 @@ class MyTusApp extends StatefulWidget {
 class _MyTusAppState extends State<MyTusApp> {
   late final PlanDeposu _deposu;
   String? _sonOturumUid;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -115,6 +116,7 @@ class _MyTusAppState extends State<MyTusApp> {
       listenable: _deposu,
       builder: (context, _) {
         return MaterialApp(
+          navigatorKey: _navigatorKey,
           title: 'MY TUS',
           debugShowCheckedModeBanner: false,
           // Ana renk mor (onaylı tasarım). Tema kullanıcı tercihini veya telefonun ayarını izler.

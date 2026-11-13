@@ -92,10 +92,10 @@ class _GirisEkraniState extends State<GirisEkrani> {
       if (!mounted) return;
       final depo = DepoKapsami.belki(context);
       final nav = Navigator.of(context);
-      await depo?.misafirModunuAyarla(false);
-      if (mounted && widget.misafirModundanMi && nav.canPop()) {
+      if (widget.misafirModundanMi && nav.canPop()) {
         nav.pop(true);
       }
+      await depo?.misafirModunuAyarla(false);
     } on KimlikHatasi catch (e) {
       if (!mounted) return;
       setState(() => _hataMesaji = e.mesaj);

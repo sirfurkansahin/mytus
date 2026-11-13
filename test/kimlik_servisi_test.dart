@@ -250,7 +250,9 @@ void main() {
         // Başarılı kayıttan sonra Ayarlar'a döner ve HesapKarti görünür
         expect(kimlik.aktifKullanici?.eposta, 'doktor@mytus.com');
         expect(depo.misafirModu, isFalse);
-        expect(find.byKey(const ValueKey('hesap_cikis_butonu')), findsOneWidget);
+        final cikisButonu = find.byKey(const ValueKey('hesap_cikis_butonu'));
+        await tester.ensureVisible(cikisButonu);
+        expect(cikisButonu, findsOneWidget);
       },
     );
   });
