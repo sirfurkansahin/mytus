@@ -217,9 +217,15 @@ void main() {
 
         // Giriş ekranı açılır (kapatma butonu ile)
         expect(find.text('Bulut Hesabı'), findsOneWidget);
-        expect(find.text('Hesabına Giriş Yap'), findsOneWidget);
 
-        // Giriş yap
+        // Kayıt Ol sekmesine geç
+        await tester.tap(find.text('Kayıt Ol'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const ValueKey('giris_takma_ad')),
+          'Dr. Furkan',
+        );
         await tester.enterText(
           find.byKey(const ValueKey('giris_eposta')),
           'doktor@mytus.com',
@@ -228,13 +234,20 @@ void main() {
           find.byKey(const ValueKey('giris_sifre')),
           '123456',
         );
+
+        final kvkkKutusu = find.byKey(const ValueKey('giris_kvkk_onay'));
+        await tester.ensureVisible(kvkkKutusu);
+        await tester.pumpAndSettle();
+        await tester.tap(kvkkKutusu);
+        await tester.pumpAndSettle();
+
         final onayla = find.byKey(const ValueKey('giris_onay_butonu'));
         await tester.ensureVisible(onayla);
         await tester.pumpAndSettle();
         await tester.tap(onayla);
         await tester.pumpAndSettle();
 
-        // Başarılı girişten sonra Ayarlar'a döner ve HesapKarti görünür
+        // Başarılı kayıttan sonra Ayarlar'a döner ve HesapKarti görünür
         expect(kimlik.aktifKullanici?.eposta, 'doktor@mytus.com');
         expect(depo.misafirModu, isFalse);
         expect(find.byKey(const ValueKey('hesap_cikis_butonu')), findsOneWidget);
