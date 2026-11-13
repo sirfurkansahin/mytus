@@ -491,13 +491,14 @@ class _BulutaBaglanKarti extends StatelessWidget {
             icon: const Icon(Icons.login_rounded, size: 18),
             label: const Text('Giriş Yap / Hesap Oluştur'),
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               final basarili = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(
                   builder: (_) => const GirisEkrani(misafirModundanMi: true),
                 ),
               );
-              if (basarili == true && context.mounted) {
-                ScaffoldMessenger.of(context)
+              if (basarili == true) {
+                messenger
                   ..hideCurrentSnackBar()
                   ..showSnackBar(
                     const SnackBar(

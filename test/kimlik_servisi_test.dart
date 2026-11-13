@@ -214,10 +214,8 @@ void main() {
         expect(find.text('Bulut Hesabına Bağlan'), findsOneWidget);
         expect(find.text('Şu an yerel (hesapsız) moddasın'), findsOneWidget);
 
-        // Giriş Yap / Hesap Oluştur butonuna dokun
+        // Giriş Yap / Hesap Oluştur butonuna dokun (kart en başta olduğu için doğrudan dokunulur)
         final girisButonu = find.byKey(const ValueKey('ayarlar_giris_yap_butonu'));
-        await tester.ensureVisible(girisButonu);
-        await tester.pumpAndSettle();
         await tester.tap(girisButonu);
         await tester.pumpAndSettle();
 
@@ -257,15 +255,22 @@ void main() {
         expect(kimlik.aktifKullanici?.eposta, 'doktor@mytus.com');
         expect(depo.misafirModu, isFalse);
         expect(find.byType(AyarlarEkrani), findsOneWidget);
-        final texts = find
-            .byType(Text)
-            .evaluate()
-            .map((e) => (e.widget as Text).data ?? (e.widget as Text).textSpan?.toPlainText() ?? '')
-            .where((t) => t.isNotEmpty)
-            .toList();
-        expect(texts, contains('doktor@mytus.com'), reason: 'EKRANDAKI YAZILAR: $texts');
         expect(find.byType(HesapKarti), findsOneWidget);
-        expect(find.byKey(const ValueKey('hesap_cikis_butonu')), findsOneWidget);
+        expect(find.textContaining('doktor@mytus.com'), findsOneWidget);
+
+        // Çıkış yap butonuna basınca oturum kapanır ve misafir modu sıfırlanıp giriş ekranına döner
+        final cikisButonu = find.byKey(const ValueKey('hesap_cikis_butonu'));
+        expect(cikisButonu, findsOneWidget);
+        await tester.tap(cikisButonu);
+        await tester.pumpAndSettle();
+
+        // Çıkış onay diyaloğunda "Çıkış Yap" eylemini onayla
+        await tester.tap(find.widgetWithText(FilledButton, 'Çıkış Yap'));
+        await tester.pumpAndSettle();
+
+        expect(kimlik.aktifKullanici, isNull);
+        expect(depo.misafirModu, isFalse);
+        expect(find.byType(GirisEkrani), findsOneWidget);
       },
     );
   });
