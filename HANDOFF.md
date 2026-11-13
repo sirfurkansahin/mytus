@@ -3,7 +3,7 @@
 Son guncelleme: 13 Kasım 2026, Misafir Modu & Esnek Bulut Girişi tamamlandı (dal `claude/esnek-giris-bulut`).
 
 ## Durum
-Kullanıcının tercihi doğrultusunda "Misafir Modu & Esnek Giriş" akışı eksiksiz uygulandı:
+Kullanıcının tercihi doğrultusunda "Misafir Modu & Esnek Giriş" akışı eksiksiz uygulandı ve GitHub Actions CI üzerinde başarıyla doğrulandı (Run `#43480472832` - tüm analiz, test ve PWA dağıtımı yeşil):
 - **Giriş Ekranı (`lib/features/auth/giris_ekrani.dart`):**
   - İlk açılışta zorunlu giriş barajı kaldırıldı. Giriş/Kayıt butonlarının altına "Hesap Açmadan Devam Et (Misafir Modu)" seçeneği eklendi.
   - Hekimlerin nöbette veya ilk denemede vakit kaybetmeden uygulamayı doğrudan kullanabilmesi sağlandı.
@@ -19,7 +19,7 @@ Kullanıcının tercihi doğrultusunda "Misafir Modu & Esnek Giriş" akışı ek
 - **Çalışma Grubu Köprüsü (`lib/features/grup/grup_ekrani.dart`):**
   - Misafir modundaki kullanıcı bir gruba katılmak veya grup kurmak istediğinde doğrudan bulut girişine yönlendirilir.
 - **Testler (`test/kimlik_servisi_test.dart`):**
-  - Misafir modu seçimiyle uygulamaya geçiş ve Ayarlar'dan bulut hesabına bağlanıp verilerin eşitlenmesi widget testleri eklendi.
+  - Misafir modu seçimiyle uygulamaya geçiş, Ayarlar'dan bulut hesabına bağlanıp verilerin eşitlenmesi ve oturum kapatma uçtan uca widget testleri başarıyla doğrulandı.
 
 ## Siradaki adim
 - Kullanıcı talebine göre sıradaki modül geliştirmeleri (F.T. Time odak sayacı, Deneme Sınavı analizi veya Google ile Giriş).
