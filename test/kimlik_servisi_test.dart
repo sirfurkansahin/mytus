@@ -250,6 +250,8 @@ void main() {
         // Başarılı kayıttan sonra Ayarlar'a döner ve HesapKarti görünür
         expect(kimlik.aktifKullanici?.eposta, 'doktor@mytus.com');
         expect(depo.misafirModu, isFalse);
+        final tumYazilar = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).toList();
+        print('=== TEST EKRANINDAKI YAZILAR ===: $tumYazilar');
         final cikisButonu = find.byKey(const ValueKey('hesap_cikis_butonu'));
         await tester.ensureVisible(cikisButonu);
         expect(cikisButonu, findsOneWidget);
