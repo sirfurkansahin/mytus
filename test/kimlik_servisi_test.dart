@@ -257,6 +257,13 @@ void main() {
         expect(kimlik.aktifKullanici?.eposta, 'doktor@mytus.com');
         expect(depo.misafirModu, isFalse);
         expect(find.byType(AyarlarEkrani), findsOneWidget);
+        final texts = find
+            .byType(Text)
+            .evaluate()
+            .map((e) => (e.widget as Text).data ?? (e.widget as Text).textSpan?.toPlainText() ?? '')
+            .where((t) => t.isNotEmpty)
+            .toList();
+        expect(texts, contains('doktor@mytus.com'), reason: 'EKRANDAKI YAZILAR: $texts');
         expect(find.byType(HesapKarti), findsOneWidget);
         expect(find.byKey(const ValueKey('hesap_cikis_butonu')), findsOneWidget);
       },
