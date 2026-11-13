@@ -178,6 +178,10 @@ void main() {
     testWidgets(
       'misafir modundayken Ayarlar ekranında Buluta Bağlan kartı görünür ve giriş yapılınca hesaba bağlanır',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 2000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
         final depo = PlanDeposu(kayit: BellekKaydi());
         await depo.yukle();
         await depo.karsilamayiTamamla(
