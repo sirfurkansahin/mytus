@@ -1,5 +1,7 @@
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/auth/hesap_karti.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
+import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/main.dart';
@@ -254,9 +256,9 @@ void main() {
         // Başarılı kayıttan sonra Ayarlar'a döner ve HesapKarti görünür
         expect(kimlik.aktifKullanici?.eposta, 'doktor@mytus.com');
         expect(depo.misafirModu, isFalse);
-        final cikisButonu = find.byKey(const ValueKey('hesap_cikis_butonu'));
-        await tester.ensureVisible(cikisButonu);
-        expect(cikisButonu, findsOneWidget);
+        expect(find.byType(AyarlarEkrani), findsOneWidget);
+        expect(find.byType(HesapKarti), findsOneWidget);
+        expect(find.byKey(const ValueKey('hesap_cikis_butonu')), findsOneWidget);
       },
     );
   });
