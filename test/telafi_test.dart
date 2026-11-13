@@ -1,4 +1,3 @@
-import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
