@@ -89,12 +89,12 @@ class _GirisEkraniState extends State<GirisEkrani> {
       } else {
         await servis.girisYap(eposta: eposta, sifre: sifre);
       }
-      if (mounted) {
-        final depo = DepoKapsami.belki(context);
-        await depo?.misafirModunuAyarla(false);
-        if (widget.misafirModundanMi && Navigator.of(context).canPop()) {
-          Navigator.of(context).pop(true);
-        }
+      if (!mounted) return;
+      final depo = DepoKapsami.belki(context);
+      final nav = Navigator.of(context);
+      await depo?.misafirModunuAyarla(false);
+      if (mounted && widget.misafirModundanMi && nav.canPop()) {
+        nav.pop(true);
       }
     } on KimlikHatasi catch (e) {
       if (!mounted) return;
