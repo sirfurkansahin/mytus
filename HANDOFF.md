@@ -1,35 +1,34 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 9 Kasım 2026, Takvime Çoklu Ders Ekleme ve Kütüphane Hazır Klasör Kartının Kaldırılması geliştirildi (dal `claude/takvim-kutuphane-gelistirme`).
+Son guncelleme: 13 Kasım 2026, Takvim, Kütüphane ve Organik Entegrasyon 3 Aşamalı Paketi tamamlandı (dal `claude/takvim-kutuphane-3asama`).
 
 ## Durum
-Kullanıcının "takvime ders ekleme fonksiyonunu geliştir. tek seferde birden çok ders eklensin. kütüphane modülünde klasör indirme butonunu ekrandan kaldır. çok yer kaplıyor" talebi doğrultusunda geliştirmeler yapıldı:
+Kullanıcının "sırayla hepsini uygula" talimatı ve netleştirdiği kararlar doğrultusunda 3 aşamalı geliştirme eksiksiz uygulandı:
 
-1. **Kütüphane Ekranı Temizliği (`lib/features/kutuphane/kutuphane_ekrani.dart`):**
-   - Ekranda dikeyde çok yer kaplayan `Hazır Klasörler — İstediğini Seç, Hesabına İndir` kartı gövdeden kaldırıldı.
-   - Hazır klasörlere erişim AppBar bulut indirme ikonu ve açılır menü üzerinden eksiksiz korundu.
-   - `test/widget_test.dart` içindeki kütüphane testi güncellendi.
+1. **Aşama 1: Takvim Modülü Geliştirmeleri (`lib/features/takvim/`)**
+   - **Telafi Planı (Catch-Up):** Nöbet veya yoğunluk sebebiyle biriken (geciken) konular ve tekrarlar için `telafi_plani.dart` ve `telafi_dialogu.dart` oluşturuldu. Tekrarlar "yapıldı" sayılmaz; erteleme kuralıyla günlük limitlere (yeni konu ve tekrar sınırı) göre sonraki günlere dengeli dağıtılır. Bugün ekranına ve Takvim sekmesine Telafi butonu bağlandı.
+   - **Tek Dokunuşla Erteleme & Taşıma:** Tekrarlar ve planlı çalışmalar için `tekrarErtele`, `tekrarBirGunErtele` eklendi (`calisma.dart` ertelemeler). Ertelenen tekrarın sonraki tekrarları da gecikme kayması kuralıyla aynı gün kadar kaydırılır.
+   - **Haftalık Odak Görünümü:** Takvim ekranına Ay / Hafta görünüm seçicisi (`SegmentedButton`) eklendi. Nöbette tek elle 7 günlük odak görünümü rahatça kullanılabilir.
 
-2. **Takvime Çoklu Ders ve Konu Ekleme:**
-   - **Plan Deposu (`lib/features/dersler/plan_deposu.dart`):** `calismalariEkle(Iterable<int> konuIdleri, DateTime gun)` ve `dersinKonulariniGetirVeyaOlustur(int dersId)` fonksiyonları eklendi.
-   - **Günlük Sınır Onayı (`lib/features/takvim/gun_siniri.dart`):** `yeniKonuSiniriOnayi` fonksiyonuna `eklenecekSayi` parametresi eklendi; çoklu eklemede tek bir bilgilendirme penceresiyle toplam sayı soruluyor.
-   - **Konu ve Ders Seçim Ekranı (`lib/features/takvim/konu_sec_ekrani.dart`):**
-     - İki sekmeli modern arayüz: 1) "Konular" (tekil/çoklu konu seçimi ve arama), 2) "Dersler (Toplu Ekle)" (Temel ve Klinik bilimler bazında tek dokunuşla tüm dersi veya birden çok dersi seçme).
-     - Hızlı seçim çipleri: "Tüm Temel Bilimler", "Tüm Klinik Bilimler", "Seçimi Temizle".
-     - Altta ergonomik başparmak alanı (Thumb Zone) seçim çubuğu: `${seciliDersSayisi} ders · ${seciliKonuSayisi} konu seçildi` ve `Takvime Ekle` butonu.
-     - Tek konuya dokunulduğunda doğrudan yerleştirme (önceki hızlı akış) bozulmadan korundu.
-   - **Takvim Ekranı (`lib/features/takvim/takvim_ekrani.dart`):** Gün görünümüne `+ Çoklu Ders Ekle` butonu eklendi, `_konuYerlestir` fonksiyonu çoklu seçimleri ve ders adları özetli SnackBar bildirimini destekleyecek şekilde güncellendi.
+2. **Aşama 2: Kütüphane Modülü Geliştirmeleri (`lib/features/kutuphane/`)**
+   - **Fotoğraflı Not Etiketleri:** `BolumNotu` modeline etiket desteği eklendi. Kullanıcının seçtiği 4 kritik etiket (`Tablo`, `Spot`, `Hoca notu`, `Şema / Algoritma`) not ekleme/düzenleme pencerelerine yerleştirildi. Bölüm notları ekranında bu etiketlerle canlı filtreleme çipleri eklendi.
+   - **Kalan Sayfa & Bitiş Tarihi Tahmini:** Hibrit model uygulandı (`Kitap.kalanSayfaSayisi`, `Kitap.tahminiKalanGun`). Kitap kartına günlük sayfa hedefi belirleme penceresi eklendi; hedef girilirse hedefe göre, girilmezse son 14 günde tamamlanan bölümlerden türetilen otomatik günlük hıza göre tahmini kalan gün ve tarih hesaplanır.
 
-3. **Testler (`test/calisma_deposu_test.dart`, `test/widget_test.dart`):**
-   - `calismalariEkle` ve `dersinKonulariniGetirVeyaOlustur` birim testleri eklendi.
-   - Takvimden `+ Çoklu Ders Ekle` butonuyla birden çok dersin tek seferde takvime yerleştirilmesi widget testi eklendi.
+3. **Aşama 3: Kütüphane ⟷ Takvim Organik Bağı**
+   - Kitap detay ekranında hem sıradaki bölüm kartından hem de her bölümün menüsünden **"Bugün Çalıştım & Tekrar Başlat"** ve **"İleri Tarihe Planla"** köprüsü kuruldu.
+   - Kullanıcı kararı gereği dersteki konulardan birini seçme veya tek dokunuşla yeni konu oluşturma diyaloğu açılır; "Çalıştım" dendiğinde R0-R4 tekrar zinciri bugünden başlatılır ve bölüm tamamlanır.
+   - Takvim ve Bugün ekranındaki konu/tekrar eylem menülerine, derse ait bir kitap varsa tek dokunuşla o kitabın notlarına ve fotoğraflarına gitme bağlantısı (`Kitap / Fasikül notları`) bağlandı.
+
+4. **Testler (`test/telafi_test.dart`, `test/kutuphane_test.dart`):**
+   - Tekrar erteleme, gecikme kayması, telafi planı hesaplama ve uygulama birim testleri eklendi.
+   - Bölüm notu etiketleri ve kitap sayfa tahmini testleri eklendi.
 
 ## Siradaki adim
+- Yapılan değişikliklerin `git commit` ile kaydedilmesi.
 - GitHub Actions CI derlemesi ve testlerinin çalıştırılması.
-- Modül 2: **Dersler & Konular** geliştirmesine devam edilmesi.
 
 ## Bilinen sorunlar / riskler
-- Yok. Mevcut tekil konu yerleştirme, Pomodoro F.T. time konu seçimi ve widget testleri geriye dönük tam uyumludur.
+- Yok. Mevcut veri yapılarıyla tam geriye dönük uyumludur.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

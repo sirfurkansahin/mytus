@@ -4,6 +4,7 @@ import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/takvim/gun_siniri.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
+import 'package:app/features/takvim/telafi_dialogu.dart';
 import 'package:flutter/material.dart';
 
 /// Takvim sekmesi: ay görünümü, aylık özet, seçili günün listesi ve "+ Konu yerleştir"
@@ -19,6 +20,9 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
   late DateTime _ay;
   late DateTime _secili;
 
+  /// Haftalık odak görünümü açık mı? (Nöbette tek elle büyük kartlarla 7 gün.)
+  bool _haftalik = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +33,21 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
 
   void _ayDegistir(int fark) {
     setState(() => _ay = DateTime(_ay.year, _ay.month + fark));
+  }
+
+  /// Haftalık görünümde önceki/sonraki haftaya geçer (seçili gün de kayar).
+  void _haftaDegistir(int fark) {
+    setState(() {
+      _secili = gunEkle(_secili, 7 * fark);
+      _ay = DateTime(_secili.year, _secili.month);
+    });
+  }
+
+  void _gunSec(DateTime gun) {
+    setState(() {
+      _secili = gun;
+      _ay = DateTime(gun.year, gun.month);
+    });
   }
 
   void _bugunuSec() {
@@ -79,6 +98,123 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(mesaj)));
+  }
+
+  Widget _haftaIzgarasi({
+    required Set<int> calismaGunleri,
+    required Set<int> bekleyenCalismaGunleri,
+    required Set<int> tekrarGunleri,
+    required Set<int> bekleyenTekrarGunleri,
+    required DateTime bugun,
+    required DateTime sinavGunu,
+  }) {
+    final pzt = haftaBasi(_secili);
+    final gunler = List.generate(7, (i) => gunEkle(pzt, i));
+    final tema = Theme.of(context);
+
+    return Row(
+      children: [
+        for (final gun in gunler)
+          Expanded(
+            child: _haftaGunuKarti(
+              gun: gun,
+              calismaGunleri: calismaGunleri,
+              bekleyenCalismaGunleri: bekleyenCalismaGunleri,
+              tekrarGunleri: tekrarGunleri,
+              bekleyenTekrarGunleri: bekleyenTekrarGunleri,
+              bugun: bugun,
+              sinavGunu: sinavGunu,
+              tema: tema,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _haftaGunuKarti({
+    required DateTime gun,
+    required Set<int> calismaGunleri,
+    required Set<int> bekleyenCalismaGunleri,
+    required Set<int> tekrarGunleri,
+    required Set<int> bekleyenTekrarGunleri,
+    required DateTime bugun,
+    required DateTime sinavGunu,
+    required ThemeData tema,
+  }) {
+    final anahtar = gunAnahtari(gun);
+    final secili = ayniGun(gun, _secili);
+    final bugunMu = ayniGun(gun, bugun);
+    final sinavGunuMu = ayniGun(gun, sinavGunu);
+    final calismaVar = calismaGunleri.contains(anahtar);
+    final calismaBekliyor = bekleyenCalismaGunleri.contains(anahtar);
+    final tekrarVar = tekrarGunleri.contains(anahtar);
+    final tekrarBekliyor = bekleyenTekrarGunleri.contains(anahtar);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _gunSec(gun),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 64),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: secili ? tema.colorScheme.primaryContainer : null,
+          borderRadius: BorderRadius.circular(12),
+          border: sinavGunuMu
+              ? Border.all(color: tekrarRengi(context), width: 2)
+              : (bugunMu
+                  ? Border.all(color: tema.colorScheme.primary, width: 1.5)
+                  : Border.all(
+                      color: tema.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    )),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              haftaGunleriKisa[gun.weekday - 1],
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: secili
+                    ? tema.colorScheme.onPrimaryContainer
+                    : tema.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '${gun.day}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight:
+                    secili || bugunMu ? FontWeight.w800 : FontWeight.w600,
+                color: secili
+                    ? tema.colorScheme.onPrimaryContainer
+                    : tema.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (calismaVar)
+                  _nokta(
+                    tema.colorScheme.primary,
+                    tamamlandi: !calismaBekliyor,
+                  ),
+                if (calismaVar && tekrarVar) const SizedBox(width: 3),
+                if (tekrarVar)
+                  _nokta(
+                    tekrarRengi(context),
+                    tamamlandi: !tekrarBekliyor,
+                  ),
+                if (!calismaVar && !tekrarVar) const SizedBox(height: 6),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _ayIzgarasi({
@@ -273,6 +409,15 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
     final yapilanGunCalisma = gunCalismalari.where((c) => c.tamam).length;
     final yapilanGunTekrar = gunTekrarlari.where((t) => t.yapildi).length;
 
+    // Gecikenler: bugünden önceki yapılmamış çalışmalar ve yapılmamış tekrarlar
+    final gecikenCalismaSayisi = calismalar
+        .where((c) => !c.tamam && c.tarih.isBefore(bugun))
+        .length;
+    final gecikenTekrarSayisi = tekrarlar
+        .where((t) => t.eylemYapilabilir && t.tarih.isBefore(bugun))
+        .length;
+    final toplamGeciken = gecikenCalismaSayisi + gecikenTekrarSayisi;
+
     final sonGun = gunEkle(sinavGunu, -1);
     final gecmisGun = _secili.isBefore(bugun);
     final sinavdanSonra = _secili.isAfter(sonGun);
@@ -280,29 +425,78 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
     final bugunMu = ayniGun(_secili, bugun);
     final sinavGunuMu = ayniGun(_secili, sinavGunu);
 
+    final pzt = haftaBasi(_secili);
+    final pzr = gunEkle(pzt, 6);
+    final baslikMetni = _haftalik
+        ? '${tarihKisa(pzt)} – ${tarihKisa(pzr)}'
+        : '${ayAdi(_ay.month)} ${_ay.year}';
+    final altMetin = _haftalik
+        ? 'Haftalık odak görünümü'
+        : 'Bu ay: $ayCalismaSayisi konu · $ayTekrarSayisi tekrar';
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [
+          // Görünüm seçici ve Telafi Planı başlık satırı
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment<bool>(
+                    value: false,
+                    label: Text('Ay'),
+                    icon: Icon(Icons.calendar_month_outlined, size: 16),
+                  ),
+                  ButtonSegment<bool>(
+                    value: true,
+                    label: Text('Hafta'),
+                    icon: Icon(Icons.view_week_outlined, size: 16),
+                  ),
+                ],
+                selected: {_haftalik},
+                onSelectionChanged: (val) {
+                  setState(() => _haftalik = val.first);
+                },
+                style: const ButtonStyle(
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+              if (toplamGeciken > 0)
+                FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: Colors.amber.withValues(alpha: 0.15),
+                    foregroundColor: Colors.amber.shade900,
+                  ),
+                  icon: const Icon(Icons.healing_outlined, size: 15),
+                  label: Text('Telafi ($toplamGeciken)'),
+                  onPressed: () => telafiPlaniDialogu(context, bugun),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               IconButton(
-                tooltip: 'Önceki ay',
-                onPressed: () => _ayDegistir(-1),
+                tooltip: _haftalik ? 'Önceki hafta' : 'Önceki ay',
+                onPressed: _haftalik ? () => _haftaDegistir(-1) : () => _ayDegistir(-1),
                 icon: const Icon(Icons.chevron_left),
               ),
               Expanded(
                 child: Column(
                   children: [
                     Text(
-                      '${ayAdi(_ay.month)} ${_ay.year}',
+                      baslikMetni,
                       textAlign: TextAlign.center,
                       style: tema.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
-                      'Bu ay: $ayCalismaSayisi konu · $ayTekrarSayisi tekrar',
+                      altMetin,
                       textAlign: TextAlign.center,
                       style: tema.textTheme.bodySmall?.copyWith(
                         color: tema.colorScheme.onSurfaceVariant,
@@ -312,38 +506,49 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
                 ),
               ),
               IconButton(
-                tooltip: 'Sonraki ay',
-                onPressed: () => _ayDegistir(1),
+                tooltip: _haftalik ? 'Sonraki hafta' : 'Sonraki ay',
+                onPressed: _haftalik ? () => _haftaDegistir(1) : () => _ayDegistir(1),
                 icon: const Icon(Icons.chevron_right),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              for (final ad in haftaGunleriKisa)
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      ad,
-                      style: tema.textTheme.labelMedium?.copyWith(
-                        color: tema.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
+          if (!_haftalik) ...[
+            Row(
+              children: [
+                for (final ad in haftaGunleriKisa)
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        ad,
+                        style: tema.textTheme.labelMedium?.copyWith(
+                          color: tema.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          _ayIzgarasi(
-            calismaGunleri: calismaGunleri,
-            bekleyenCalismaGunleri: bekleyenCalismaGunleri,
-            tekrarGunleri: tekrarGunleri,
-            bekleyenTekrarGunleri: bekleyenTekrarGunleri,
-            bugun: bugun,
-            sinavGunu: sinavGunu,
-          ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            _ayIzgarasi(
+              calismaGunleri: calismaGunleri,
+              bekleyenCalismaGunleri: bekleyenCalismaGunleri,
+              tekrarGunleri: tekrarGunleri,
+              bekleyenTekrarGunleri: bekleyenTekrarGunleri,
+              bugun: bugun,
+              sinavGunu: sinavGunu,
+            ),
+          ] else ...[
+            _haftaIzgarasi(
+              calismaGunleri: calismaGunleri,
+              bekleyenCalismaGunleri: bekleyenCalismaGunleri,
+              tekrarGunleri: tekrarGunleri,
+              bekleyenTekrarGunleri: bekleyenTekrarGunleri,
+              bugun: bugun,
+              sinavGunu: sinavGunu,
+            ),
+          ],
           const SizedBox(height: 8),
           Wrap(
             alignment: WrapAlignment.center,

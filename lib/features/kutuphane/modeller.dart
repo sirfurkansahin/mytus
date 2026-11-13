@@ -2,6 +2,14 @@
 /// Kitap, içindekiler/bölüm yapısı ve bölümlere ait fotoğraflı/metinli notlar.
 library;
 
+/// Fotoğraflı ve metinli notlar için hazır TUS etiketleri.
+const List<String> hazirNotEtiketleri = [
+  'Tablo',
+  'Spot',
+  'Hoca notu',
+  'Şema / Algoritma',
+];
+
 /// Kitabın bir bölümüne eklenen fotoğraflı veya metinli not kartı.
 class BolumNotu {
   const BolumNotu({
@@ -9,27 +17,32 @@ class BolumNotu {
     this.metin = '',
     this.resimBase64,
     required this.olusturmaTarihi,
+    this.etiketler = const [],
   });
 
   final String id;
   final String metin;
   final String? resimBase64;
   final DateTime olusturmaTarihi;
+  final List<String> etiketler;
 
   bool get resimVar => resimBase64 != null && resimBase64!.isNotEmpty;
   bool get metinVar => metin.trim().isNotEmpty;
+  bool get etiketVar => etiketler.isNotEmpty;
 
   BolumNotu kopya({
     String? id,
     String? metin,
     String? resimBase64,
     DateTime? olusturmaTarihi,
+    List<String>? etiketler,
   }) {
     return BolumNotu(
       id: id ?? this.id,
       metin: metin ?? this.metin,
       resimBase64: resimBase64 ?? this.resimBase64,
       olusturmaTarihi: olusturmaTarihi ?? this.olusturmaTarihi,
+      etiketler: etiketler ?? this.etiketler,
     );
   }
 
@@ -38,9 +51,11 @@ class BolumNotu {
         if (metin.isNotEmpty) 'metin': metin,
         if (resimBase64 != null) 'resimBase64': resimBase64,
         'olusturmaTarihi': olusturmaTarihi.toIso8601String(),
+        if (etiketler.isNotEmpty) 'etiketler': etiketler,
       };
 
   factory BolumNotu.fromJson(Map<String, dynamic> json) {
+    final rawEtiketler = json['etiketler'] as List<dynamic>? ?? [];
     return BolumNotu(
       id: json['id'] as String? ?? '',
       metin: json['metin'] as String? ?? '',
@@ -48,6 +63,10 @@ class BolumNotu {
       olusturmaTarihi: json['olusturmaTarihi'] != null
           ? DateTime.tryParse(json['olusturmaTarihi'] as String) ?? DateTime.now()
           : DateTime.now(),
+      etiketler: [
+        for (final e in rawEtiketler)
+          if (e is String && e.isNotEmpty) e,
+      ],
     );
   }
 }
@@ -147,6 +166,7 @@ class Kitap {
     this.dersAdi,
     this.klasorAdi,
     this.toplamSayfa,
+    this.gunlukSayfaHedefi,
     required this.eklenmeTarihi,
     this.bolumler = const [],
   });
@@ -157,6 +177,9 @@ class Kitap {
   final String? dersAdi;
   final String? klasorAdi;
   final int? toplamSayfa;
+
+  /// Kullanıcının bu kitap için belirlediği günlük sayfa hedefi (opsiyonel).
+  final int? gunlukSayfaHedefi;
   final DateTime eklenmeTarihi;
   final List<KitapBolumu> bolumler;
 
@@ -196,6 +219,34 @@ class Kitap {
     return null;
   }
 
+  /// Kalan tahmini sayfa sayısı.
+  int? get kalanSayfaSayisi {
+    final bolumSayfalari = bolumler
+        .where((b) => !b.tamamlandi && b.sayfaSayisi != null)
+        .fold<int>(0, (toplam, b) => toplam + b.sayfaSayisi!);
+    if (bolumSayfalari > 0) return bolumSayfalari;
+    if (toplamSayfa != null && toplamSayfa! > 0) {
+      final kalan = (toplamSayfa! * (1.0 - ilerlemeOrani)).round();
+      return kalan >= 0 ? kalan : 0;
+    }
+    return null;
+  }
+
+  /// Kalan gün tahmini:
+  /// Hedef girildiyse hedefe göre, girilmediyse son 14 günün otomatik ortalama hızına göre.
+  int? tahminiKalanGun(double? otomatikGunlukHiz) {
+    if (tamamlandi) return 0;
+    final kalan = kalanSayfaSayisi;
+    if (kalan == null || kalan <= 0) return null;
+    if (gunlukSayfaHedefi != null && gunlukSayfaHedefi! > 0) {
+      return (kalan / gunlukSayfaHedefi!).ceil();
+    }
+    if (otomatikGunlukHiz != null && otomatikGunlukHiz > 0) {
+      return (kalan / otomatikGunlukHiz).ceil();
+    }
+    return null;
+  }
+
   Kitap kopya({
     String? id,
     String? ad,
@@ -204,6 +255,8 @@ class Kitap {
     String? klasorAdi,
     bool klasoruTemizle = false,
     int? toplamSayfa,
+    int? gunlukSayfaHedefi,
+    bool hedefiTemizle = false,
     DateTime? eklenmeTarihi,
     List<KitapBolumu>? bolumler,
   }) {
@@ -214,6 +267,7 @@ class Kitap {
       dersAdi: dersAdi ?? this.dersAdi,
       klasorAdi: klasoruTemizle ? null : (klasorAdi ?? this.klasorAdi),
       toplamSayfa: toplamSayfa ?? this.toplamSayfa,
+      gunlukSayfaHedefi: hedefiTemizle ? null : (gunlukSayfaHedefi ?? this.gunlukSayfaHedefi),
       eklenmeTarihi: eklenmeTarihi ?? this.eklenmeTarihi,
       bolumler: bolumler ?? this.bolumler,
     );
@@ -227,6 +281,7 @@ class Kitap {
         if (klasorAdi != null && klasorAdi!.trim().isNotEmpty)
           'klasorAdi': klasorAdi!.trim(),
         if (toplamSayfa != null) 'toplamSayfa': toplamSayfa,
+        if (gunlukSayfaHedefi != null) 'gunlukSayfaHedefi': gunlukSayfaHedefi,
         'eklenmeTarihi': eklenmeTarihi.toIso8601String(),
         'bolumler': [for (final b in bolumler) b.toJson()],
       };
@@ -243,6 +298,7 @@ class Kitap {
           ? hamKlasor.trim()
           : null,
       toplamSayfa: json['toplamSayfa'] as int?,
+      gunlukSayfaHedefi: json['gunlukSayfaHedefi'] as int?,
       eklenmeTarihi: json['eklenmeTarihi'] != null
           ? DateTime.tryParse(json['eklenmeTarihi'] as String) ?? DateTime.now()
           : DateTime.now(),

@@ -14,6 +14,7 @@ import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/takvim/calisma.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
+import 'package:app/features/takvim/telafi_plani.dart';
 import 'package:flutter/widgets.dart';
 
 enum YuklemeDurumu { yukleniyor, hazir, hata }
@@ -749,18 +750,84 @@ class PlanDeposu extends ChangeNotifier {
   bool calistim(int id, DateTime bugun) {
     final i = _calismalar.indexWhere((c) => c.id == id);
     if (i < 0 || _calismalar[i].tamam) return false;
-    _calismalar[i] = _calismalar[i].kopya(tarih: gunBasi(bugun), tamam: true);
+    _calismalar[i] = _calismalar[i].kopya(
+      tarih: gunBasi(bugun),
+      tamam: true,
+      ertelemeler: const {},
+    );
     _degisti();
     return true;
   }
 
-  /// "Çalıştım" işaretini geri alır; yapılmış tekrar kayıtları da silinir.
+  /// "Çalıştım" işaretini geri alır; yapılmış tekrar kayıtları ve ertelemeler de silinir.
   bool calismaGeriAl(int id) {
     final i = _calismalar.indexWhere((c) => c.id == id);
     if (i < 0 || !_calismalar[i].tamam) return false;
-    _calismalar[i] = _calismalar[i].kopya(tamam: false, tekrarlar: const []);
+    _calismalar[i] = _calismalar[i].kopya(
+      tamam: false,
+      tekrarlar: const [],
+      ertelemeler: const {},
+    );
     _degisti();
     return true;
+  }
+
+  // ------------------------------------------------- erteleme ve telafi
+
+  /// En geç yerleştirme/erteleme günü: sınavdan bir gün önce (sınav yoksa 1 yıl sonrası).
+  DateTime enGecGun(DateTime bugun) {
+    final g = gunBasi(bugun);
+    final sinav = sinavTarihi;
+    final son = sinav == null ? gunEkle(g, 365) : gunEkle(gunBasi(sinav), -1);
+    return son.isBefore(g) ? g : son;
+  }
+
+  /// Bir tekrarı [hedefGun]'e erteler (yalnızca ileri). O çalışmanın sonraki
+  /// tekrarları da aynı gün kadar kayar (gecikme kayması kuralı).
+  bool tekrarErtele(int calismaId, int no, DateTime hedefGun, DateTime bugun) {
+    final g = gunBasi(bugun);
+    final hedef = gunBasi(hedefGun);
+    if (hedef.isBefore(g) || hedef.isAfter(enGecGun(g))) return false;
+    TekrarOgesi? oge;
+    for (final t in tekrarlar(g)) {
+      if (t.calismaId == calismaId && t.no == no) {
+        oge = t;
+        break;
+      }
+    }
+    if (oge == null || !oge.ertelenebilir) return false;
+    final fark = gunFarki(hedef, oge.idealTarih);
+    if (fark <= 0) return false;
+    final i = _calismalar.indexWhere((c) => c.id == calismaId);
+    if (i < 0) return false;
+    _calismalar[i] = _calismalar[i].ertelemeEkle(no, fark);
+    _degisti();
+    return true;
+  }
+
+  /// Nöbet sonrası telafi planı (önizleme; veriyi değiştirmez).
+  TelafiPlani telafiPlani(DateTime bugun) {
+    final g = gunBasi(bugun);
+    return telafiPlaniHesapla(
+      calismalar: _calismalar,
+      bugun: g,
+      sonGun: enGecGun(g),
+      sinavTarihi: sinavTarihi,
+      gunlukYeniKonuSiniri: gunlukYeniKonuSiniri,
+      gunlukTekrarSiniri: etkinTekrarSiniri(g),
+    );
+  }
+
+  /// Telafi planını uygular. Taşınan iş sayısını döner.
+  int telafiPlaniUygula(DateTime bugun) {
+    final plan = telafiPlani(bugun);
+    if (plan.bos) return 0;
+    final yeni = plan.uygula(_calismalar);
+    _calismalar
+      ..clear()
+      ..addAll(yeni);
+    _degisti();
+    return plan.calismaSayisi + plan.tekrarSayisi;
   }
 
   /// "Tekrar yaptım". Önceki tekrarlar yapılmadıysa veya çalışma bitmediyse false döner.
@@ -1367,6 +1434,34 @@ class PlanDeposu extends ChangeNotifier {
       if (k.id == id) return k;
     }
     return null;
+  }
+
+  /// Son 14 günde tamamlanan kitap bölümlerinin sayfa toplamından günlük ortalama okuma hızı.
+  double get otomatikGunlukSayfaHizi {
+    final sinir = DateTime.now().subtract(const Duration(days: 14));
+    var toplamSayfa = 0;
+    for (final k in _kitaplar) {
+      for (final b in k.bolumler) {
+        if (b.tamamlandi &&
+            b.tamamlanmaTarihi != null &&
+            b.tamamlanmaTarihi!.isAfter(sinir)) {
+          toplamSayfa += b.sayfaSayisi ?? 15;
+        }
+      }
+    }
+    if (toplamSayfa <= 0) return 0.0;
+    return toplamSayfa / 14.0;
+  }
+
+  /// Kitaba özel günlük sayfa okuma hedefi belirler (null veya <=0 ise kaldırır).
+  Future<void> kitapGunlukSayfaHedefiBelirle(String kitapId, int? hedef) async {
+    final idx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (idx == -1) return;
+    _kitaplar[idx] = (hedef == null || hedef <= 0)
+        ? _kitaplar[idx].kopya(hedefiTemizle: true)
+        : _kitaplar[idx].kopya(gunlukSayfaHedefi: hedef);
+    _degisti();
+    await hemenKaydet();
   }
 
   Future<void> kitapEkle(Kitap kitap) async {

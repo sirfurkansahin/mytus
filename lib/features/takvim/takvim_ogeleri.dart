@@ -195,9 +195,15 @@ class TekrarSatiri extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                     onPressed: () {
-                      final calisma = depo.calismaBul(tekrar.calismaId);
-                      if (calisma != null) {
-                        depo.calismaGunuDegistir(calisma.id, gunEkle(calisma.tarih, 1));
+                      if (tekrarBirGunErtele(depo, tekrar, bugun)) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                              content: Text('Tekrar 1 gün ertelendi; sonraki tekrarlar da kaydı.'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                       }
                     },
                   ),

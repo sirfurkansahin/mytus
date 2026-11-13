@@ -6,7 +6,7 @@ import 'package:app/features/kutuphane/resim_secici.dart';
 import 'package:flutter/material.dart';
 
 /// Kitabın belirli bir bölümüne ait fotoğraflı ve metinli notların listelendiği ekran.
-class BolumNotlariEkrani extends StatelessWidget {
+class BolumNotlariEkrani extends StatefulWidget {
   const BolumNotlariEkrani({
     super.key,
     required this.kitapId,
@@ -16,12 +16,19 @@ class BolumNotlariEkrani extends StatelessWidget {
   final String kitapId;
   final String bolumId;
 
+  @override
+  State<BolumNotlariEkrani> createState() => _BolumNotlariEkraniState();
+}
+
+class _BolumNotlariEkraniState extends State<BolumNotlariEkrani> {
+  String? _seciliEtiket;
+
   void _notEkleDuzenle(BuildContext context, PlanDeposu depo, {BolumNotu? mevcutNot}) {
     showDialog<void>(
       context: context,
       builder: (_) => NotDuzenleDialogu(
-        kitapId: kitapId,
-        bolumId: bolumId,
+        kitapId: widget.kitapId,
+        bolumId: widget.bolumId,
         mevcutNot: mevcutNot,
       ),
     );
@@ -41,7 +48,7 @@ class BolumNotlariEkrani extends StatelessWidget {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
-              depo.kitapBolumNotuSil(kitapId, bolumId, not.id);
+              depo.kitapBolumNotuSil(widget.kitapId, widget.bolumId, not.id);
               Navigator.of(ctx).pop();
             },
             child: const Text('Sil'),
@@ -56,7 +63,7 @@ class BolumNotlariEkrani extends StatelessWidget {
     final depo = DepoKapsami.of(context);
     final tema = Theme.of(context);
 
-    final kitap = depo.kitapBul(kitapId);
+    final kitap = depo.kitapBul(widget.kitapId);
     if (kitap == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Bölüm Notları')),
@@ -65,8 +72,8 @@ class BolumNotlariEkrani extends StatelessWidget {
     }
 
     final bolum = kitap.bolumler.firstWhere(
-      (b) => b.id == bolumId,
-      orElse: () => KitapBolumu(id: '', ad: 'Bölüm'),
+      (b) => b.id == widget.bolumId,
+      orElse: () => const KitapBolumu(id: '', ad: 'Bölüm'),
     );
 
     if (bolum.id.isEmpty) {
@@ -76,7 +83,10 @@ class BolumNotlariEkrani extends StatelessWidget {
       );
     }
 
-    final notlar = bolum.notlar;
+    final tumNotlar = bolum.notlar;
+    final notlar = _seciliEtiket == null
+        ? tumNotlar
+        : tumNotlar.where((n) => n.etiketler.contains(_seciliEtiket)).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -149,6 +159,43 @@ class BolumNotlariEkrani extends StatelessWidget {
               ),
             ),
           ),
+
+          if (tumNotlar.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: Text('Tümü (${tumNotlar.length})', style: const TextStyle(fontSize: 12)),
+                    selected: _seciliEtiket == null,
+                    visualDensity: VisualDensity.compact,
+                    onSelected: (_) => setState(() => _seciliEtiket = null),
+                  ),
+                  const SizedBox(width: 6),
+                  for (final etiket in hazirNotEtiketleri) ...[
+                    Builder(
+                      builder: (_) {
+                        final sayi = tumNotlar.where((n) => n.etiketler.contains(etiket)).length;
+                        if (sayi == 0) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ChoiceChip(
+                            label: Text('$etiket ($sayi)', style: const TextStyle(fontSize: 12)),
+                            selected: _seciliEtiket == etiket,
+                            visualDensity: VisualDensity.compact,
+                            onSelected: (secildi) {
+                              setState(() => _seciliEtiket = secildi ? etiket : null);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
 
           const SizedBox(height: 12),
 
@@ -327,6 +374,31 @@ class _NotKarti extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
+            if (not.etiketVar) ...[
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  for (final etiket in not.etiketler)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: tema.colorScheme.secondaryContainer.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '#$etiket',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: tema.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -384,11 +456,13 @@ class _NotDuzenleDialoguState extends State<NotDuzenleDialogu> {
   late final TextEditingController _metinDenetci;
   Uint8List? _resimBytes;
   bool _yukleniyor = false;
+  final Set<String> _seciliEtiketler = {};
 
   @override
   void initState() {
     super.initState();
     _metinDenetci = TextEditingController(text: widget.mevcutNot?.metin ?? '');
+    _seciliEtiketler.addAll(widget.mevcutNot?.etiketler ?? []);
     if (widget.mevcutNot?.resimVar == true) {
       try {
         _resimBytes = base64Decode(widget.mevcutNot!.resimBase64!);
@@ -441,6 +515,7 @@ class _NotDuzenleDialoguState extends State<NotDuzenleDialogu> {
       final guncel = widget.mevcutNot!.kopya(
         metin: metin,
         resimBase64: resimBase64,
+        etiketler: _seciliEtiketler.toList(),
       );
       depo.kitapBolumNotuGuncelle(widget.kitapId, widget.bolumId, guncel);
     } else {
@@ -449,6 +524,7 @@ class _NotDuzenleDialoguState extends State<NotDuzenleDialogu> {
         metin: metin,
         resimBase64: resimBase64,
         olusturmaTarihi: DateTime.now(),
+        etiketler: _seciliEtiketler.toList(),
       );
       depo.kitapBolumNotuEkle(widget.kitapId, widget.bolumId, yeni);
     }
@@ -605,6 +681,39 @@ class _NotDuzenleDialoguState extends State<NotDuzenleDialogu> {
                         border: OutlineInputBorder(),
                         alignLabelWithHint: true,
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Etiketler (Çoklu Seçim)
+                    Text(
+                      'NOT ETİKETLERİ',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                        color: tema.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        for (final etiket in hazirNotEtiketleri)
+                          FilterChip(
+                            label: Text(etiket, style: const TextStyle(fontSize: 12)),
+                            selected: _seciliEtiketler.contains(etiket),
+                            visualDensity: VisualDensity.compact,
+                            onSelected: (secildi) {
+                              setState(() {
+                                if (secildi) {
+                                  _seciliEtiketler.add(etiket);
+                                } else {
+                                  _seciliEtiketler.remove(etiket);
+                                }
+                              });
+                            },
+                          ),
+                      ],
                     ),
                   ],
                 ),

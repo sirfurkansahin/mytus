@@ -2,6 +2,8 @@ import 'package:app/core/tarih.dart';
 import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/konu_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/kutuphane/kitap_detay_ekrani.dart';
+import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/takvim/calisma.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +69,17 @@ Future<void> calismaEylemleri(
   final son = yerlestirmeSonGunu(depo, bugun);
   final yarinaErtelenebilir =
       !calisma.tamam && !ayniGun(calisma.tarih, yarin) && !yarin.isAfter(son);
+  Kitap? ilgiliKitap;
+  final ders = depo.dersBul(konu.dersId);
+  for (final k in depo.kitaplar) {
+    if ((k.dersId != null && k.dersId == konu.dersId) ||
+        (ders != null &&
+            k.dersAdi != null &&
+            k.dersAdi!.toLowerCase() == ders.ad.toLowerCase())) {
+      ilgiliKitap = k;
+      break;
+    }
+  }
   final secim = await showModalBottomSheet<String>(
     context: context,
     showDragHandle: true,
@@ -121,6 +134,13 @@ Future<void> calismaEylemleri(
               'Gününü değiştir',
               'gun',
             ),
+          if (ilgiliKitap != null)
+            _eylemSatiri(
+              sheetContext,
+              Icons.collections_bookmark_outlined,
+              'Kitap / Fasikül notları (${ilgiliKitap.ad})',
+              'kitap',
+            ),
           _eylemSatiri(sheetContext, Icons.menu_book_outlined, 'Konuya git', 'konu'),
           _eylemSatiri(
             sheetContext,
@@ -152,6 +172,14 @@ Future<void> calismaEylemleri(
         baslangic: calisma.tarih,
       );
       if (yeni != null) depo.calismaGunuDegistir(calisma.id, yeni);
+    case 'kitap':
+      if (ilgiliKitap != null) {
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => KitapDetayEkrani(kitapId: ilgiliKitap!.id),
+          ),
+        );
+      }
     case 'konu':
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -170,6 +198,14 @@ Future<void> calismaEylemleri(
   }
 }
 
+/// Tekrarı bir sonraki uygun güne erteler: bugün/gecikmişse yarına, ilerideyse bir gün sonrasına.
+bool tekrarBirGunErtele(PlanDeposu depo, TekrarOgesi tekrar, DateTime bugun) {
+  final hedef = tekrar.tarih.isAfter(bugun)
+      ? gunEkle(tekrar.tarih, 1)
+      : gunEkle(bugun, 1);
+  return depo.tekrarErtele(tekrar.calismaId, tekrar.no, hedef, bugun);
+}
+
 /// Takvimdeki bir tekrar için işlem menüsü.
 Future<void> tekrarEylemleri(
   BuildContext context,
@@ -179,6 +215,26 @@ Future<void> tekrarEylemleri(
   final depo = DepoKapsami.oku(context);
   final konu = depo.konuBul(tekrar.konuId);
   if (konu == null) return;
+  final son = depo.enGecGun(bugun);
+  final yarin = gunEkle(bugun, 1);
+  // Gecikmiş tekrar bugüne bile taşınabilir; bugünkü/ilerideki en erken bir gün sonrasına.
+  final ilkTasima =
+      tekrar.tarih.isBefore(bugun) ? bugun : gunEkle(tekrar.tarih, 1);
+  final yarinaErtelenebilir = tekrar.ertelenebilir &&
+      !tekrar.tarih.isAfter(bugun) &&
+      !yarin.isAfter(son);
+  final tasinabilir = tekrar.ertelenebilir && !ilkTasima.isAfter(son);
+  Kitap? ilgiliKitap;
+  final ders = depo.dersBul(konu.dersId);
+  for (final k in depo.kitaplar) {
+    if ((k.dersId != null && k.dersId == konu.dersId) ||
+        (ders != null &&
+            k.dersAdi != null &&
+            k.dersAdi!.toLowerCase() == ders.ad.toLowerCase())) {
+      ilgiliKitap = k;
+      break;
+    }
+  }
   final secim = await showModalBottomSheet<String>(
     context: context,
     showDragHandle: true,
@@ -222,6 +278,27 @@ Future<void> tekrarEylemleri(
               leading: Icon(Icons.info_outline),
               title: Text('Önceki tekrarı yaptıktan sonra sıra buna gelir.'),
             ),
+          if (yarinaErtelenebilir)
+            _eylemSatiri(
+              sheetContext,
+              Icons.next_plan_outlined,
+              'Yarına ertele (sonraki tekrarlar da kayar)',
+              'yarina',
+            ),
+          if (tasinabilir)
+            _eylemSatiri(
+              sheetContext,
+              Icons.event_outlined,
+              'Başka güne taşı',
+              'gun',
+            ),
+          if (ilgiliKitap != null)
+            _eylemSatiri(
+              sheetContext,
+              Icons.collections_bookmark_outlined,
+              'Kitap / Fasikül notları (${ilgiliKitap.ad})',
+              'kitap',
+            ),
           _eylemSatiri(sheetContext, Icons.menu_book_outlined, 'Konuya git', 'konu'),
         ],
       ),
@@ -233,6 +310,32 @@ Future<void> tekrarEylemleri(
       depo.tekrarYapildi(tekrar.calismaId, tekrar.no, bugun);
     case 'geriAl':
       depo.tekrarGeriAl(tekrar.calismaId, tekrar.no);
+    case 'yarina':
+      if (depo.tekrarErtele(tekrar.calismaId, tekrar.no, yarin, bugun)) {
+        _mesaj(context, 'Tekrar yarına ertelendi.');
+      }
+    case 'gun':
+      final yeni = await showDatePicker(
+        context: context,
+        initialDate: ilkTasima,
+        firstDate: ilkTasima,
+        lastDate: son,
+        helpText: 'Tekrarı hangi güne taşıyalım?',
+      );
+      if (yeni == null || !context.mounted) return;
+      if (depo.tekrarErtele(tekrar.calismaId, tekrar.no, yeni, bugun)) {
+        _mesaj(context, 'Tekrar ${tarihKisa(yeni)} gününe taşındı.');
+      } else {
+        _mesaj(context, 'Bu güne taşınamadı (zaten o gün veya sonrasında).');
+      }
+    case 'kitap':
+      if (ilgiliKitap != null) {
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => KitapDetayEkrani(kitapId: ilgiliKitap!.id),
+          ),
+        );
+      }
     case 'konu':
       await Navigator.of(context).push(
         MaterialPageRoute<void>(

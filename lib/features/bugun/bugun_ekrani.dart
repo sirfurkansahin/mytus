@@ -16,6 +16,7 @@ import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/rehber/rehber_ekrani.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
+import 'package:app/features/takvim/telafi_dialogu.dart';
 import 'package:flutter/material.dart';
 
 /// "Bugün" ekranı: sınav sayacı, günlük görev ilerlemesi, geciken işler,
@@ -679,6 +680,14 @@ class BugunEkrani extends StatelessWidget {
                 Wrap(
                   spacing: 4,
                   children: [
+                    FilledButton.tonalIcon(
+                      onPressed: () => telafiPlaniDialogu(context, bugun),
+                      icon: const Icon(Icons.healing_outlined, size: 16),
+                      label: const Text('Telafi planı'),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
                     if (gecikenCalismalar.isNotEmpty)
                       TextButton(
                         onPressed: () => depo.gecikenleriBuguneAl(bugun),

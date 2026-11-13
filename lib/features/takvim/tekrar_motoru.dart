@@ -46,7 +46,8 @@ class TekrarOgesi {
     required this.calismaTamam,
     required this.siradaki,
     this.yapilanTarih,
-  });
+    DateTime? idealTarih,
+  }) : _idealTarih = idealTarih;
 
   final int calismaId;
   final int konuId;
@@ -71,6 +72,15 @@ class TekrarOgesi {
 
   /// Yapıldıysa gerçekten yapıldığı gün.
   final DateTime? yapilanTarih;
+
+  final DateTime? _idealTarih;
+
+  /// Günlük sınır uygulanmadan önceki gün (kayma, erteleme ve sınav sınırı dahil).
+  /// Erteleme miktarı bu günden hesaplanır.
+  DateTime get idealTarih => _idealTarih ?? tarih;
+
+  /// Elle ertelenebilir mi? (Çalışma bitmiş, tekrar yapılmamış.)
+  bool get ertelenebilir => calismaTamam && !yapildi;
 
   /// Şimdi "Tekrar yaptım" denebilir mi? (Çalışma bitmiş ve sıra bunda.)
   bool get eylemYapilabilir => calismaTamam && siradaki && !yapildi;
@@ -114,6 +124,8 @@ List<TekrarOgesi> tekrarlariHesapla({
     var kayma = 0;
     for (var i = 0; i < gunler.length; i++) {
       final no = i + 1;
+      // Elle erteleme: bu tekrarı ve sonrakileri aynı gün kadar kaydırır.
+      kayma += c.erteleme(no);
       var ideal = gunEkle(c.tarih, gunler[i] + kayma);
       if (ideal.isAfter(sonGun)) ideal = sonGun;
       final kayit = c.tekrarKaydi(no);
@@ -176,6 +188,7 @@ List<TekrarOgesi> tekrarlariHesapla({
         calismaTamam: h.calisma.tamam,
         siradaki: ilkBekleyen[h.calisma.id] == h.no,
         yapilanTarih: h.kayit?.tarih,
+        idealTarih: h.ideal,
       ),
   ]..sort((a, b) {
       final k = a.tarih.compareTo(b.tarih);

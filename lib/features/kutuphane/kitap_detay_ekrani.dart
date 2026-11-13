@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/core/tarih.dart';
+import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/kutuphane/bolum_notlari_ekrani.dart';
 import 'package:app/features/kutuphane/modeller.dart';
+import 'package:app/features/takvim/gun_siniri.dart';
+import 'package:app/features/takvim/takvim_eylemleri.dart';
 import 'package:flutter/material.dart';
 
 /// Kitap detay ve içindekiler/bölüm çalışma ekranı.
@@ -27,6 +31,232 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
     _yeniBolumDenetci.dispose();
     _aramaDenetci.dispose();
     super.dispose();
+  }
+
+  Future<void> _gunlukHedefBelirleDialogu(PlanDeposu depo, Kitap kitap) async {
+    final denetci = TextEditingController(
+      text: kitap.gunlukSayfaHedefi != null ? '${kitap.gunlukSayfaHedefi}' : '',
+    );
+    final sonuc = await showDialog<int?>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Günlük Sayfa Hedefi'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Bu kitaptan günde kaç sayfa okumayı hedefliyorsunuz? Bitiş tarihi buna göre hesaplanacaktır.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: denetci,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Günlük Sayfa',
+                hintText: 'Örn: 25',
+                border: OutlineInputBorder(),
+                suffixText: 'sayfa/gün',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          if (kitap.gunlukSayfaHedefi != null)
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(-1),
+              child: const Text('Hedefi Kaldır'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final sayi = int.tryParse(denetci.text.trim());
+              Navigator.of(ctx).pop(sayi);
+            },
+            child: const Text('Kaydet'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || sonuc == null) return;
+    if (sonuc == -1) {
+      await depo.kitapGunlukSayfaHedefiBelirle(kitap.id, null);
+    } else if (sonuc > 0) {
+      await depo.kitapGunlukSayfaHedefiBelirle(kitap.id, sonuc);
+    }
+  }
+
+  /// Kütüphane ⟷ Takvim Organik Bağı:
+  /// Bölümü bir konuya bağlar; "hemenBugunCalistim" ise bugünden R0-R4 tekrar zincirini başlatır,
+  /// değilse takvimde seçilen güne yerleştirir.
+  Future<void> _bolumuTakvimeBagla(
+    PlanDeposu depo,
+    Kitap kitap,
+    KitapBolumu bolum, {
+    required bool hemenBugunCalistim,
+  }) async {
+    // 1) İlgili dersi bul
+    Ders? ders;
+    if (kitap.dersId != null) {
+      ders = depo.dersBul(kitap.dersId!);
+    }
+    if (ders == null && kitap.dersAdi != null) {
+      for (final d in depo.tumDersler) {
+        if (d.ad.toLowerCase() == kitap.dersAdi!.toLowerCase()) {
+          ders = d;
+          break;
+        }
+      }
+    }
+    if (ders == null && depo.tumDersler.isNotEmpty) {
+      ders = depo.tumDersler.first;
+    }
+    if (ders == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Önce Dersler sekmesinden en az 1 ders eklemelisiniz.')),
+      );
+      return;
+    }
+
+    // 2) Dersteki mevcut konuları getir
+    final mevcutKonular = depo.konular(ders.id);
+
+    // 3) Konu seçme diyaloğu (Kullanıcı Kararı A1: dersteki mevcut konulardan seç veya yeni oluştur)
+    final secilenKonuId = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetCtx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(sheetCtx).size.height * 0.75,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hemenBugunCalistim
+                          ? 'Tekrar Zincirini Başlat'
+                          : 'Takvime Planla',
+                      style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '"${bolum.ad}" bölümü ${ders!.ad} dersinde hangi konuya bağlansın?',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(sheetCtx).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // Yeni konu olarak oluştur seçeneği
+              ListTile(
+                leading: const CircleAvatar(
+                  radius: 16,
+                  child: Icon(Icons.add, size: 18),
+                ),
+                title: Text(
+                  '+ Yeni Konu Oluştur: "${bolum.ad}"',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text('${ders.ad} dersine yeni konu olarak eklenir'),
+                onTap: () {
+                  final yeni = depo.konuEkle(ders!.id, bolum.ad);
+                  Navigator.of(sheetCtx).pop(yeni?.id);
+                },
+              ),
+              if (mevcutKonular.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
+                  child: Text(
+                    'VEYA MEVCUT KONULARDAN BİRİNİ SEÇ:',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: mevcutKonular.length,
+                    itemBuilder: (_, i) {
+                      final k = mevcutKonular[i];
+                      return ListTile(
+                        leading: const Icon(Icons.menu_book_outlined, size: 20),
+                        title: Text(k.ad),
+                        onTap: () => Navigator.of(sheetCtx).pop(k.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (secilenKonuId == null || !mounted) return;
+
+    final bugun = gunBasi(DateTime.now());
+
+    if (hemenBugunCalistim) {
+      // 1) Çalışma ekle ve hemen "Çalıştım" işaretle
+      final calisma = depo.calismaEkle(secilenKonuId, bugun);
+      if (calisma != null) {
+        depo.calistim(calisma.id, bugun);
+      }
+      // 2) Kütüphanedeki bölümü de tamamlandı yap
+      await depo.kitapBolumDurumuDegistir(kitap.id, bolum.id, true);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                'Harika! "${bolum.ad}" tamamlandı ve aralıklı tekrar zinciri (R0–R4) bugünden planlandı.',
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+      }
+    } else {
+      // Takvime ileri tarihli planlama
+      final secilenGun = await yerlestirmeGunuSec(context, depo, baslangic: bugun);
+      if (secilenGun == null || !mounted) return;
+
+      if (!await yeniKonuSiniriOnayi(context, depo, secilenGun) || !mounted) {
+        return;
+      }
+
+      depo.calismaEkle(secilenKonuId, secilenGun);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                '"${bolum.ad}" ${tarihKisa(secilenGun)} gününe planlandı.',
+              ),
+            ),
+          );
+      }
+    }
   }
 
   void _yeniBolumEkle(PlanDeposu depo, Kitap kitap) {
@@ -417,10 +647,21 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
           ),
           PopupMenuButton<String>(
             onSelected: (val) {
+              if (val == 'hedef') _gunlukHedefBelirleDialogu(depo, kitap);
               if (val == 'klasor') _klasorDegistirDialogu(depo, kitap);
               if (val == 'sil') _kitapSilOnayi(depo, kitap);
             },
             itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'hedef',
+                child: Row(
+                  children: [
+                    Icon(Icons.flag_outlined, size: 18),
+                    SizedBox(width: 8),
+                    Text('Günlük Sayfa Hedefi Belirle'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'klasor',
                 child: Row(
@@ -559,6 +800,63 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                       color: tema.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  Builder(
+                    builder: (_) {
+                      final kalanSayfa = kitap.kalanSayfaSayisi;
+                      if (kalanSayfa == null || kitap.tamamlandi) {
+                        return const SizedBox.shrink();
+                      }
+                      final otoHiz = depo.otomatikGunlukSayfaHizi;
+                      final tahminiGun = kitap.tahminiKalanGun(otoHiz);
+                      final tahminiTarih = tahminiGun != null
+                          ? gunEkle(DateTime.now(), tahminiGun)
+                          : null;
+
+                      final bilgiMetni = tahminiGun != null
+                          ? '$kalanSayfa sayfa kaldı · ${kitap.gunlukSayfaHedefi != null ? "Hedef: ${kitap.gunlukSayfaHedefi} s/gün" : "Hız: ${otoHiz.toStringAsFixed(0)} s/gün"} · Bitiş: $tahminiGun gün (${tarihKisa(tahminiTarih!)})'
+                          : '$kalanSayfa sayfa kaldı · Tahmini bitiş için hedef belirleyin';
+
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: tema.colorScheme.surface.withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: tema.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.auto_graph_outlined,
+                                size: 16,
+                                color: tema.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  bilgiMetni,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: tema.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                tooltip: 'Günlük Sayfa Hedefi Belirle',
+                                icon: const Icon(Icons.edit_outlined, size: 15),
+                                onPressed: () => _gunlukHedefBelirleDialogu(depo, kitap),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -623,6 +921,39 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                           ),
                           tooltip: 'Bölüm Notları (${siradaki.notSayisi})',
                           onPressed: () => _bolumHizliNotPenceresi(depo, kitap, siradaki),
+                        ),
+                        PopupMenuButton<String>(
+                          tooltip: 'Takvim ve Tekrar Seçenekleri',
+                          icon: const Icon(Icons.event_note, color: Colors.teal, size: 22),
+                          onSelected: (val) {
+                            if (val == 'planla') {
+                              _bolumuTakvimeBagla(depo, kitap, siradaki, hemenBugunCalistim: false);
+                            } else if (val == 'zincir') {
+                              _bolumuTakvimeBagla(depo, kitap, siradaki, hemenBugunCalistim: true);
+                            }
+                          },
+                          itemBuilder: (_) => const [
+                            PopupMenuItem(
+                              value: 'zincir',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.replay_circle_filled, size: 18, color: Colors.teal),
+                                  SizedBox(width: 8),
+                                  Text('Bugün Çalıştım & Tekrar Başlat'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'planla',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_today_outlined, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('İleri Tarihe Planla'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         FilledButton.tonal(
                           style: FilledButton.styleFrom(
@@ -774,6 +1105,18 @@ class _KitapDetayEkraniState extends State<KitapDetayEkrani> {
                 },
                 onNotlar: () => _bolumNotlariniAc(filtrelenmis[i].id),
                 onHizliNot: () => _bolumHizliNotPenceresi(depo, kitap, filtrelenmis[i]),
+                onTakvimePlanla: () => _bolumuTakvimeBagla(
+                  depo,
+                  kitap,
+                  filtrelenmis[i],
+                  hemenBugunCalistim: false,
+                ),
+                onTekrarBaslat: () => _bolumuTakvimeBagla(
+                  depo,
+                  kitap,
+                  filtrelenmis[i],
+                  hemenBugunCalistim: true,
+                ),
                 onSil: () {
                   final guncel = List<KitapBolumu>.from(kitap.bolumler)
                     ..removeWhere((b) => b.id == filtrelenmis[i].id);
@@ -795,6 +1138,8 @@ class _BolumKarti extends StatelessWidget {
     required this.onDegisti,
     required this.onNotlar,
     required this.onHizliNot,
+    required this.onTakvimePlanla,
+    required this.onTekrarBaslat,
     required this.onSil,
   });
 
@@ -803,6 +1148,8 @@ class _BolumKarti extends StatelessWidget {
   final ValueChanged<bool> onDegisti;
   final VoidCallback onNotlar;
   final VoidCallback onHizliNot;
+  final VoidCallback onTakvimePlanla;
+  final VoidCallback onTekrarBaslat;
   final VoidCallback onSil;
 
   @override
@@ -898,6 +1245,40 @@ class _BolumKarti extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            PopupMenuButton<String>(
+              tooltip: 'Takvim ve Tekrar Seçenekleri',
+              icon: const Icon(Icons.calendar_month_outlined, size: 20),
+              color: tema.colorScheme.surface,
+              onSelected: (val) {
+                if (val == 'planla') {
+                  onTakvimePlanla();
+                } else if (val == 'zincir') {
+                  onTekrarBaslat();
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'zincir',
+                  child: Row(
+                    children: [
+                      Icon(Icons.replay_circle_filled, size: 18, color: Colors.teal),
+                      SizedBox(width: 8),
+                      Text('Bugün Çalıştım & Tekrar Başlat'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'planla',
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 18),
+                      SizedBox(width: 8),
+                      Text('İleri Tarihe Planla'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             IconButton(
               icon: Icon(
                 bolum.notVar ? Icons.note_alt : Icons.note_alt_outlined,
@@ -974,12 +1355,38 @@ class _HizliNotKarti extends StatelessWidget {
                 ),
               ),
             if (resimBytes != null && not.metinVar) const SizedBox(height: 8),
-            if (not.metinVar)
+            if (not.metinVar) ...[
               Text(
                 not.metin,
                 style: const TextStyle(fontSize: 13, height: 1.4),
               ),
-            const SizedBox(height: 6),
+              const SizedBox(height: 6),
+            ],
+            if (not.etiketVar) ...[
+              Wrap(
+                spacing: 4,
+                runSpacing: 2,
+                children: [
+                  for (final etiket in not.etiketler)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: tema.colorScheme.secondaryContainer.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '#$etiket',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: tema.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

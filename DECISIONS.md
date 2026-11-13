@@ -198,4 +198,15 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 | Geriye Dönük Uyumluluk | Tek bir konuya doğrudan dokunulduğunda anında tekil yerleştirme davranışı korunarak tüm testler ve hızlı kullanım akışı muhafaza edildi. |
 | Günlük Sınır Bildirimi | Birden çok konu veya ders eklendiğinde önerilen günlük limit kontrol edilerek tek bir onay penceresinde kullanıcıya toplam sayı bildirilir. |
 
+## Takvim, Kütüphane ve Organik Entegrasyon Geliştirmeleri (13 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar ve Neden |
+|---|---|
+| Telafi Planı (Catch-Up) | Nöbet veya yoğunluk sonrası geciken konular ve tekrarlar "yapıldı" sayılmadan, günlük sınırları (yeni konu ve tekrar) aşmayacak şekilde önümüzdeki günlere dengeli olarak yayılır (`telafi_plani.dart` ve `telafi_dialogu.dart`). |
+| Tekrar ve Konu Erteleme | Takvimdeki ve Bugün ekranındaki tekrarlar tek dokunuşla yarına ertelenebilir veya ileri bir tarihe taşınabilir (`calisma.dart` ertelemeler). Ertelenen tekrarın sonraki tekrarları da gecikme kayması kuralıyla aynı gün kadar kayar. |
+| Haftalık Odak Görünümü | Takvim sekmesine Ay / Hafta SegmentedButton görünüm seçicisi eklendi. Hafta modunda 7 gün başparmak hizasında ferah kartlar olarak yönetilebilir. |
+| Fotoğraflı Not Etiketleri | Bölüm notlarına 4 kritik TUS etiketi seçimi eklendi: `Tablo`, `Spot`, `Hoca notu`, `Şema / Algoritma`. Bölüm notları ekranında bu etiketlerle filtreleme desteği sağlandı. |
+| Kalan Sayfa & Bitiş Tahmini | Hibrit model uygulandı: Kullanıcı isterse kitaba özel günlük sayfa hedefi belirleyebilir; hedef yoksa son 14 günün tamamlanan bölümlerine göre hesaplanan otomatik günlük hız kullanılır. Kalan sayfa ve tahmini bitiş tarihi kitap kartında gösterilir. |
+| Kütüphane ⟷ Takvim Köprüsü | Kitap bölümü üzerinden doğrudan "Takvime Planla" veya "Bugün Çalıştım & Tekrar Başlat" eylemleri bağlandı. Kullanıcı tercihi doğrultusunda dersteki mevcut konulardan biri seçilir veya yeni konu üretilir; "Çalıştım" dendiğinde R0-R4 tekrar zinciri bugünden başlatılır ve bölüm tamamlanır. Takvimden de konunun ilişkili olduğu kitap notlarına tek dokunuşla geçilebilir. |
+
+
 

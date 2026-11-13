@@ -135,6 +135,50 @@ void main() {
       expect(geri.bolumler.first.bitisSayfa, 150);
       expect(geri.bolumler.first.tamamlandi, isTrue);
     });
+
+    test('BolumNotu etiketleri ve serileştirme', () {
+      final not = BolumNotu(
+        id: 'n_etiket',
+        metin: 'Önemli tablo notu',
+        etiketler: const ['Tablo', 'Spot'],
+        olusturmaTarihi: DateTime(2026, 11, 10),
+      );
+
+      expect(not.etiketVar, isTrue);
+      expect(not.etiketler, contains('Tablo'));
+      expect(not.etiketler, contains('Spot'));
+
+      final json = not.toJson();
+      final geri = BolumNotu.fromJson(json);
+
+      expect(geri.id, 'n_etiket');
+      expect(geri.etiketler, ['Tablo', 'Spot']);
+    });
+
+    test('Kitap kalanSayfaSayisi ve tahminiKalanGun hesabı (hedef ve otomatik hız)', () {
+      final bolumler = [
+        const KitapBolumu(id: 'b1', ad: 'Bölüm 1', baslangicSayfa: 1, bitisSayfa: 40, tamamlandi: true),
+        const KitapBolumu(id: 'b2', ad: 'Bölüm 2', baslangicSayfa: 41, bitisSayfa: 100, tamamlandi: false), // 60 sayfa
+        const KitapBolumu(id: 'b3', ad: 'Bölüm 3', baslangicSayfa: 101, bitisSayfa: 140, tamamlandi: false), // 40 sayfa
+      ];
+
+      final kitap = Kitap(
+        id: 'k_sayfa',
+        ad: 'Fizyoloji',
+        eklenmeTarihi: DateTime.now(),
+        bolumler: bolumler,
+      );
+
+      // Kalan sayfa: 60 + 40 = 100
+      expect(kitap.kalanSayfaSayisi, 100);
+
+      // Otomatik hız günde 20 sayfa ise: 100 / 20 = 5 gün
+      expect(kitap.tahminiKalanGun(20.0), 5);
+
+      // Kullanıcı günde 25 sayfa hedef girerse: 100 / 25 = 4 gün
+      final hedefli = kitap.kopya(gunlukSayfaHedefi: 25);
+      expect(hedefli.tahminiKalanGun(20.0), 4);
+    });
   });
 
   group('PlanDeposu Kütüphane Entegrasyonu', () {
