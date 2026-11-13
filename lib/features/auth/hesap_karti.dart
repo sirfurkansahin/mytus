@@ -58,6 +58,7 @@ class _HesapKartiState extends State<HesapKarti> {
       } else {
         await depo.tumVerileriSifirla();
       }
+      await depo.misafirModunuAyarla(false);
       await kimlik.cikisYap();
       if (!context.mounted) return;
       Navigator.of(context).popUntil((r) => r.isFirst);
@@ -89,6 +90,7 @@ class _HesapKartiState extends State<HesapKarti> {
       } else {
         await depo.tumVerileriSifirla();
       }
+      await depo.misafirModunuAyarla(false);
       await kimlik.hesabiSil();
       if (!context.mounted) return;
       Navigator.of(context).popUntil((r) => r.isFirst);

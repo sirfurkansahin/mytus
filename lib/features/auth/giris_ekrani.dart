@@ -1,13 +1,21 @@
 import 'package:app/core/renkler.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/auth/kvkk_dialogu.dart';
+import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:flutter/material.dart';
 
-/// İlk açılışta (oturum yokken) gösterilen Giriş Yap / Kayıt Ol / Şifremi Unuttum ekranı.
+/// İlk açılışta veya Ayarlar'dan çağrıldığında gösterilen Giriş Yap / Kayıt Ol / Şifremi Unuttum ekranı.
 class GirisEkrani extends StatefulWidget {
-  const GirisEkrani({super.key, this.kimlikServisi});
+  const GirisEkrani({
+    super.key,
+    this.kimlikServisi,
+    this.misafirModundanMi = false,
+  });
 
   final KimlikServisi? kimlikServisi;
+
+  /// Ayarlar ekranından açıldığında kapatma düğmesi gösterir ve işlem bitince geri döner.
+  final bool misafirModundanMi;
 
   @override
   State<GirisEkrani> createState() => _GirisEkraniState();
@@ -81,6 +89,13 @@ class _GirisEkraniState extends State<GirisEkrani> {
       } else {
         await servis.girisYap(eposta: eposta, sifre: sifre);
       }
+      if (mounted) {
+        final depo = DepoKapsami.belki(context);
+        await depo?.misafirModunuAyarla(false);
+        if (widget.misafirModundanMi && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop(true);
+        }
+      }
     } on KimlikHatasi catch (e) {
       if (!mounted) return;
       setState(() => _hataMesaji = e.mesaj);
@@ -153,12 +168,29 @@ class _GirisEkraniState extends State<GirisEkrani> {
     }
   }
 
+  Future<void> _hesapsizDevamEt(BuildContext context) async {
+    final depo = DepoKapsami.belki(context);
+    if (depo != null) {
+      await depo.misafirModunuAyarla(true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
     final soluk = tema.colorScheme.onSurfaceVariant;
 
     return Scaffold(
+      appBar: widget.misafirModundanMi
+          ? AppBar(
+              title: const Text('Bulut Hesabı'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Vazgeç',
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -362,6 +394,59 @@ class _GirisEkraniState extends State<GirisEkrani> {
                       ),
                     ],
                   ),
+                  if (!widget.misafirModundanMi) ...[
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: tema.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'VEYA',
+                            style: tema.textTheme.labelSmall?.copyWith(
+                              color: soluk,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: tema.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    OutlinedButton.icon(
+                      key: const ValueKey('hesapsiz_devam_et_butonu'),
+                      onPressed: _islemSuruyor ? null : () => _hesapsizDevamEt(context),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.explore_outlined, size: 20),
+                      label: const Text(
+                        'Hesap Açmadan Devam Et (Misafir Modu)',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Çalışmaların bu cihazda güvenle saklanır. İstediğin zaman Ayarlar\'dan ücretsiz hesap açarak buluta aktarabilirsin.',
+                      textAlign: TextAlign.center,
+                      style: tema.textTheme.bodySmall?.copyWith(
+                        color: soluk,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -1,37 +1,31 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 13 Kasım 2026, Takvim, Kütüphane ve Organik Entegrasyon 3 Aşamalı Paketi tamamlandı (dal `claude/takvim-kutuphane-3asama`).
+Son guncelleme: 13 Kasım 2026, Misafir Modu & Esnek Bulut Girişi tamamlandı (dal `claude/esnek-giris-bulut`).
 
 ## Durum
-Kullanıcının "sırayla hepsini uygula" talimatı ve netleştirdiği kararlar doğrultusunda 3 aşamalı geliştirme eksiksiz uygulandı:
-
-1. **Aşama 1: Takvim Modülü Geliştirmeleri (`lib/features/takvim/`)**
-   - **Telafi Planı (Catch-Up):** Nöbet veya yoğunluk sebebiyle biriken (geciken) konular ve tekrarlar için `telafi_plani.dart` ve `telafi_dialogu.dart` oluşturuldu. Tekrarlar "yapıldı" sayılmaz; erteleme kuralıyla günlük limitlere (yeni konu ve tekrar sınırı) göre sonraki günlere dengeli dağıtılır. Bugün ekranına ve Takvim sekmesine Telafi butonu bağlandı.
-   - **Tek Dokunuşla Erteleme & Taşıma:** Tekrarlar ve planlı çalışmalar için `tekrarErtele`, `tekrarBirGunErtele` eklendi (`calisma.dart` ertelemeler). Ertelenen tekrarın sonraki tekrarları da gecikme kayması kuralıyla aynı gün kadar kaydırılır.
-   - **Haftalık Odak Görünümü:** Takvim ekranına Ay / Hafta görünüm seçicisi (`SegmentedButton`) eklendi. Nöbette tek elle 7 günlük odak görünümü rahatça kullanılabilir.
-
-2. **Aşama 2: Kütüphane Modülü Geliştirmeleri (`lib/features/kutuphane/`)**
-   - **Fotoğraflı Not Etiketleri:** `BolumNotu` modeline etiket desteği eklendi. Kullanıcının seçtiği 4 kritik etiket (`Tablo`, `Spot`, `Hoca notu`, `Şema / Algoritma`) not ekleme/düzenleme pencerelerine yerleştirildi. Bölüm notları ekranında bu etiketlerle canlı filtreleme çipleri eklendi.
-   - **Kalan Sayfa & Bitiş Tarihi Tahmini:** Hibrit model uygulandı (`Kitap.kalanSayfaSayisi`, `Kitap.tahminiKalanGun`). Kitap kartına günlük sayfa hedefi belirleme penceresi eklendi; hedef girilirse hedefe göre, girilmezse son 14 günde tamamlanan bölümlerden türetilen otomatik günlük hıza göre tahmini kalan gün ve tarih hesaplanır.
-
-3. **Aşama 3: Kütüphane ⟷ Takvim Organik Bağı**
-   - Kitap detay ekranında hem sıradaki bölüm kartından hem de her bölümün menüsünden **"Bugün Çalıştım & Tekrar Başlat"** ve **"İleri Tarihe Planla"** köprüsü kuruldu.
-   - Kullanıcı kararı gereği dersteki konulardan birini seçme veya tek dokunuşla yeni konu oluşturma diyaloğu açılır; "Çalıştım" dendiğinde R0-R4 tekrar zinciri bugünden başlatılır ve bölüm tamamlanır.
-   - Takvim ve Bugün ekranındaki konu/tekrar eylem menülerine, derse ait bir kitap varsa tek dokunuşla o kitabın notlarına ve fotoğraflarına gitme bağlantısı (`Kitap / Fasikül notları`) bağlandı.
-
-4. **Testler (`test/telafi_test.dart`, `test/kutuphane_test.dart`):**
-   - Tekrar erteleme, gecikme kayması, telafi planı hesaplama ve uygulama birim testleri eklendi.
-   - Bölüm notu etiketleri ve kitap sayfa tahmini testleri eklendi.
-
-## CI ve Canlı Dağıtım Doğrulaması
-- **GitHub Actions İş Akışı (Run 43468985212):** Kod analizi (`flutter analyze`), tüm birim/widget/uçtan uca testler (`flutter test`) ve Web derlemesi başarıyla tamamlandı (yeşil).
-- **Canlı Yayın:** Web Mobil (PWA) sürümü `https://sirfurkansahin.github.io/mytus/` adresinde güncellendi.
+Kullanıcının tercihi doğrultusunda "Misafir Modu & Esnek Giriş" akışı eksiksiz uygulandı:
+- **Giriş Ekranı (`lib/features/auth/giris_ekrani.dart`):**
+  - İlk açılışta zorunlu giriş barajı kaldırıldı. Giriş/Kayıt butonlarının altına "Hesap Açmadan Devam Et (Misafir Modu)" seçeneği eklendi.
+  - Hekimlerin nöbette veya ilk denemede vakit kaybetmeden uygulamayı doğrudan kullanabilmesi sağlandı.
+  - Ekran Ayarlar'dan açıldığında kapatma ikonu (`X`) ve işlem tamamlanınca geri dönme desteği eklendi (`misafirModundanMi`).
+- **Veri Kalıcılığı ve Misafir Durumu (`lib/features/dersler/plan_deposu.dart`):**
+  - `PlanDeposu` içerisine `misafirModu` durumu ve `misafirModunuAyarla(bool)` metodu eklendi; yerel bellekte (`localStorage`) kalıcı olarak saklanır.
+  - `_AcilisKapisi` (`lib/main.dart`): Kullanıcı misafir modunu seçtiğinde veya oturum açtığında doğrudan karşılama veya ana ekrana yönlendirilir.
+- **Ayarlar Ekranında Buluta Bağlan Kartı (`lib/features/ayarlar/ayarlar_ekrani.dart`):**
+  - Misafir modundaki kullanıcıya Ayarlar sekmesinde mor temalı `_BulutaBaglanKarti` sunulur: "Şu an yerel moddasın, tek dokunuşla buluta yedekle ve diğer cihazlarınla eşitle".
+  - Giriş yapıldığında mevcut yerel veriler (dersler, notlar, takvim, kütüphane) otomatik olarak yeni bulut hesabına aktarılır (İlk Giriş Göçü) ve kart `HesapKarti`na dönüşür.
+- **Çıkış ve Hesap Silme (`lib/features/auth/hesap_karti.dart`):**
+  - Oturum kapatıldığında veya hesap silindiğinde misafir modu sıfırlanarak kullanıcı başlangıç giriş ekranına yönlendirilir.
+- **Çalışma Grubu Köprüsü (`lib/features/grup/grup_ekrani.dart`):**
+  - Misafir modundaki kullanıcı bir gruba katılmak veya grup kurmak istediğinde doğrudan bulut girişine yönlendirilir.
+- **Testler (`test/kimlik_servisi_test.dart`):**
+  - Misafir modu seçimiyle uygulamaya geçiş ve Ayarlar'dan bulut hesabına bağlanıp verilerin eşitlenmesi widget testleri eklendi.
 
 ## Siradaki adim
-- Kullanıcının talebine göre sonraki modül geliştirmelerine geçilmesi (F.T. Time sayacı, Denemeler veya Kullanıcı Hesabı / Bulut).
+- Kullanıcı talebine göre sıradaki modül geliştirmeleri (F.T. Time odak sayacı, Deneme Sınavı analizi veya Google ile Giriş).
 
 ## Bilinen sorunlar / riskler
-- Yok. Mevcut veri yapılarıyla tam geriye dönük uyumludur. Küçük ekran taşmaları Wrap düzeniyle güvenceye alınmıştır.
+- Yok. Geriye dönük tam uyumludur.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

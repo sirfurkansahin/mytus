@@ -1,4 +1,5 @@
 import 'package:app/core/renkler.dart';
+import 'package:app/features/auth/giris_ekrani.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/grup/grup_servisi.dart';
@@ -73,6 +74,18 @@ class _GrupEkraniState extends State<GrupEkrani> {
   }
 
   Future<void> _grubaKatil(PlanDeposu depo, String uid, String takmaAd) async {
+    final kimlik = KimlikKapsami.belki(context);
+    if (kimlik != null && kimlik.aktifKullanici == null) {
+      final girildi = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => const GirisEkrani(misafirModundanMi: true),
+        ),
+      );
+      if (girildi != true || !mounted) return;
+      uid = kimlik.aktifKullanici?.uid ?? uid;
+      takmaAd = kimlik.aktifKullanici?.takmaAd ?? takmaAd;
+    }
+
     final kod = _kodDenetci.text.trim().toUpperCase();
     if (kod.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -118,6 +131,18 @@ class _GrupEkraniState extends State<GrupEkrani> {
   }
 
   Future<void> _grupOlustur(PlanDeposu depo, String uid, String takmaAd) async {
+    final kimlik = KimlikKapsami.belki(context);
+    if (kimlik != null && kimlik.aktifKullanici == null) {
+      final girildi = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => const GirisEkrani(misafirModundanMi: true),
+        ),
+      );
+      if (girildi != true || !mounted) return;
+      uid = kimlik.aktifKullanici?.uid ?? uid;
+      takmaAd = kimlik.aktifKullanici?.takmaAd ?? takmaAd;
+    }
+
     final ad = _grupAdiDenetci.text.trim();
     if (ad.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

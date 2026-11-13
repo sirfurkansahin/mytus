@@ -43,6 +43,7 @@ class PlanDeposu extends ChangeNotifier {
   DateTime? sinavTarihi;
   String? aktifGrupId;
   bool karsilamaTamam = false;
+  bool misafirModu = false;
   MufredatTuru mufredatTuru = MufredatTuru.speetus;
   TemaSecimi temaSecimi = TemaSecimi.sistem;
 
@@ -158,6 +159,7 @@ class PlanDeposu extends ChangeNotifier {
       sinavTarihi = tarih is String ? tarihCoz(tarih) : null;
       aktifGrupId = veri['aktifGrupId'] as String?;
       karsilamaTamam = veri['karsilamaTamam'] == true;
+      misafirModu = veri['misafirModu'] == true;
       final temaAdi = veri['temaSecimi'];
       temaSecimi = TemaSecimi.values.firstWhere(
         (t) => t.name == temaAdi,
@@ -332,6 +334,7 @@ class PlanDeposu extends ChangeNotifier {
         'surum': 1,
         'sonId': _sonId,
         'karsilamaTamam': karsilamaTamam,
+        'misafirModu': misafirModu,
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
         'aktifGrupId': aktifGrupId,
         'temaSecimi': temaSecimi.name,
@@ -934,12 +937,21 @@ class PlanDeposu extends ChangeNotifier {
     sinavTarihi = resmiSinavTarihi;
     aktifGrupId = null;
     karsilamaTamam = false;
+    misafirModu = false;
     turSayisi = 3;
     gunlukTekrarSiniri = 10;
     gunlukYeniKonuSiniri = 4;
     _gunlukSorular.clear();
     _zorGun = null;
     ftAyar = const FtAyarlari();
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Hesapsız misafir modunu ayarlar.
+  Future<void> misafirModunuAyarla(bool deger) async {
+    if (misafirModu == deger) return;
+    misafirModu = deger;
     _degisti();
     await hemenKaydet();
   }
@@ -1648,6 +1660,12 @@ class DepoKapsami extends InheritedNotifier<PlanDeposu> {
     final kapsam = context.dependOnInheritedWidgetOfExactType<DepoKapsami>();
     assert(kapsam != null, 'DepoKapsami bulunamadı');
     return kapsam!.notifier!;
+  }
+
+  /// Güvenli okuma: kapsam yoksa null döner.
+  static PlanDeposu? belki(BuildContext context) {
+    final kapsam = context.dependOnInheritedWidgetOfExactType<DepoKapsami>();
+    return kapsam?.notifier;
   }
 
   /// initState gibi yerlerde kullan: değişince yenilenmez.

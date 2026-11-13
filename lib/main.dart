@@ -82,6 +82,7 @@ class _MyTusAppState extends State<MyTusApp> {
     final aktif = kimlik.aktifKullanici;
     if (aktif != null && aktif.uid != _sonOturumUid) {
       _sonOturumUid = aktif.uid;
+      _deposu.misafirModunuAyarla(false);
       senkron.oturumAcildi(aktif);
     } else if (aktif == null && _sonOturumUid != null) {
       _sonOturumUid = null;
@@ -206,16 +207,6 @@ class _AcilisKapisi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kimlik = KimlikKapsami.belki(context);
-    if (kimlik != null) {
-      if (!kimlik.hazirMi) {
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
-      }
-      if (kimlik.aktifKullanici == null) {
-        return const GirisEkrani();
-      }
-    }
-
     final depo = DepoKapsami.of(context);
     switch (depo.durum) {
       case YuklemeDurumu.yukleniyor:
@@ -251,9 +242,21 @@ class _AcilisKapisi extends StatelessWidget {
           ),
         );
       case YuklemeDurumu.hazir:
-        return depo.karsilamaTamam
-            ? AnaIskelet(ftNative: ftNative)
-            : const KarsilamaEkrani();
+        break;
     }
+
+    final kimlik = KimlikKapsami.belki(context);
+    if (kimlik != null) {
+      if (!kimlik.hazirMi) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+      if (kimlik.aktifKullanici == null && !depo.misafirModu) {
+        return const GirisEkrani();
+      }
+    }
+
+    return depo.karsilamaTamam
+        ? AnaIskelet(ftNative: ftNative)
+        : const KarsilamaEkrani();
   }
 }

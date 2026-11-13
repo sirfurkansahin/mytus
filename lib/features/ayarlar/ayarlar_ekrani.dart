@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
+import 'package:app/features/auth/giris_ekrani.dart';
 import 'package:app/features/auth/hesap_karti.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
@@ -168,6 +169,7 @@ class AyarlarEkrani extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
+    final kimlik = KimlikKapsami.belki(context);
     final tema = Theme.of(context);
     final sinav = depo.sinavTarihi ?? resmiSinavTarihi;
     final bugun = gunBasi(DateTime.now());
@@ -181,9 +183,12 @@ class AyarlarEkrani extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
         children: [
-          if (KimlikKapsami.belki(context)?.aktifKullanici != null) ...[
+          if (kimlik != null) ...[
             _baslik(context, 'HESAP VE BULUT'),
-            const HesapKarti(),
+            if (kimlik.aktifKullanici != null)
+              const HesapKarti()
+            else
+              const _BulutaBaglanKarti(),
           ],
           _baslik(context, 'ÇALIŞMA GRUBU'),
           AyarSatiri(
@@ -410,6 +415,94 @@ class _SurumYazisiState extends State<_SurumYazisi> {
         style: tema.textTheme.bodySmall?.copyWith(
           color: tema.colorScheme.onSurfaceVariant,
         ),
+      ),
+    );
+  }
+}
+
+/// Kullanıcı misafir modundayken (oturum açılmamışken) gösterilen buluta bağlanma kartı.
+class _BulutaBaglanKarti extends StatelessWidget {
+  const _BulutaBaglanKarti();
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: tema.colorScheme.primaryContainer.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: tema.colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: tema.colorScheme.primary,
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.cloud_upload_outlined),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bulut Hesabına Bağlan',
+                      style: tema.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Şu an yerel (hesapsız) moddasın',
+                      style: tema.textTheme.bodySmall?.copyWith(
+                        color: tema.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Çalışma planın, derslerin ve notların yalnızca bu cihazda tutuluyor. '
+            'Ücretsiz bir hesap açarak veya giriş yaparak verilerini bulutta güvenle '
+            'saklayabilir, diğer telefon veya tabletlerinle anlık eşitleyebilirsin.',
+            style: tema.textTheme.bodySmall?.copyWith(
+              color: tema.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            key: const ValueKey('ayarlar_giris_yap_butonu'),
+            icon: const Icon(Icons.login_rounded, size: 18),
+            label: const Text('Giriş Yap / Hesap Oluştur'),
+            onPressed: () async {
+              final basarili = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => const GirisEkrani(misafirModundanMi: true),
+                ),
+              );
+              if (basarili == true && context.mounted) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Harika! Cihazındaki veriler yeni hesabınla buluta eşitlendi.',
+                      ),
+                    ),
+                  );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

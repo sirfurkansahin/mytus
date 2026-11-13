@@ -159,7 +159,7 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 
 | Konu | Karar |
 |---|---|
-| Giris zorunlulugu | Zorunlu. Yalnizca ilk acilista sorulur; sonra oturum acik kalir (her acilista sifre sorulmaz). |
+| Giris zorunlulugu | Esnek Giriş ve Misafir Modu (13 Kasım 2026 kullanıcı kararı): İlk açılışta zorunlu giriş barajı yerine 'Hesap Açmadan Devam Et (Misafir Modu)' seçeneği sunulur. Hekim dilediği zaman Ayarlar ekranındaki 'Bulut Hesabına Bağlan' kartından veya Çalışma Grubu ekranından tek dokunuşla hesabına giriş yapabilir; yerel veriler otomatik olarak yeni bulut hesabına aktarılır (göç). |
 | Giris yontemi | E-posta + sifre (Firebase Authentication). Profilde ayrica takma ad. Kullanici adiyla giris YOK. |
 | Sifre sifirlama | E-posta ile sifirlama baglantisi. |
 | Google girisi | Ilk asamada YOK, ileride eklenebilir. |
