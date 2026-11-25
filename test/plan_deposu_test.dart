@@ -197,4 +197,47 @@ void main() {
       expect(d.konuBul(3), isNull);
     });
   });
+
+  group('Sadeleştirme ve Yeni Özellikler (S9, S14, E7)', () {
+    test('günlük yeni konu ve tekrar sınırı çalışır', () async {
+      final d = await hazirDepo();
+      expect(d.gunlukYeniKonuSiniri, 4);
+      expect(d.gunlukTekrarSiniri, 10);
+
+      d.gunlukYeniKonuSinirBelirle(5);
+      expect(d.gunlukYeniKonuSiniri, 5);
+    });
+
+    test('günlük soru sayacı ekleme, eksiltme ve kalıcılık', () async {
+      final kayit = BellekKaydi();
+      final d = await hazirDepo(kayit);
+      final bugun = DateTime(2026, 11, 6);
+
+      expect(d.soruSayisiGun(bugun), 0);
+      d.soruEkle(bugun, 20);
+      expect(d.soruSayisiGun(bugun), 20);
+      d.soruEkle(bugun, -5);
+      expect(d.soruSayisiGun(bugun), 15);
+      await d.hemenKaydet();
+
+      final d2 = await hazirDepo(kayit);
+      expect(d2.soruSayisiGun(bugun), 15);
+    });
+
+    test('zor gün modu ve tekrar yükü hafifletme', () async {
+      final d = await hazirDepo();
+      final bugun = DateTime(2026, 11, 6);
+
+      expect(d.zorGunMu(bugun), isFalse);
+      expect(d.etkinTekrarSiniri(bugun), 10);
+
+      d.zorGunBaslat(bugun);
+      expect(d.zorGunMu(bugun), isTrue);
+      expect(d.etkinTekrarSiniri(bugun), 7); // 10 * 0.7 = 7
+
+      d.zorGunKapat();
+      expect(d.zorGunMu(bugun), isFalse);
+      expect(d.etkinTekrarSiniri(bugun), 10);
+    });
+  });
 }

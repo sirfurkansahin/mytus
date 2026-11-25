@@ -15,7 +15,11 @@ Color klinikYazi(BuildContext context) =>
         : const Color(0xFF0B5A4C);
 
 /// Açık temada tasarımın ışıklı zemin rengi; koyu temada sistem rengi kullanılır.
-const Color acikZemin = Color(0xFFFBFAFE);
+const Color acikZemin = Color(0xFFF8F7FC);
+
+/// Koyu temada göz yormayan derin mor-gece zemin ve kart rengi (nöbet ve gece okuması).
+const Color koyuZemin = Color(0xFF0F0C20);
+const Color koyuKartYuzeyi = Color(0xFF1A1633);
 
 /// Tekrar vurgusu: kehribar (onaylı tasarım). Koyu temada daha açık ton.
 Color tekrarRengi(BuildContext context) =>

@@ -1,6 +1,10 @@
 import 'dart:convert';
 
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
+import 'package:app/features/auth/giris_ekrani.dart';
+import 'package:app/features/auth/hesap_karti.dart';
+import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
 import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/kokpit/kokpit_ekrani.dart';
@@ -10,6 +14,7 @@ import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/grup/grup_ekrani.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/ft_time/ft_test_screen.dart';
 import 'package:app/features/ft_time/pil_rehberi.dart';
@@ -164,6 +169,7 @@ class AyarlarEkrani extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final depo = DepoKapsami.of(context);
+    final kimlik = KimlikKapsami.belki(context);
     final tema = Theme.of(context);
     final sinav = depo.sinavTarihi ?? resmiSinavTarihi;
     final bugun = gunBasi(DateTime.now());
@@ -177,6 +183,31 @@ class AyarlarEkrani extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
         children: [
+          if (kimlik != null)
+            ListenableBuilder(
+              listenable: kimlik,
+              builder: (context, _) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _baslik(context, 'HESAP VE BULUT'),
+                  if (kimlik.aktifKullanici != null)
+                    const HesapKarti()
+                  else
+                    const _BulutaBaglanKarti(),
+                ],
+              ),
+            ),
+          _baslik(context, 'ÇALIŞMA GRUBU'),
+          AyarSatiri(
+            baslik: 'Çalışma Grubu & Puan Tablosu',
+            altYazi: depo.aktifGrupId != null
+                ? 'Aktif bir gruptasın. Puan durumunu ve hedefleri gör.'
+                : 'Arkadaşlarınla 2-10 kişilik grup kur veya davet koduyla katıl',
+            deger: depo.aktifGrupId != null ? 'Grup Aktif' : 'Katıl',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const GrupEkrani()),
+            ),
+          ),
           _baslik(context, 'PLAN'),
           AyarSatiri(
             baslik: 'Sınav tarihi',
@@ -197,6 +228,22 @@ class AyarlarEkrani extends StatelessWidget {
                 birim: 'tur',
               );
               if (v != null) depo.turSayisiBelirle(v);
+            },
+          ),
+          AyarSatiri(
+            baslik: 'Günlük yeni konu sınırı',
+            altYazi: 'Bir güne yerleştirilmesi önerilen en çok yeni konu sayısı',
+            deger: ' konu',
+            onTap: () async {
+              final v = await sayiDialogu(
+                context,
+                baslik: 'Günlük yeni konu sınırı',
+                ilkDeger: depo.gunlukYeniKonuSiniri,
+                enAz: 1,
+                enCok: 15,
+                birim: 'konu',
+              );
+              if (v != null) depo.gunlukYeniKonuSinirBelirle(v);
             },
           ),
           AyarSatiri(
@@ -232,24 +279,27 @@ class AyarlarEkrani extends StatelessWidget {
             onTap: () => _temaSec(context, depo),
           ),
           _baslik(context, 'BİLİŞSEL PERFORMANS & UYKU'),
-          ListTile(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            leading: const Icon(Icons.dashboard_customize_outlined, color: Colors.purple),
-            title: const Text('Master Yönetim Kokpiti'),
-            subtitle: const Text('8 bilişsel gösterge, eğer–o zaman karar motoru ve netler.'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+          if (kokpitAcik) ...[
+            // K2: Master Kokpit gizli (gizli_ozellikler.dart)
+            ListTile(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              leading: const Icon(Icons.dashboard_customize_outlined, color: Colors.purple),
+              title: const Text('Master Yönetim Kokpiti'),
+              subtitle: const Text('8 bilişsel gösterge, eğer–o zaman karar motoru ve netler.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
           ListTile(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             leading: const Icon(Icons.psychology_outlined, color: Colors.indigo),
             title: const Text('Bilişsel & Uyku Yönetimi'),
-            subtitle: const Text('Zor bilişsel tavan, sirkadiyen odak, kafein kesilme ve PFC koruma.'),
+            subtitle: const Text('Zor bilişsel tavan, hedef uyku saati, kafein kesilme ve PFC koruma.'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
@@ -372,6 +422,95 @@ class _SurumYazisiState extends State<_SurumYazisi> {
         style: tema.textTheme.bodySmall?.copyWith(
           color: tema.colorScheme.onSurfaceVariant,
         ),
+      ),
+    );
+  }
+}
+
+/// Kullanıcı misafir modundayken (oturum açılmamışken) gösterilen buluta bağlanma kartı.
+class _BulutaBaglanKarti extends StatelessWidget {
+  const _BulutaBaglanKarti();
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: tema.colorScheme.primaryContainer.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: tema.colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: tema.colorScheme.primary,
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.cloud_upload_outlined),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bulut Hesabına Bağlan',
+                      style: tema.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Şu an yerel (hesapsız) moddasın',
+                      style: tema.textTheme.bodySmall?.copyWith(
+                        color: tema.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Çalışma planın, derslerin ve notların yalnızca bu cihazda tutuluyor. '
+            'Ücretsiz bir hesap açarak veya giriş yaparak verilerini bulutta güvenle '
+            'saklayabilir, diğer telefon veya tabletlerinle anlık eşitleyebilirsin.',
+            style: tema.textTheme.bodySmall?.copyWith(
+              color: tema.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            key: const ValueKey('ayarlar_giris_yap_butonu'),
+            icon: const Icon(Icons.login_rounded, size: 18),
+            label: const Text('Giriş Yap / Hesap Oluştur'),
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final basarili = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => const GirisEkrani(misafirModundanMi: true),
+                ),
+              );
+              if (basarili == true) {
+                messenger
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Harika! Cihazındaki veriler yeni hesabınla buluta eşitlendi.',
+                      ),
+                    ),
+                  );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:app/core/renkler.dart';
 import 'package:app/features/dersler/ders_detay_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
+import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/defterler/defterler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
@@ -52,7 +53,7 @@ class _DerslerEkraniState extends State<DerslerEkrani> {
 
     final durumMetni = klasikMi
         ? 'Bu grupta $toplamKonu konu · $calisilanKonu çalışıldı'
-        : 'Toplam $toplamKonu konu · $calisilanKonu çalışıldı';
+        : 'Toplam $toplamKonu video konu · 229 saat · $calisilanKonu çalışıldı';
 
     return SafeArea(
       child: ListView(
@@ -167,6 +168,7 @@ class _DersKarti extends StatelessWidget {
     final klinik = klasikMi && ders.grup == DersGrubu.klinik;
     final toplam = depo.konuSayisi(ders.id);
     final calisilan = depo.calisilanSayisi(ders.id);
+    final dersSuresi = speetusDersSureleri[ders.ad];
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -199,7 +201,9 @@ class _DersKarti extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$toplam konu · $calisilan çalışıldı',
+                    dersSuresi != null
+                        ? '$dersSuresi · $calisilan/$toplam çalışıldı'
+                        : '$toplam konu · $calisilan çalışıldı',
                     style: tema.textTheme.bodySmall?.copyWith(
                       color: tema.colorScheme.onSurfaceVariant,
                     ),

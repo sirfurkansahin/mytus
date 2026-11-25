@@ -1,3 +1,4 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/features/bilissel/dialoglar.dart';
 import 'package:app/features/bilissel/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
@@ -44,9 +45,11 @@ class BilisselEkrani extends StatelessWidget {
           _zorBilisselTavanKarti(context, depo, zorDk, toplamDk),
           const SizedBox(height: 16),
 
-          // 2. Sirkadiyen Odak Dağılımı ve Eğrisi
-          _odakEgrisiKarti(context, depo, ortOdak),
-          const SizedBox(height: 16),
+          // 2. Sirkadiyen Odak Dağılımı ve Eğrisi (K1: gizli, bkz. gizli_ozellikler.dart)
+          if (sirkadiyenGrafikAcik) ...[
+            _odakEgrisiKarti(context, depo, ortOdak),
+            const SizedBox(height: 16),
+          ],
 
           // 3. Uyku, Kafein ve Sirkadiyen Ritim Kartı
           _uykuKafeinKarti(context, depo, bugunkuUyku),
@@ -196,14 +199,19 @@ class BilisselEkrani extends StatelessWidget {
     final Color renk;
     final String durumYazisi;
     if (zorDk >= 240) {
-      renk = Colors.red;
-      durumYazisi = '⛔ Ağır Analitik Tavan Doldu (4 saat)! Kalan sürede sadece hafif tekrar ve kart çalışın.';
+      // K6: sert kırmızı uyarı yerine soluk, bilgilendirici not.
+      renk = sertTavanUyarisiAcik ? Colors.red : Colors.blueGrey;
+      durumYazisi = sertTavanUyarisiAcik
+          ? '⛔ Ağır Analitik Tavan Doldu (4 saat)! Kalan sürede sadece hafif tekrar ve kart çalışın.'
+          : 'Bugün 4 saatten fazla derin çalıştın. Bir ara ver; istersen hafif tekrarla devam et.';
     } else if (zorDk >= 180) {
-      renk = Colors.orange;
-      durumYazisi = '⚡ Zor Bilişsel Tavana Yaklaşıldı (3+ saat). PFC yorulmak üzere.';
+      renk = sertTavanUyarisiAcik ? Colors.orange : Colors.blueGrey;
+      durumYazisi = sertTavanUyarisiAcik
+          ? '⚡ Zor Bilişsel Tavana Yaklaşıldı (3+ saat). PFC yorulmak üzere.'
+          : 'Bugün 3 saatten fazla derin çalıştın. Kısa bir mola iyi gelir.';
     } else {
       renk = Colors.green;
-      durumYazisi = '✅ Prefrontal korteks analitik kapasitesi dengeli.';
+      durumYazisi = 'Bugünkü derin çalışma yükü dengeli.';
     }
 
     return Card(
@@ -449,6 +457,8 @@ class BilisselEkrani extends StatelessWidget {
                 ],
               ),
             ),
+            // K1: Günlük uyku girişi gizli (bkz. gizli_ozellikler.dart)
+            if (gunlukUykuGirisiAcik) ...[
             const SizedBox(height: 12),
             if (bugunkuUyku != null) ...[
               Container(
@@ -523,6 +533,7 @@ class BilisselEkrani extends StatelessWidget {
                     ],
                   ),
                 ),
+            ],
             ],
           ],
         ),

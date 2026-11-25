@@ -135,4 +135,37 @@ void main() {
     await depo.yukle();
     expect(depo.tekrarlar(bugun), isEmpty);
   });
+
+  test('calismalariEkle tek seferde birden çok konuyu güne yerleştirir', () async {
+    final h = await hazirla();
+    final konu2 = h.depo.konuEkle(h.dersId, 'Hücre fizyolojisi')!;
+    final konu3 = h.depo.konuEkle(h.dersId, 'Solunum mekaniği')!;
+
+    final eklenenler = h.depo.calismalariEkle([h.konuId, konu2.id, konu3.id], bugun);
+    expect(eklenenler.length, 3);
+    expect(h.depo.calismalarGun(bugun).length, 3);
+    expect(h.depo.calismalarGun(bugun).map((c) => c.konuId), containsAll([h.konuId, konu2.id, konu3.id]));
+  });
+
+  test('dersinKonulariniGetirVeyaOlustur konusu olmayan derse genel konu üretir', () async {
+    final h = await hazirla();
+    final bosDers = h.depo.tumDersler.first; // Zaten konusu var
+    expect(h.depo.dersinKonulariniGetirVeyaOlustur(bosDers.id), isNotEmpty);
+
+    // Yeni konusu olmayan ders ekle
+    await h.depo.karsilamayiTamamla(
+      sinavTarihi: DateTime(2027, 4, 1),
+      secilenDersler: const [
+        HazirDers('Fizyoloji', DersGrubu.temel),
+        HazirDers('Farmakoloji', DersGrubu.temel),
+      ],
+    );
+    final farma = h.depo.tumDersler.firstWhere((d) => d.ad == 'Farmakoloji');
+    expect(h.depo.konular(farma.id), isEmpty);
+
+    final uretilen = h.depo.dersinKonulariniGetirVeyaOlustur(farma.id);
+    expect(uretilen.length, 1);
+    expect(uretilen.single.ad, 'Farmakoloji - Genel Çalışma');
+    expect(h.depo.konular(farma.id).length, 1);
+  });
 }

@@ -2,16 +2,26 @@
 import 'dart:html' as html;
 
 /// Web (tarayıcı) ortamında veriyi localStorage içine yazar ve oradan okur.
-String? webDepoOku() {
+String? webDepoOku([String anahtar = 'mytus_data.json']) {
   try {
-    return html.window.localStorage['mytus_data.json'];
+    return html.window.localStorage[anahtar];
   } catch (_) {
     return null;
   }
 }
 
-void webDepoYaz(String icerik) {
+/// Yazar. Tarayıcı deposu doluysa ya da erişilemiyorsa HATA FIRLATIR:
+/// hata sessizce yutulmaz, kullanıcı kaydın yapılamadığını görmelidir.
+void webDepoYaz(String icerik, [String anahtar = 'mytus_data.json']) {
   try {
-    html.window.localStorage['mytus_data.json'] = icerik;
+    html.window.localStorage[anahtar] = icerik;
+  } catch (e) {
+    throw StateError('Tarayıcı deposuna yazılamadı ($anahtar): $e');
+  }
+}
+
+void webDepoSil([String anahtar = 'mytus_data.json']) {
+  try {
+    html.window.localStorage.remove(anahtar);
   } catch (_) {}
 }

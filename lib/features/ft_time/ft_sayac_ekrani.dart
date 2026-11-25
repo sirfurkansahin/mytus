@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/dersler/dialoglar.dart';
@@ -297,7 +298,8 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                   ),
                 ),
               ],
-              if (calisma && o.bolumBitti && !o.tamamlandi) ...[
+              // K5: zorunlu odak puanı gizli (gizli_ozellikler.dart)
+              if (odakPuaniSorulsun && calisma && o.bolumBitti && !o.tamamlandi) ...[
                 const SizedBox(height: 12),
                 _BlokOdakDegerlendirme(
                   oturumId: o.id,

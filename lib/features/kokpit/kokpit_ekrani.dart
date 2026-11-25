@@ -628,7 +628,7 @@ class _SekizBilisselGostergeGrid extends StatelessWidget {
                     ? Colors.orange
                     : Colors.green,
                 altMetin: gostergeler.zorBilisselTavanAsildi
-                    ? '4 Saatlik Kanıtlı Tavan Doldu'
+                    ? '4 Saatlik Günlük Tavan Doldu'
                     : 'Verimli Odak Skalası',
                 ikon: Icons.timer_outlined,
               ),

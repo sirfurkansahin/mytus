@@ -1,13 +1,15 @@
+import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/features/bugun/bugun_ekrani.dart';
 import 'package:app/features/dersler/dersler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_ekrani.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/features/ft_time/ft_native.dart';
+import 'package:app/features/kutuphane/kutuphane_ekrani.dart';
 import 'package:app/features/takvim/takvim_ekrani.dart';
 import 'package:flutter/material.dart';
 
-/// Alt menülü ana çerçeve: Bugün · Dersler · Takvim · F.T. time.
+/// Alt menülü ana çerçeve: Bugün · Dersler · Takvim · (Kütüphane / F.T. time).
 class AnaIskelet extends StatefulWidget {
   const AnaIskelet({super.key, this.ftNative = const FtNative()});
 
@@ -28,10 +30,11 @@ class _AnaIskeletState extends State<AnaIskelet> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Uygulama kapalıyken biten bir odak bölümü varsa açılışta işle (puan kaybolmasın).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _ftKontrol.tazele();
-    });
+    if (ftTimeAcik) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _ftKontrol.tazele();
+      });
+    }
   }
 
   @override
@@ -42,10 +45,9 @@ class _AnaIskeletState extends State<AnaIskelet> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState durum) {
-    if (durum == AppLifecycleState.resumed) _ftKontrol.tazele();
+    if (ftTimeAcik && durum == AppLifecycleState.resumed) _ftKontrol.tazele();
   }
 
-  // Sekmeler ilk açıldığında oluşturulur (örneğin sayaç ekranı gereksiz yere erken açılmasın).
   final Set<int> _acilanlar = {0};
 
   Widget _sekmeIcerigi(int sira) {
@@ -58,7 +60,7 @@ class _AnaIskeletState extends State<AnaIskelet> with WidgetsBindingObserver {
       case 2:
         return const TakvimEkrani();
       default:
-        return FtEkrani(kontrol: _ftKontrol);
+        return ftTimeAcik ? FtEkrani(kontrol: _ftKontrol) : const KutuphaneEkrani();
     }
   }
 
@@ -91,11 +93,18 @@ class _AnaIskeletState extends State<AnaIskelet> with WidgetsBindingObserver {
             selectedIcon: Icon(Icons.calendar_month),
             label: 'Takvim',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.timer_outlined),
-            selectedIcon: Icon(Icons.timer),
-            label: 'F.T. time',
-          ),
+          if (ftTimeAcik)
+            NavigationDestination(
+              icon: Icon(Icons.timer_outlined),
+              selectedIcon: Icon(Icons.timer),
+              label: 'F.T. time',
+            )
+          else
+            NavigationDestination(
+              icon: Icon(Icons.local_library_outlined),
+              selectedIcon: Icon(Icons.local_library),
+              label: 'Kütüphane',
+            ),
         ],
       ),
     );

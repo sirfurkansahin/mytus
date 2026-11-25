@@ -1,23 +1,59 @@
 import 'package:app/app/ana_iskelet.dart';
+import 'package:app/app/kayit_hatasi_seridi.dart';
+import 'package:app/core/firebase_ayarlari.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/auth/giris_ekrani.dart';
+import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/karsilama/karsilama_ekrani.dart';
+import 'package:app/features/senkronizasyon/bulut_kaynagi.dart';
+import 'package:app/features/senkronizasyon/bulut_senkron_servisi.dart';
+import 'package:app/features/senkronizasyon/cakisma_dialogu.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
-  runApp(const MyTusApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  KimlikServisi? kimlikServisi;
+  BulutSenkronServisi? senkronServisi;
+  if (FirebaseAyarlari.yapilandirildiMi) {
+    try {
+      await Firebase.initializeApp(options: FirebaseAyarlari.webSecenekleri);
+      kimlikServisi = FirebaseKimlikServisi();
+      senkronServisi = BulutSenkronServisi(
+        yerelKayit: const DosyaKaydi(),
+        bulutKaynagi: FirestoreBulutKaynagi(),
+      );
+    } catch (_) {
+      kimlikServisi = null;
+      senkronServisi = null;
+    }
+  }
+  runApp(
+    MyTusApp(
+      kimlikServisi: kimlikServisi,
+      senkronServisi: senkronServisi,
+    ),
+  );
 }
 
 class MyTusApp extends StatefulWidget {
-  /// [deposu] ve [ftNative] yalnızca testler içindir; verilmezse telefondaki dosya
-  /// ve gerçek Android köprüsü kullanılır.
-  const MyTusApp({super.key, this.deposu, this.ftNative = const FtNative()});
+  /// [deposu], [ftNative], [kimlikServisi] ve [senkronServisi] testlerde dışarıdan verilebilir.
+  const MyTusApp({
+    super.key,
+    this.deposu,
+    this.ftNative = const FtNative(),
+    this.kimlikServisi,
+    this.senkronServisi,
+  });
 
   final PlanDeposu? deposu;
   final FtNative ftNative;
+  final KimlikServisi? kimlikServisi;
+  final BulutSenkronServisi? senkronServisi;
 
   @override
   State<MyTusApp> createState() => _MyTusAppState();
@@ -25,18 +61,63 @@ class MyTusApp extends StatefulWidget {
 
 class _MyTusAppState extends State<MyTusApp> {
   late final PlanDeposu _deposu;
+  String? _sonOturumUid;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
     super.initState();
-    _deposu = widget.deposu ?? PlanDeposu(kayit: const DosyaKaydi());
+    final senkron = widget.senkronServisi;
+    _deposu = widget.deposu ??
+        PlanDeposu(kayit: senkron ?? const DosyaKaydi());
+    senkron?.depoBagla(_deposu);
     if (_deposu.durum == YuklemeDurumu.yukleniyor) {
       _deposu.yukle();
+    }
+    widget.kimlikServisi?.addListener(_oturumDegisti);
+    widget.senkronServisi?.addListener(_senkronDegisti);
+    _oturumDegisti();
+  }
+
+  bool _cakismaSoruluyor = false;
+
+  /// Girişte cihaz ile hesap arasında çakışma çıkarsa kullanıcıya sorar.
+  void _senkronDegisti() {
+    final senkron = widget.senkronServisi;
+    final cakisma = senkron?.bekleyenCakisma;
+    if (senkron == null || cakisma == null || _cakismaSoruluyor) return;
+    _cakismaSoruluyor = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final baglam = _navigatorKey.currentContext;
+      if (!mounted || baglam == null) {
+        _cakismaSoruluyor = false;
+        return;
+      }
+      final cihazdaki = await cakismaDialoguGoster(baglam, cakisma);
+      await senkron.cakismayiCoz(cihazdakiKalsin: cihazdaki);
+      _cakismaSoruluyor = false;
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
+  }
+
+  void _oturumDegisti() {
+    final kimlik = widget.kimlikServisi;
+    final senkron = widget.senkronServisi;
+    if (kimlik == null || senkron == null || !kimlik.hazirMi) return;
+    final aktif = kimlik.aktifKullanici;
+    if (aktif != null && aktif.uid != _sonOturumUid) {
+      _sonOturumUid = aktif.uid;
+      _deposu.misafirModunuAyarla(false);
+      senkron.oturumAcildi(aktif);
+    } else if (aktif == null && _sonOturumUid != null) {
+      _sonOturumUid = null;
     }
   }
 
   @override
   void dispose() {
+    widget.kimlikServisi?.removeListener(_oturumDegisti);
+    widget.senkronServisi?.removeListener(_senkronDegisti);
     if (widget.deposu == null) {
       _deposu.dispose();
     }
@@ -60,32 +141,103 @@ class _MyTusAppState extends State<MyTusApp> {
       listenable: _deposu,
       builder: (context, _) {
         return MaterialApp(
+          navigatorKey: _navigatorKey,
           title: 'MY TUS',
           debugShowCheckedModeBanner: false,
           // Ana renk mor (onaylı tasarım). Tema kullanıcı tercihini veya telefonun ayarını izler.
           theme: ThemeData(
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: morAna).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: morAna,
+              surface: acikZemin,
+            ).copyWith(
               primary: morAna,
               onPrimary: Colors.white,
             ),
             scaffoldBackgroundColor: acikZemin,
+            cardTheme: CardThemeData(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+              ),
+              color: Colors.white,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              height: 64,
+              elevation: 0,
+              indicatorColor: morAna.withValues(alpha: 0.12),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.padded,
           ),
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: morAna,
               brightness: Brightness.dark,
+              surface: koyuZemin,
+            ).copyWith(
+              primary: const Color(0xFF9D8DF1),
+              onPrimary: Colors.white,
             ),
+            scaffoldBackgroundColor: koyuZemin,
+            cardTheme: CardThemeData(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+              color: koyuKartYuzeyi,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              height: 64,
+              elevation: 0,
+              backgroundColor: koyuZemin,
+              indicatorColor: morAna.withValues(alpha: 0.3),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.padded,
           ),
           themeMode: _temaModu(_deposu.temaSecimi),
           locale: const Locale('tr', 'TR'),
           supportedLocales: const [Locale('tr', 'TR')],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          builder: (context, child) => DepoKapsami(
-            deposu: _deposu,
-            child: child ?? const SizedBox.shrink(),
-          ),
+          builder: (context, child) {
+            Widget icerik = DepoKapsami(
+              deposu: _deposu,
+              child: child ?? const SizedBox.shrink(),
+            );
+            final senkron = widget.senkronServisi;
+            if (senkron != null) {
+              icerik = SenkronKapsami(servis: senkron, child: icerik);
+            }
+            final kimlik = widget.kimlikServisi;
+            if (kimlik != null) {
+              icerik = KimlikKapsami(servis: kimlik, child: icerik);
+            }
+            // Cihaza kaydedilemediyse (ör. tarayıcı deposu dolu) tüm ekranların
+            // üstünde uyarı şeridi gösterilir; hata sessiz kalmaz.
+            if (_deposu.kayitHatasi) {
+              icerik = Column(
+                children: [
+                  KayitHatasiSeridi(
+                    yenidenDene: () {
+                      _deposu.kaydetmeyiYenidenDene();
+                    },
+                  ),
+                  Expanded(
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: icerik,
+                    ),
+                  ),
+                ],
+              );
+            }
+            return icerik;
+          },
           home: _AcilisKapisi(ftNative: widget.ftNative),
         );
       },
@@ -93,7 +245,8 @@ class _MyTusAppState extends State<MyTusApp> {
   }
 }
 
-/// Verinin durumuna göre doğru ekranı açar: yükleniyor, hata, karşılama veya ana ekran.
+/// Verinin ve oturumun durumuna göre doğru ekranı açar:
+/// yükleniyor, giriş ekranı (oturum yoksa), hata, karşılama veya ana ekran.
 class _AcilisKapisi extends StatelessWidget {
   const _AcilisKapisi({required this.ftNative});
 
@@ -136,9 +289,21 @@ class _AcilisKapisi extends StatelessWidget {
           ),
         );
       case YuklemeDurumu.hazir:
-        return depo.karsilamaTamam
-            ? AnaIskelet(ftNative: ftNative)
-            : const KarsilamaEkrani();
+        break;
     }
+
+    final kimlik = KimlikKapsami.belki(context);
+    if (kimlik != null) {
+      if (!kimlik.hazirMi) {
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      }
+      if (kimlik.aktifKullanici == null && !depo.misafirModu) {
+        return const GirisEkrani();
+      }
+    }
+
+    return depo.karsilamaTamam
+        ? AnaIskelet(ftNative: ftNative)
+        : const KarsilamaEkrani();
   }
 }

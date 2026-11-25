@@ -1,7 +1,11 @@
+import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/kokpit/kokpit_ekrani.dart';
+import 'package:app/features/ft_time/ft_ekrani.dart';
+import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,7 +54,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     // Bugün sekmesi: sınava kalan gün yazısı görünür.
@@ -84,7 +88,7 @@ void main() {
   testWidgets('Dersler sekmesinde SpeeTUS tüm dersleri tek liste olarak gösterir',
       (tester) async {
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Dersler'));
@@ -137,6 +141,7 @@ void main() {
   provaTestleri();
   kokpitTestleri();
   rehberTestleri();
+  kutuphaneTestleri();
 }
 
 void takvimTestleri() {
@@ -179,6 +184,53 @@ void takvimTestleri() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('Takvimde çoklu ders ekleme butonuyla birden çok ders tek seferde takvime eklenir',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Takvim'));
+    await tester.pumpAndSettle();
+
+    // "+ Çoklu Ders Ekle" butonuna dokunulur
+    expect(find.text('+ Çoklu Ders Ekle'), findsOneWidget);
+    await tester.tap(find.text('+ Çoklu Ders Ekle'));
+    await tester.pumpAndSettle();
+
+    // "Dersler (Toplu Ekle)" sekmesi açık olmalı
+    expect(find.text('Dersler (Toplu Ekle)'), findsOneWidget);
+
+    // Listeden iki farklı derse dokunarak seç
+    final dersler = depo.tumDersler;
+    final d1 = dersler[0];
+    final d2 = dersler[1];
+
+    await tester.tap(find.text(d1.ad));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(d2.ad));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Takvime Ekle'), findsOneWidget);
+    await tester.tap(find.text('Takvime Ekle'));
+    await tester.pumpAndSettle();
+
+    // Günlük yeni konu sınırı onay penceresi çıkarsa onaylanır
+    if (find.text('Yine de ekle').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Yine de ekle'));
+      await tester.pumpAndSettle();
+    }
+
+    // Takvime eklenmiş olmalı
+    final eklenenKonular = depo.calismalarGun(gunBasi(DateTime.now()));
+    expect(eklenenKonular.length, greaterThanOrEqualTo(2));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('Konu ekranında tekrar planı görünür', (tester) async {
     final depo = await doluDepo(tester);
     final ilkDers = depo.tumDersler.first;
@@ -209,9 +261,15 @@ void ftTestleri() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: KisitliNative()));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('F.T. time'));
+    final kontrol = FtKontrol(depo, KisitliNative());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Başlat'));
     await tester.pump(const Duration(milliseconds: 300));
@@ -233,10 +291,15 @@ void ftTestleri() {
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
     final native = SahteNative();
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: native));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('F.T. time'));
+    final kontrol = FtKontrol(depo, native);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Toplam yaklaşık süre'), findsOneWidget);
     expect(find.text('1 sa 55 dk'), findsOneWidget);
@@ -282,9 +345,15 @@ void ftTestleri() {
     depo.oturumGuncelle(o);
     expect(depo.toplamPuan, 25);
 
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('F.T. time'));
+    final kontrol = FtKontrol(depo, SahteNative());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Oturum tamamlandı'), findsOneWidget);
@@ -326,7 +395,10 @@ void ftTestleri() {
     await tester.pumpAndSettle();
     expect(depo.turSayisi, 3);
 
-    await tester.tap(find.text('Çalışma süresi'));
+    final calismaFinder = find.byWidgetPredicate((w) => w is Text && w.data != null && w.data!.endsWith('resi') && w.data!.length < 20);
+    await tester.scrollUntilVisible(calismaFinder, 100);
+    await tester.pumpAndSettle();
+    await tester.tap(calismaFinder);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), '40');
     await tester.tap(find.text('Kaydet'));
@@ -384,7 +456,7 @@ void denemeTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Denemeler & Analiz'));
@@ -421,30 +493,24 @@ void defterlerTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Özel Defterler'));
     await tester.pumpAndSettle();
-    expect(find.text('Özel Defterler & Akıllı Havuz'), findsOneWidget);
+    expect(find.text('Defter'), findsOneWidget);
     expect(find.text('Hata & Çeldirici'), findsOneWidget);
-    expect(find.text('Skor Defteri'), findsOneWidget);
+    expect(find.text('Referans'), findsOneWidget);
 
-    // Skor Defteri sekmesine geç
-    await tester.tap(find.text('Skor Defteri'));
+    // K3 & K4: Mekanizma Zincirleri ve Vaka Kartı arayüzden gizlidir
+    expect(find.text('Mekanizma Zincirleri'), findsNothing);
+    expect(find.text('3 Dk Vaka Kartı'), findsNothing);
+
+    // Referans sekmesine geç
+    await tester.tap(find.text('Referans'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Hinchey'), findsWidgets);
     expect(find.textContaining('Hodgkin'), findsOneWidget);
-
-    // Mekanizma Zincirleri sekmesine geç
-    await tester.tap(find.text('Mekanizma Zincirleri'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Illness Script'), findsOneWidget);
-
-    // 3 Dk Vaka Kartı sekmesine geç
-    await tester.tap(find.text('3 Dk Vaka Kartı'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Vaka Kartı'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -458,7 +524,7 @@ void bilisselTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Bilişsel & Uyku'));
@@ -466,7 +532,9 @@ void bilisselTestleri() {
 
     expect(find.text('Bilişsel & Uyku Yönetimi'), findsOneWidget);
     expect(find.textContaining('Zor Bilişsel İş Tavanı'), findsOneWidget);
-    expect(find.textContaining('Sirkadiyen Odak'), findsOneWidget);
+    // K1: sirkadiyen grafik ve günlük uyku girişi gizli; hedef/kafein kartı açık.
+    expect(find.textContaining('Sirkadiyen Odak'), findsNothing);
+    expect(find.text('Dün Geceki Uykuyu Kaydet'), findsNothing);
     expect(find.textContaining('Uyku & Kafein Disiplini'), findsOneWidget);
     expect(find.textContaining('Prefrontal Korteks (PFC) & Kurtarma'), findsOneWidget);
 
@@ -487,7 +555,7 @@ void provaTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Denemeler & Analiz'));
@@ -531,11 +599,21 @@ void kokpitTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
-    // Bugün ekranındaki Master Kokpit butonuna dokun
-    await tester.tap(find.byTooltip('Master Kokpit'));
+    // K2: Bugün ekranında Master Kokpit gizlidir
+    expect(find.byTooltip('Master Kokpit'), findsNothing);
+
+    // Doğrudan Kokpit ekranı açılır
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: const KokpitEkrani(),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Master Yönetim Kokpiti'), findsOneWidget);
@@ -571,7 +649,7 @@ void rehberTestleri() {
     addTearDown(tester.view.reset);
 
     final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo));
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
     await tester.pumpAndSettle();
 
     // Bugün ekranındaki Rehber kartına dokun
@@ -592,6 +670,40 @@ void rehberTestleri() {
 
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+}
+
+
+void kutuphaneTestleri() {
+  testWidgets('Kütüphane sekmesi açılır, hazır klasörler önerilir ve kitap ekleme penceresi görünür',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
+    expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
+
+    // Hazır klasörler AppBar butonuyla açılır (ekrandan yer kaplayan kart kaldırılmıştır)
+    await tester.tap(find.byTooltip('Hazır Klasörler'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Hazır Kitap Klasörleri'), findsOneWidget);
+    expect(find.textContaining('1 - SpeeTUS (5. Baskı)'), findsOneWidget);
+    expect(find.textContaining('2 - TUSDATA Konu Anlatım'), findsOneWidget);
+    await tester.tap(find.text('Kapat'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kitap Ekle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kütüphaneye Kitap Ekle'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

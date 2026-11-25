@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
+import 'package:app/features/ft_time/ft_ekrani.dart';
+import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,11 +166,17 @@ void main() {
     ekranAyarla(tester);
     final depo = await doluDepo(tester);
     depo.ftAyarBelirle(depo.ftAyar.kopya(donguSayisi: 2));
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    final kontrol = FtKontrol(depo, SahteNative());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DepoKapsami(
+          deposu: depo,
+          child: Scaffold(body: FtEkrani(kontrol: kontrol)),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('F.T. time'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Başlat'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Döngü 1 / 2'), findsOneWidget);
@@ -295,23 +303,80 @@ void main() {
       await dokun('Ayarlar', find.byTooltip('Ayarlar'));
       await geri('ayarlardan geri');
 
-      await dokun('sekme F.T. time', find.text('F.T. time'));
-      final baslat = find.text('Başlat');
-      if (baslat.evaluate().isEmpty) {
-        await tester.scrollUntilVisible(
-          baslat,
-          300,
-          scrollable: find.byType(Scrollable).first,
-        );
-      }
-      await tester.ensureVisible(baslat.first);
-      await tester.pump();
-      await tester.tap(baslat.first);
-      await tester.pump(const Duration(milliseconds: 300));
-      kontrol('F.T. time Baslat');
+      await dokun('sekme Kütüphane', find.text('Kütüphane'));
+      kontrol('Kütüphane sekmesi');
       FlutterError.onError = eskiHata;
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets('Kütüphane: kitap ekleme, bölümler ve tamamlama', (tester) async {
+    ekranAyarla(tester);
+    final depo = await doluDepo(tester);
+    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Kütüphane'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
+    expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
+
+    await tester.tap(find.text('Kitap Ekle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kütüphaneye Kitap Ekle'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Dahiliye Konu Kitabı');
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byType(TextField).at(2),
+      'Gastroenteroloji (s. 1-30)\nHematoloji (s. 31-60)',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.textContaining('Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dahiliye Konu Kitabı'), findsOneWidget);
+    expect(find.textContaining('Sırada: Gastroenteroloji'), findsOneWidget);
+    expect(depo.kitaplar.length, 2);
+
+    await tester.tap(find.text('Dahiliye Konu Kitabı'));
+    await tester.pumpAndSettle();
+    expect(find.text('BÖLÜMLER (2)'), findsOneWidget);
+
+    await tester.tap(find.text('Çalıştım ✓'));
+    await tester.pumpAndSettle();
+
+    final dahiliye = depo.kitaplar.firstWhere((k) => k.ad == 'Dahiliye Konu Kitabı');
+    expect(dahiliye.tamamlananBolumSayisi, 1);
+    expect(dahiliye.yuzde, 50);
+
+    // Bölüm notları ekranını aç ve yeni not ekle
+    await tester.tap(find.byTooltip('Bölüm Notları').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Bu Bölüme Henüz Not Eklenmedi'), findsOneWidget);
+
+    await tester.tap(find.text('İlk Notunu Ekle'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Bölüm Notu / Bilgi Girişi'),
+      'Önemli vaka spot notu: Antikor aracılı reaksiyon',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaydet'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Önemli vaka spot notu: Antikor aracılı reaksiyon'), findsOneWidget);
+    expect(find.text('1 Not'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 not'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
 }

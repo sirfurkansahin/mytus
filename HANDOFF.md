@@ -1,46 +1,47 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 4 Kasim 2026 (Gemini), Kullanım Rehberi & Görsel Tanıtım Turu tamamlandı ve main dalına birleştirildi (PR #18).
+Son guncelleme: 25 Kasım 2026, Claude (denetim raporu sonrası düzeltmeler, 1. aşama).
 
 ## Durum
-Tüm modüller aktif, birim ve uçtan uca testleri geçmiş ve CI doğrulaması tamamlanmıştır:
-- **Faz 1 (Modül 1: Deneme Sınavları & Bilişsel Hata Analizi - PR #12):**
-  - 200 soru (100 TTBT + 100 KTBT, 135'er dk), ÖSYM net formülü (Doğru - Yanlış/4).
-  - Klinik Ağırlıklı K Puanı (0.4 TTBT + 0.6 KTBT) ve ÖSYM 85 EBAP tavan tahmin puanı.
-  - A–F Hata Sınıfları (A: Bilgi, B: Yanlış İnanç, C: Okuma/Kurgu, D: Mantık, E: Süre, F: Form).
-  - Güven Matrisi (Emin / Kararsız / Tahmin), Kalibrasyon Farkı ve B Sınıfı Hiperdüzeltme Alarmları.
-- **Faz 2 (Modül 2: Özel Defterler & Akıllı Havuz - PR #13):**
-  - Hata Defteri & Çeldirici Bankası (karışan çeldirici, ayıran tek kriter, adayın kendi kuralı).
-  - Sınıflama & Skor Defteri (10+ hazır TUS skoru: Hinchey, Wells, CURB-65 vb. ve özel skorlar).
-  - Mekanizma Zincirleri (Illness Script - 6 branş 5 halkalı şablonlar).
-  - 3 Dakikalık Vaka Kartı (klinik vizit vakalarını TUS soru kalıbına dönüştürme).
-- **Faz 3 (Modül 3: Nörobiyoloji, Uyku & Bilişsel Performans - PR #14):**
-  - F.T. Time blok sonu 1-5 odak puanı ve "Ağır Analitik İş" takibi.
-  - Zor Bilişsel İş Tavanı (günlük 180 dk uyarı, 240 dk / 4 saat kanıtlı tavan aşımı).
-  - Sirkadiyen Odak Dağılımı ve 14 günlük biyolojik verim eğrisi.
-  - Uyku & Kafein Disiplini (hedef yatıştan 8 saat önce kafein kesilme alarmı, sirkadiyen sapma hesabı).
-  - Prefrontal Korteks %70 Yük Kurtarma Modu (C hatası > %15 ise yük %70'e iner, sadece R1-R2 tekrarları yapılır).
-- **Faz 4 (Modül 4: Sınav Anı, Panik Protokolü & Provalar - PR #15):**
-  - 84 saniyelik Huberman Lab Döngüsel İç Çekme (Cyclic Sighing) görsel nefes rehberi ve Jamieson uyarılmayı yeniden değerlendirme kartı.
-  - Gerçek Saat Sınav Provası (135 dk geri sayım, 25, 50, 75, 100. soru tempo kontrolleri).
-  - İki oturum arası 135 dk Ara Dinlenme Protokolü.
-  - Beklenen Değer (EV) Kartı (+0.167 net matematiksel kazanç ve cevap değiştirme kuralları).
-- **Faz 5 (Modül 5: Master Yönetim Kokpiti & Karar Motoru - PR #16):**
-  - Haftalık 8 Bilişsel Gösterge (Kalibrasyon, Aşırı Güven, Uyku, PFC C Hatası, Kaygı, R1, R3, Odak/Tavan).
-  - 4 Sınav Göstergesi (Temel Net, Klinik Net, K Puanı, EBAP Puanı).
-  - 0-100 Kompozit Bilişsel Sağlık Skoru.
-  - Otomatik "Eğer–O Zaman" (If-Then) Strateji ve Eylem Motoru.
-- **Kullanım Rehberi & Görsel Tanıtım Turu (`model2/kullanim-rehberi`):**
-  - `TanitimTuruEkrani`: 5 tematik görsel slayt (Planlama & Tekrar, Odak & 3-4 Saat Tavanı, Hata Defteri & Çeldirici, Sınav Anı & 90 sn Nefes, Master Kokpit).
-  - `RehberEkrani`: 6 ana kategoride detaylı Sıkça Sorulan Sorular (SSS) ve modül kullanım kılavuzu.
-  - Karşılama, Bugün ve Ayarlar ekranlarında doğrudan erişim kısayolları.
-  - `test/rehber_test.dart` ve `test/widget_test.dart` (rehberTestleri) ile doğrulandı.
+25 Kasım 2026'da tüm dallar denetlendi (rapor sohbette verildi). Kullanıcının kararlarıyla
+1. aşama düzeltmeleri ayrı dallarda, zincir halinde yapıldı; hepsi GitHub Actions'ta geçti:
 
-## Siradaki adim
-- TUS Master Araştırma Raporunun 5 fazlık entegrasyonu ve Kullanım Rehberi & Tanıtım Turu tamamlandı.
-- Kullanıcıdan yeni istek veya gerçek cihaz kullanım geri bildirimleri bekleniyor.
-## Bilinen sorunlar / riskler
-- Bulut ortamında yerel derleme kısıtlıdır; tüm analiz, test ve derlemeler GitHub Actions üzerinde yeşil olarak doğrulanmaktadır.
+| Dal | İçerik | CI |
+|---|---|---|
+| `claude/yayin-yalniz-main` | `deploy-web.yml`: testler her dalda, canlı yayın YALNIZ `main`'den | #81 geçti, yayın atlandı |
+| `claude/kayit-hatasi-uyari` | A1: cihaza yazılamazsa (depo dolu) uyarı şeridi + "Tekrar dene"; fotoğraflar tek kopya, silinen notun fotoğrafı kalmaz | #82 geçti (195 test) |
+| `claude/bulut-esitleme-onarim` | A2: gönderilemeyen bölümler kalıcı; bulut okunamazsa hiçbir şey gönderilmez; cihaz/hesap farklıysa kullanıcıya sorulur + yedeği geri getirme; bölüm içeriğine göre eşitleme; aktif grup korunur | #83 geçti (203 test) |
+| `claude/kayit-alan-koruma` | A3: kayıt sürümü 2, tanınmayan alanlar korunur; eksik "kitaplar" alanında örnek kitap eklenmez | #84 geçti (206 test) |
+
+Zincir: `main` ← `claude/esnek-giris-bulut` (önceki 11 dallık iş zinciri) ← yukarıdaki 4 dal.
+`main` bu zincirin atasıdır; birleştirme "ileri sarma" ile çakışmasız olur.
+Canlı site şu an hâlâ 13 Kasım'daki `claude/esnek-giris-bulut` sürümünü gösteriyor.
+
+## Kullanıcı kararları (25 Kasım 2026)
+DECISIONS.md'ye "Denetim Sonrası Kararlar" başlığıyla yazıldı.
+
+## Sıradaki adım
+1. `main`'e birleştirme: kullanıcının AÇIK izniyle (birleştirme siteyi yayınlar).
+2. 2. aşama (onaylandı, her biri ayrı dalda): sınav tarihi seçimi (27 Mart / 22 Ağustos 2027),
+   bilişsel/uyku/kafein/nefes bölümlerinin tamamen kaldırılması (Kurtarma Modu dahil),
+   "Tekrarları affet & dağıt" gecikenleri dağıtsın, son ders paylaşımı isteğe bağlı (varsayılan kapalı),
+   puan her yerde Seçenek C, TUSDATA örnek kitabının kaldırılıp mevcut kütüphanelerden de silinmesi,
+   A4 (sıfırla/müfredat/hesap silme/yedek), A5, A6, A8, C4 (45 puan), B1, B2, B5, A9, A11,
+   B4 (önce taslak göster).
+
+## Bilinen sorunlar / notlar
+- Bu ortamdan dal SİLİNEMİYOR (git push --delete: 403, ağ politikası). Kullanıcının silmeyi
+  onayladığı, içeriği main'de olan dallar: claude/ders-konu-not, claude/ft-ayarlar-puan,
+  claude/ft-sayac-prototip, claude/ft-time-sadelestirme, claude/ilerleme, claude/imza-ve-dagitim,
+  claude/kapanis, claude/on-plan-servisi, claude/takvim-tekrar, claude/uctan-uca-test,
+  model2/ft-time-temizlik, model2/ios-web-test, model2/rapor-tekrar-sistemi,
+  model2/speetus-mufredat; ayrıca claude/s2-giris-yedek (tek değişiklik 6c6c32eda6f1,
+  APK imza parmak izi; artık gereksiz). GitHub > Branches sayfasından silinebilir.
+- Kanıt dalları (`claude/kanit-testleri-main`, `claude/kanit-testleri-uc`) düzeltmeler bitince silinecek.
+- GitHub ayarı: `github-pages` ortamı yalnız `main`'e izin verecek şekilde kısıtlanmalı
+  (kullanıcıya adımlar verildi; buradan API ile değiştirilemiyor).
+- Bulut eşitlemesinin Firestore tarafı (sunucudan okuma, önbellek olaylarını atlama) gerçek
+  Firebase'de denenmedi; testler sahte bulutla.
 
 ## Calisma kurali
 - Tek yazar: baska model calisiyorsa dokunma. Isi birakirken bu dosyayi guncelle.

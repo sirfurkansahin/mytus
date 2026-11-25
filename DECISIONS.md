@@ -4,7 +4,7 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 
 | Konu | Karar |
 |---|---|
-| Urun | Calisma sureci takibi + planlama. Soru bankasi degil. Tibbi icerik yok. |
+| Urun | Calisma sureci takibi + planlama. Soru bankasi degil. Tibbi icerik yok; ISTISNA (6 Kasim 2026): kucuk, salt-okunur "Referans" (hazir skorlar, mekanizma sablonlari) serbest. |
 | Kullanicilar | Kullanicinin arkadaslari, 2-10 kisi, hepsi Android ve 18+. Ucretsiz. |
 | Uygulama adi / modul | MY TUS / "F.T. time" (odak sayaci modulu) |
 | Paket adi | com.mytus.app |
@@ -111,3 +111,121 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 |---|---|
 | Görsel Tanıtım Turu (TanitimTuruEkrani) | 5 tematik slayt (1. Planlama & R0-R4 Tekrarlar, 2. F.T. time & 3-4 Saat Tavanı, 3. Denemeler & Özel Defterler, 4. Sınav Anı & 90 sn Nefes, 5. Master Kokpit). Karşılama ekranında, Bugün ekranında, Rehberde ve Ayarlarda tek dokunuşla izlenebilir. |
 | Kullanım Rehberi & SSS (RehberEkrani) | 6 ana kategoride pratik soru-cevap rehberi: İlk gün adımları, R0-R4 tekrar formülleri, gecikme kayması, kafein kesilme alarmı, %70 kurtarma modu, A-F hata kodlaması, 90 sn panik protokolü, Beklenen Değer (EV) kuralı ve Master Kokpit göstergeleri. |
+
+
+## Sadelestirme ve Rakip Analizi Kararlari (6 Kasim 2026 - Kullanici Karari)
+Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari `docs/sadelestirme-plani.md` icinde.
+
+| Konu | Karar |
+|---|---|
+| Budama yontemi | Ozellikler SILINMEZ, arayuzden GIZLENIR. Mevcut JSON verisi ve kullanici notlari korunur. |
+| Hazir tibbi referans | Hazir skor listesi ve mekanizma sablonlari salt-okunur kucuk "Referans" olarak kalir. Yukaridaki "Tibbi icerik yok" karari buna gore guncellendi. |
+| Grup motivasyonu (Surum 2) | Iki secenek de olacak: haftalik siralama VE ortak haftalik hedef. Kullanici hangisini gorecegini secebilir. |
+| Gunluk limit | Iki sinir birlikte: gunde en fazla 4 YENI konu + en fazla 10 TEKRAR. (Eski "10 tekrar/gun" karari yeni konu siniriyla tamamlandi.) |
+| Bildirim sorunu | Planlamanin DISINDA. Kullanici ozel bir zamanda kendisi ilgilenecek. Yeni gorevlerde bu soruna bagimlilik kurulmaz. Sorun HANDOFF > Bilinen sorunlar'da kalir. |
+| Hata kodu esleme (S5) | Kullanici karari devretti (6 Kasim 2026), model karar verdi: A ve D -> Bilgi, B -> Yanlis biliyordum, C, E, F -> Dikkat-Sure. Neden: D (mantik/halka hatasi) neden-sonuc zincirinde eksik bilgiden kaynaklanir; dikkat veya sure sorunu degildir. Eski kayitlar silinmez, yalnizca gosterimde eslenir. |
+
+## Kütüphane Modülü ve F.T. Time Geçici Kaldırma (6 Kasım 2026)
+| Konu | Karar |
+|---|---|
+| F.T. Time Modülü | Geçici olarak projeden kaldırıldı/gizlendi (`ftTimeAcik = false`). Kodlar silinmedi; düzenleme yapıldıktan sonra yeniden açılacak. |
+| Alt Menü Dönüşümü | 4. sekme olan F.T. time yerine **Kütüphane** sekmesi yerleştirildi (Bugün · Dersler · Takvim · Kütüphane). |
+| Kütüphane Modülü | Sürüm 1 için kitap ekleme, içindekiler/bölüm yerleştirme, çalışma işaretleme ve ilerleme takibi. |
+| İçindekiler Girişi | 1) Toplu Yapıştırma: alt alta yapıştırılan veya telefon kamerasından (Google Lens / Canlı Metin) kopyalanan içindekiler metnini otomatik bölümlere ayırma. 2) Tek tek bölüm ekleme. İsteğe bağlı sayfa aralığı desteği. |
+| İlerleme Takibi | Kitap bazında (% ve bölüm sayısı) ve genel kütüphane bazında tamamlama oranı; sıradaki çalışılacak bölümün öne çıkarılması. |
+| Veri Saklama | Kitap ve bölüm verileri yerel `PlanDeposu` JSON yapısına entegre edildi. |
+
+## Kütüphane Bölüm Notları ve Fotoğraf Ekleme (6 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Bölüm Notları | Her kitabın her bölümüne birden fazla fotoğraflı veya metinli not kartı eklenebilir. İstendiğinde sadece fotoğraf, sadece metin veya her ikisi birlikte kullanılabilir. |
+| Fotoğraf Kaynağı | Hem cihaz kamerası (anında çekim) hem de galeri (ekran görüntüleri) desteklenir (`image_picker`). |
+| Fotoğraf Görüntüleme & Zoom | Eklenen fotoğrafa dokunulduğunda tam ekran açılır ve iki parmakla yakınlaştırma (pinch-to-zoom) yapılabilir (`InteractiveViewer`). |
+| Veri & Optimizasyon | Fotoğraflar okunabilirlik korunarak optimize edilir ve yerel JSON içinde Base64 olarak saklanır; böylece harici dosya kaybı riski olmadan yedeklenebilir. |
+| Test Soyutlaması | `ResimSecici` soyut arayüzü sayesinde testler `SahteResimSecici` ile çalışır; platform/kamera bağımlılığı testleri etkilemez. |
+| Örnek Kitap Desteği | İlk kurulumda veya kütüphane boşken/menüden tek dokunuşla yüklenebilen zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, 2 tamamlanmış bölüm ve örnek klinik not). |
+
+## Web Mobil Uygulamaya Geçiş ve APK Derlemesinin Kaldırılması (6 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Platform Stratejisi | Android APK derlemesi ve dağıtımı (`build-apk.yml`) planlardan ve iş akışlarından kaldırıldı. Proje tamamen **Web Mobil Uygulama** (PWA: Progressive Web App) olarak devam eder. |
+| Hedef Kitle & Cihazlar | Hem iPhone (iOS / Safari) hem de Android (Chrome / diğer) mobil tarayıcılardan doğrudan çalışır. "Ana Ekrana Ekle" seçeneğiyle tam ekran, adres çubuğu olmadan yerel uygulama gibi kullanılır. |
+| Dağıtım & Canlı Adres | GitHub Pages: `https://sirfurkansahin.github.io/mytus/` |
+| CI / CD İş Akışı | `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesi tek akışta çalışır, her başarılı gönderimde otomatik olarak yayına alınır. |
+| Veri Saklama | Tarayıcı yerel belleği (`window.localStorage`) üzerinden tam veri kalıcılığı ve güvenlik sağlanır (`lib/core/veri_kaydi.dart`). |
+
+## Hesap ve Bulut Esitleme (6 Kasim 2026 - Kullanici Karari)
+Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin gunceller. Google girisi ve Analytics daha sonra ayrica ele alinacak.
+
+| Konu | Karar |
+|---|---|
+| Giris zorunlulugu | Esnek Giriş ve Misafir Modu (13 Kasım 2026 kullanıcı kararı): İlk açılışta zorunlu giriş barajı yerine 'Hesap Açmadan Devam Et (Misafir Modu)' seçeneği sunulur. Hekim dilediği zaman Ayarlar ekranındaki 'Bulut Hesabına Bağlan' kartından veya Çalışma Grubu ekranından tek dokunuşla hesabına giriş yapabilir; yerel veriler otomatik olarak yeni bulut hesabına aktarılır (göç). |
+| Giris yontemi | E-posta + sifre (Firebase Authentication). Profilde ayrica takma ad. Kullanici adiyla giris YOK. |
+| Sifre sifirlama | E-posta ile sifirlama baglantisi. |
+| Google girisi | Ilk asamada YOK, ileride eklenebilir. |
+| Fotograflar | Ilk asamada yalnizca cihazda kalir, buluta gitmez. Cikis yapildiginda fotograflar silinmez; cihazda o hesaba ozel alanda saklanir ve ayni hesapla tekrar girildiginde geri gelir. |
+| Firebase yapilandirmasi | Depoya yazilmaz; GitHub Actions gizli degiskenlerinde (Secrets) tutulur, derlemede `--dart-define` ile eklenir. |
+| Cikis yapinca | Cihazdaki calisma verisi silinir (bulutta durur), fotograflar hesaba ozel alanda korunur. Gonderilemeyen degisiklik varsa once uyari verilir. |
+| Bulut verisi | Firestore: `kullanicilar/{uid}` altinda bolumlere ayrilmis belgeler. Herkes yalnizca kendi verisini okur/yazar (guvenlik kurallari). |
+| Ilk giriste yerel veri | Cihazda veri var, bulut bos: buluta aktarilir. Ikisinde de varsa kullaniciya sorulur; secilmeyen taraf cihazda yedek olarak saklanir. |
+| Cakisma kurali | Bolum bazinda en son degistiren kazanir. |
+| Analytics | Bu ise dahil degil. |
+
+## Çalışma Grubu ve Haftalık Puan Tablosu (8 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Grup Modeli | 2-10 kişilik arkadaş/çalışma grubu. 6 karakterlik davet koduyla (`davetKoduUret()`, kafa karıştırmayan harf/sayılar) katılma. |
+| Puanlama Modeli | **Seçenek C (Konu ve Soru Modeli):** 1 Çözülen Soru = 1 Puan, 1 Tamamlanan Konu = 10 Puan. Süre sayılmaksızın hesaplanır. |
+| Puanlama Periyodu | Haftalık periyot (Pazartesi 00:00 - Pazar 23:59). Her hafta başında sıralama ve hedef sıfırdan başlar. |
+| Gizlilik Kuralı | Kişisel notlar, defterler ve detaylı çalışma içerikleri ASLA grupta paylaşılmaz; grupta yalnızca takma ad, haftalık puan, çözülen soru ve biten konu sayısı görünür. |
+| Ortak Hedef Modu | Grubun ortak haftalık soru ve konu hedefine göre kümülatif ilerleme çubuğu ve yüzde hesabı (`GrupHedefDurumu`). |
+| Güvenlik Kuralları | Cloud Firestore Security Rules (`firestore.rules`): `gruplar/{grupId}`, `gruplar/{grupId}/uyeler/{uid}`, `davetKodlari/{kod}` koleksiyonları sıkı tip denetimi ve yetkilendirmeyle korundu. |
+
+## Kütüphane Modülü İyileştirmeleri (8 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Kitap İçi Arama & Filtre | `KitapDetayEkrani` içine anlık başlık ve sayfa araması eklendi. Canlı filtre çipleri: Tümü, Kalanlar, Bitenler ve Notlular (`notluBolumSayisi`). |
+| Hızlı Not Alt Penceresi | Bölüm kartından tam ekrana gitmeye gerek kalmadan alttan açılan modal alt pencere (`DraggableScrollableSheet`) ile notları okuma, silme ve tek dokunuşla yeni not ekleme ergonomisi sağlandı. |
+| Kütüphane Kitap Arama | `KutuphaneEkrani` ana sayfasında kitap adı, ders adı veya klasör adına göre anlık filtreleme ve temizleme çubuğu bağlandı. |
+| Dokunmatik Alan Standardı | Bölüm listelerinde en az 44x44 dp dokunma alanı ve `MaterialTapTargetSize.padded` kuralı uygulandı. |
+| Hazır Klasör Kartının Kaldırılması | Kütüphane ekranında dikeyde çok yer kaplayan "Hazır Klasörler — İstediğini Seç, Hesabına İndir" kartı ekrandan kaldırıldı (9 Kasım 2026). Hazır klasörlere erişim AppBar bulut indirme ikonu ve açılır menü üzerinden korundu. |
+
+## Takvim Çoklu Ders Ekleme (9 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar |
+|---|---|
+| Çoklu Ders & Konu Ekleme | Hekimlerin tek seferde birden çok dersi veya konuyu takvime yerleştirebilmesi sağlandı. Takvim gün görünümüne `+ Çoklu Ders Ekle` butonu eklendi. |
+| Seçim Modeli | `KonuSecEkrani` iki sekmeli yapıya kavuşturuldu: 1) "Konular" (tekil/çoklu konu seçimi ve anlık arama), 2) "Dersler (Toplu Ekle)" (Temel ve Klinik bilimler bazında tek dokunuşla tüm dersi veya birden çok dersi toplu seçme). |
+| Geriye Dönük Uyumluluk | Tek bir konuya doğrudan dokunulduğunda anında tekil yerleştirme davranışı korunarak tüm testler ve hızlı kullanım akışı muhafaza edildi. |
+| Günlük Sınır Bildirimi | Birden çok konu veya ders eklendiğinde önerilen günlük limit kontrol edilerek tek bir onay penceresinde kullanıcıya toplam sayı bildirilir. |
+
+## Takvim, Kütüphane ve Organik Entegrasyon Geliştirmeleri (13 Kasım 2026 - Kullanıcı Kararı)
+| Konu | Karar ve Neden |
+|---|---|
+| Telafi Planı (Catch-Up) | Nöbet veya yoğunluk sonrası geciken konular ve tekrarlar "yapıldı" sayılmadan, günlük sınırları (yeni konu ve tekrar) aşmayacak şekilde önümüzdeki günlere dengeli olarak yayılır (`telafi_plani.dart` ve `telafi_dialogu.dart`). |
+| Tekrar ve Konu Erteleme | Takvimdeki ve Bugün ekranındaki tekrarlar tek dokunuşla yarına ertelenebilir veya ileri bir tarihe taşınabilir (`calisma.dart` ertelemeler). Ertelenen tekrarın sonraki tekrarları da gecikme kayması kuralıyla aynı gün kadar kayar. |
+| Haftalık Odak Görünümü | Takvim sekmesine Ay / Hafta SegmentedButton görünüm seçicisi eklendi. Hafta modunda 7 gün başparmak hizasında ferah kartlar olarak yönetilebilir. |
+| Fotoğraflı Not Etiketleri | Bölüm notlarına 4 kritik TUS etiketi seçimi eklendi: `Tablo`, `Spot`, `Hoca notu`, `Şema / Algoritma`. Bölüm notları ekranında bu etiketlerle filtreleme desteği sağlandı. |
+| Kalan Sayfa & Bitiş Tahmini | Hibrit model uygulandı: Kullanıcı isterse kitaba özel günlük sayfa hedefi belirleyebilir; hedef yoksa son 14 günün tamamlanan bölümlerine göre hesaplanan otomatik günlük hız kullanılır. Kalan sayfa ve tahmini bitiş tarihi kitap kartında gösterilir. |
+| Kütüphane ⟷ Takvim Köprüsü | Kitap bölümü üzerinden doğrudan "Takvime Planla" veya "Bugün Çalıştım & Tekrar Başlat" eylemleri bağlandı. Kullanıcı tercihi doğrultusunda dersteki mevcut konulardan biri seçilir veya yeni konu üretilir; "Çalıştım" dendiğinde R0-R4 tekrar zinciri bugünden başlatılır ve bölüm tamamlanır. Takvimden de konunun ilişkili olduğu kitap notlarına tek dokunuşla geçilebilir. |
+
+
+
+
+## Denetim Sonrası Kararlar (25 Kasım 2026 - Kullanıcı Kararı)
+Denetim raporundaki karar sorularına kullanıcının cevapları. Bu bölüm, aşağıda sayılan önceki kararların yerini alır.
+
+| Konu | Karar |
+|---|---|
+| Sınav tarihi | 27 Mart 2027 ile 22 Ağustos 2027 (ÖSYM 2027 TUS 1. ve 2. dönem) arasında seçim yapılır. "22 Ağustos 2027 sabit" kararının yerini alır. |
+| Bilişsel, uyku, kafein, nefes içerikleri | Bölümlerin tamamı kaldırılır (Bilişsel & Uyku ekranı, nefes/panik aracı, uyku-kafein kuralları ve bunları anlatan Rehber metinleri). İlk "tıbbi içerik yok" kararına dönülür. |
+| %70 Kurtarma Modu | Kaldırılır. Yoğun günler için "Zor gün / nöbetteyim" düğmesi kalır. |
+| Canlı yayın | Siteyi yalnız `main` yayınlar. Önce A1–A3 ayrı dallarda düzeltilir, sonra zincir kullanıcının açık onayıyla `main`'e alınır. `github-pages` ortamı yalnız `main`'e kısıtlanır. |
+| Tekrar tablosu (R1–R4) | Koddaki (3 Kasım 2026) tablo kalır. Kullanıcı "sen öner" dedi; Claude'un önerisine itiraz etmedi. Tablo (sınava kalan gün: tekrar günleri): 7: 1, 3, 6 · 14: 1, 4, 7, 12 · 30: 1, 7, 15, 25 · 60: 1, 7, 21, 45 · 120: 1, 7, 30, 60 · 180: 1, 7, 30, 75 · 300: 1, 7, 30, 90. Kanıtlanmış kesin değerler değildir (16 Ekim'deki ilk tablo da ara değerlemeydi). |
+| "Tekrarları affet & dağıt" | Geciken tekrarlar "yapıldı" sayılmaz; önümüzdeki günlere dağıtılır. |
+| Son çalışılan ders paylaşımı | İsteğe bağlı: Ayarlar'dan açılır, varsayılan KAPALI. |
+| Puan | Her yerde Seçenek C (1 soru = 1, 1 konu = 10 puan). "1 dakika = 1 puan" ifadesi kaldırılır. |
+| Örnek kitap (TUSDATA Patoloji) | Özellik kaldırılır ve mevcut kütüphanelerden de silinir (kullanıcı geri alınamayacağını bilerek seçti). |
+| Dal temizliği | İçeriği `main`'de olan 14 dal ve `claude/s2-giris-yedek` silinir; kanıt dalları düzeltmeler bitince silinir. |
+| Diğer bulgular | A4, A5, A6, A8, C4, B1, B2, B5, A9, A11 düzeltilir; B4 (Bugün ekranı simgeleri) için önce taslak gösterilir. |
+| Kayıt sürümü | Kayıt biçimi sürüm 2: tanınmayan alanlar korunur (eski/yeni sürüm geçişinde veri silinmesin diye). |
+| Bulut eşitleme | Gönderilemeyen bölümler cihazda saklanır; bulut okunamazsa "boş" sayılmaz; cihazda ve hesapta farklı veri varsa sorulur, seçilmeyen taraf yedeklenir ve Ayarlar > hesap kartından geri getirilebilir. Aktif çalışma grubu hesapla birlikte eşitlenir. |

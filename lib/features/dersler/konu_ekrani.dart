@@ -4,6 +4,7 @@ import 'package:app/features/dersler/dialoglar.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/takvim/calisma.dart';
+import 'package:app/features/takvim/gun_siniri.dart';
 import 'package:app/features/takvim/takvim_eylemleri.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +81,7 @@ class _KonuEkraniState extends State<KonuEkrani> with WidgetsBindingObserver {
     final bugun = gunBasi(DateTime.now());
     final gun = await yerlestirmeGunuSec(context, _depo, baslangic: bugun);
     if (!mounted || gun == null) return;
+    if (!await yeniKonuSiniriOnayi(context, _depo, gun) || !mounted) return;
     _depo.calismaEkle(widget.konuId, gun);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()

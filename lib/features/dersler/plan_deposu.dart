@@ -9,9 +9,12 @@ import 'package:app/features/defterler/hazir_skorlar.dart';
 import 'package:app/features/defterler/modeller.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
+import 'package:app/features/kutuphane/hazir_klasorler.dart';
+import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/ft_time/ft_oturum.dart';
 import 'package:app/features/takvim/calisma.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
+import 'package:app/features/takvim/telafi_plani.dart';
 import 'package:flutter/widgets.dart';
 
 enum YuklemeDurumu { yukleniyor, hazir, hata }
@@ -35,10 +38,22 @@ class PlanDeposu extends ChangeNotifier {
 
   YuklemeDurumu durum = YuklemeDurumu.yukleniyor;
   String? hataMesaji;
+
+  /// Son kayıt cihaza yazılamadıysa true (ör. tarayıcı deposu dolu).
+  /// Ekranın üstünde uyarı şeridi gösterilir.
   bool kayitHatasi = false;
 
+  /// Kayıt biçiminin sürümü. 2: tanınmayan alanlar kaydederken korunur.
+  static const int kayitSurumu = 2;
+
+  /// Kayıtta olup bu sürümün tanımadığı alanlar (daha yeni bir sürümün
+  /// yazdığı bilgiler). Silinmez, kaydederken olduğu gibi geri yazılır.
+  Map<String, Object?> _bilinmeyenAlanlar = {};
+
   DateTime? sinavTarihi;
+  String? aktifGrupId;
   bool karsilamaTamam = false;
+  bool misafirModu = false;
   MufredatTuru mufredatTuru = MufredatTuru.speetus;
   TemaSecimi temaSecimi = TemaSecimi.sistem;
 
@@ -53,9 +68,16 @@ class PlanDeposu extends ChangeNotifier {
   /// Bir güne düşebilecek en çok tekrar sayısı (varsayılan 10).
   int gunlukTekrarSiniri = 10;
 
+  /// Bir güne yerleştirilmesi önerilen en çok yeni konu sayısı (varsayılan 4).
+  int gunlukYeniKonuSiniri = 4;
+
+  /// "Zor gün" (nöbet/yoğun gün) olarak işaretlenen gün; o gün yük hafifler. Yoksa null.
+  DateTime? _zorGun;
+
   /// F.T. time süre ayarları.
   FtAyarlari ftAyar = const FtAyarlari();
 
+  final Map<String, int> _gunlukSorular = {};
   final List<OdakKaydi> _odaklar = [];
   FtOturum? _oturum;
   final List<DenemeSinavi> _denemeler = [];
@@ -64,6 +86,7 @@ class PlanDeposu extends ChangeNotifier {
   final List<MekanizmaZinciri> _zincirler = [];
   final List<VakaKarti> _vakaKartlari = [];
   final List<UykuKaydi> _uykular = [];
+  final List<Kitap> _kitaplar = [];
   bool _kurtarmaModuAktif = false;
   String _hedefYatisSaati = '23:30';
   String _hedefKalkisSaati = '07:30';
@@ -144,7 +167,9 @@ class PlanDeposu extends ChangeNotifier {
 
       final tarih = veri['sinavTarihi'];
       sinavTarihi = tarih is String ? tarihCoz(tarih) : null;
+      aktifGrupId = veri['aktifGrupId'] as String?;
       karsilamaTamam = veri['karsilamaTamam'] == true;
+      misafirModu = veri['misafirModu'] == true;
       final temaAdi = veri['temaSecimi'];
       temaSecimi = TemaSecimi.values.firstWhere(
         (t) => t.name == temaAdi,
@@ -171,7 +196,21 @@ class PlanDeposu extends ChangeNotifier {
       turSayisi = tur is int && tur >= 1 && tur <= 10 ? tur : 3;
       final sinir = veri['gunlukTekrarSiniri'];
       gunlukTekrarSiniri = sinir is int && sinir >= 0 ? sinir : 10;
+      final yeniSinir = veri['gunlukYeniKonuSiniri'];
+      gunlukYeniKonuSiniri =
+          yeniSinir is int && yeniSinir >= 1 && yeniSinir <= 20 ? yeniSinir : 4;
+      final zorGun = veri['zorGun'];
+      _zorGun = zorGun is String ? tarihCoz(zorGun) : null;
       ftAyar = FtAyarlari.fromJson(veri['ftAyar']);
+      final sorular = veri['gunlukSorular'];
+      if (sorular is Map) {
+        _gunlukSorular.clear();
+        for (final entry in sorular.entries) {
+          if (entry.key is String && entry.value is int) {
+            _gunlukSorular[entry.key as String] = entry.value as int;
+          }
+        }
+      }
       final odaklar = <OdakKaydi>[];
       final odakListesi = veri['odaklar'];
       if (odakListesi is List) {
@@ -275,22 +314,51 @@ class PlanDeposu extends ChangeNotifier {
       _uykular
         ..clear()
         ..addAll(uykular);
+
+      final kitaplar = <Kitap>[];
+      final kitapListesi = veri['kitaplar'];
+      if (kitapListesi is List) {
+        for (final e in kitapListesi) {
+          if (e is Map<String, dynamic>) {
+            kitaplar.add(Kitap.fromJson(e));
+          }
+        }
+      }
+      // Not: Kayıtta "kitaplar" alanı yoksa (ör. eski sürüm yazmış) kütüphaneye
+      // kendiliğinden örnek kitap EKLENMEZ; kullanıcının verisine dokunulmaz.
+      _kitaplar
+        ..clear()
+        ..addAll(kitaplar);
       _kurtarmaModuAktif = veri['kurtarmaModuAktif'] as bool? ?? false;
       _hedefYatisSaati = veri['hedefYatisSaati'] as String? ?? '23:30';
       _hedefKalkisSaati = veri['hedefKalkisSaati'] as String? ?? '07:30';
 
       _sonId = math.max(_sonId, enBuyuk);
+      final bilinen = _temelJson().keys.toSet();
+      _bilinmeyenAlanlar = {
+        for (final e in veri.entries)
+          if (!bilinen.contains(e.key)) e.key: e.value,
+      };
       return true;
     } on FormatException {
       return false;
     }
   }
 
+  /// Kaydedilecek veri. Tanınmayan (daha yeni sürümün yazdığı) alanlar da
+  /// korunur; böylece eski/yeni sürümler arasında geçişte veri silinmez.
   Map<String, Object?> toJson() => {
-        'surum': 1,
+        ..._bilinmeyenAlanlar,
+        ..._temelJson(),
+      };
+
+  Map<String, Object?> _temelJson() => {
+        'surum': kayitSurumu,
         'sonId': _sonId,
         'karsilamaTamam': karsilamaTamam,
+        'misafirModu': misafirModu,
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
+        'aktifGrupId': aktifGrupId,
         'temaSecimi': temaSecimi.name,
         'mufredatTuru': mufredatTuru.name,
         'dersler': [for (final d in _dersler) d.toJson()],
@@ -298,6 +366,9 @@ class PlanDeposu extends ChangeNotifier {
         'calismalar': [for (final c in _calismalar) c.toJson()],
         'turSayisi': turSayisi,
         'gunlukTekrarSiniri': gunlukTekrarSiniri,
+        'gunlukYeniKonuSiniri': gunlukYeniKonuSiniri,
+        'gunlukSorular': _gunlukSorular,
+        'zorGun': _zorGun == null ? null : tarihAnahtari(_zorGun!),
         'ftAyar': ftAyar.toJson(),
         'odaklar': [for (final o in _odaklar) o.toJson()],
         'oturum': _oturum?.toJson(),
@@ -307,6 +378,7 @@ class PlanDeposu extends ChangeNotifier {
         'zincirler': [for (final z in _zincirler) z.toJson()],
         'vakaKartlari': [for (final v in _vakaKartlari) v.toJson()],
         'uykular': [for (final u in _uykular) u.toJson()],
+        'kitaplar': [for (final k in _kitaplar) k.toJson()],
         'kurtarmaModuAktif': _kurtarmaModuAktif,
         'hedefYatisSaati': _hedefYatisSaati,
         'hedefKalkisSaati': _hedefKalkisSaati,
@@ -369,6 +441,9 @@ class PlanDeposu extends ChangeNotifier {
           _konuEkleIc(ders.id, k);
         }
       }
+    }
+    if (_kitaplar.isEmpty) {
+      _kitaplar.add(ornekKitapUret());
     }
     karsilamaTamam = true;
     _degisti();
@@ -569,8 +644,61 @@ class PlanDeposu extends ChangeNotifier {
       calismalar: _calismalar,
       sinavTarihi: sinav,
       bugun: bugun,
-      gunlukSinir: gunlukTekrarSiniri,
+      gunlukSinir: etkinTekrarSiniri(bugun),
     );
+  }
+
+  /// Bir güne yerleştirilmiş konu sayısı (tamamlananlar dahil).
+  int gundekiKonuSayisi(DateTime gun) => calismalarGun(gun).length;
+
+  /// O gün için önerilen yeni konu sınırına ulaşıldı mı?
+  bool gunDolu(DateTime gun) => gundekiKonuSayisi(gun) >= gunlukYeniKonuSiniri;
+
+  /// Verilen gün "Zor gün" olarak işaretli mi?
+  bool zorGunMu(DateTime gun) => _zorGun != null && ayniGun(_zorGun!, gun);
+
+  /// O günün tekrar sınırı: zor günde %70'e iner (en az 3).
+  int etkinTekrarSiniri(DateTime gun) => zorGunMu(gun)
+      ? math.max(3, (gunlukTekrarSiniri * 0.7).floor())
+      : gunlukTekrarSiniri;
+
+  /// "Zor gün": bugünün ve geciken yapılmamış konuları yarına taşır, tekrar yükünü %70'e indirir.
+  void zorGunBaslat(DateTime bugun) {
+    final g = gunBasi(bugun);
+    final yarin = gunEkle(g, 1);
+    for (var i = 0; i < _calismalar.length; i++) {
+      final c = _calismalar[i];
+      if (!c.tamam && !c.tarih.isAfter(g)) {
+        _calismalar[i] = c.kopya(tarih: yarin);
+      }
+    }
+    _zorGun = g;
+    _degisti();
+  }
+
+  /// Zor gün işaretini kaldırır (taşınan konular yerinde kalır).
+  void zorGunKapat() {
+    if (_zorGun == null) return;
+    _zorGun = null;
+    _degisti();
+  }
+
+  /// Geciken tekrarları "bugün yapıldı" sayar; sonraki tekrarlar mevcut kayma kuralıyla yeniden dağılır.
+  int gecikenTekrarlariSifirla(DateTime bugun) {
+    final g = gunBasi(bugun);
+    var sayac = 0;
+    for (var tur = 0; tur < 500; tur++) {
+      TekrarOgesi? hedef;
+      for (final t in tekrarlar(g)) {
+        if (t.eylemYapilabilir && t.tarih.isBefore(g)) {
+          hedef = t;
+          break;
+        }
+      }
+      if (hedef == null || !tekrarYapildi(hedef.calismaId, hedef.no, g)) break;
+      sayac++;
+    }
+    return sayac;
   }
 
   /// Konuyu bir güne yerleştirir. Aynı konu tekrar yerleştirilebilir (sonraki tur).
@@ -580,6 +708,38 @@ class PlanDeposu extends ChangeNotifier {
     _calismalar.add(c);
     _degisti();
     return c;
+  }
+
+  /// Birden çok konuyu tek seferde bir güne yerleştirir.
+  List<Calisma> calismalariEkle(Iterable<int> konuIdleri, DateTime gun) {
+    final eklenenler = <Calisma>[];
+    final g = gunBasi(gun);
+    for (final id in konuIdleri) {
+      if (konuBul(id) == null) continue;
+      final c = Calisma(id: _yeniId(), konuId: id, tarih: g);
+      _calismalar.add(c);
+      eklenenler.add(c);
+    }
+    if (eklenenler.isNotEmpty) {
+      _degisti();
+    }
+    return eklenenler;
+  }
+
+  /// Bir derse ait tüm konuları döndürür. Eğer derste hiç konu yoksa
+  /// otomatik bir genel çalışma konusu oluşturur.
+  List<Konu> dersinKonulariniGetirVeyaOlustur(int dersId) {
+    var liste = konular(dersId);
+    if (liste.isEmpty) {
+      final ders = dersBul(dersId);
+      if (ders != null) {
+        final yeni = konuEkle(dersId, '${ders.ad} - Genel Çalışma');
+        if (yeni != null) {
+          liste = [yeni];
+        }
+      }
+    }
+    return liste;
   }
 
   void calismaSil(int id) {
@@ -615,18 +775,84 @@ class PlanDeposu extends ChangeNotifier {
   bool calistim(int id, DateTime bugun) {
     final i = _calismalar.indexWhere((c) => c.id == id);
     if (i < 0 || _calismalar[i].tamam) return false;
-    _calismalar[i] = _calismalar[i].kopya(tarih: gunBasi(bugun), tamam: true);
+    _calismalar[i] = _calismalar[i].kopya(
+      tarih: gunBasi(bugun),
+      tamam: true,
+      ertelemeler: const {},
+    );
     _degisti();
     return true;
   }
 
-  /// "Çalıştım" işaretini geri alır; yapılmış tekrar kayıtları da silinir.
+  /// "Çalıştım" işaretini geri alır; yapılmış tekrar kayıtları ve ertelemeler de silinir.
   bool calismaGeriAl(int id) {
     final i = _calismalar.indexWhere((c) => c.id == id);
     if (i < 0 || !_calismalar[i].tamam) return false;
-    _calismalar[i] = _calismalar[i].kopya(tamam: false, tekrarlar: const []);
+    _calismalar[i] = _calismalar[i].kopya(
+      tamam: false,
+      tekrarlar: const [],
+      ertelemeler: const {},
+    );
     _degisti();
     return true;
+  }
+
+  // ------------------------------------------------- erteleme ve telafi
+
+  /// En geç yerleştirme/erteleme günü: sınavdan bir gün önce (sınav yoksa 1 yıl sonrası).
+  DateTime enGecGun(DateTime bugun) {
+    final g = gunBasi(bugun);
+    final sinav = sinavTarihi;
+    final son = sinav == null ? gunEkle(g, 365) : gunEkle(gunBasi(sinav), -1);
+    return son.isBefore(g) ? g : son;
+  }
+
+  /// Bir tekrarı [hedefGun]'e erteler (yalnızca ileri). O çalışmanın sonraki
+  /// tekrarları da aynı gün kadar kayar (gecikme kayması kuralı).
+  bool tekrarErtele(int calismaId, int no, DateTime hedefGun, DateTime bugun) {
+    final g = gunBasi(bugun);
+    final hedef = gunBasi(hedefGun);
+    if (hedef.isBefore(g) || hedef.isAfter(enGecGun(g))) return false;
+    TekrarOgesi? oge;
+    for (final t in tekrarlar(g)) {
+      if (t.calismaId == calismaId && t.no == no) {
+        oge = t;
+        break;
+      }
+    }
+    if (oge == null || !oge.ertelenebilir) return false;
+    final fark = gunFarki(hedef, oge.idealTarih);
+    if (fark <= 0) return false;
+    final i = _calismalar.indexWhere((c) => c.id == calismaId);
+    if (i < 0) return false;
+    _calismalar[i] = _calismalar[i].ertelemeEkle(no, fark);
+    _degisti();
+    return true;
+  }
+
+  /// Nöbet sonrası telafi planı (önizleme; veriyi değiştirmez).
+  TelafiPlani telafiPlani(DateTime bugun) {
+    final g = gunBasi(bugun);
+    return telafiPlaniHesapla(
+      calismalar: _calismalar,
+      bugun: g,
+      sonGun: enGecGun(g),
+      sinavTarihi: sinavTarihi,
+      gunlukYeniKonuSiniri: gunlukYeniKonuSiniri,
+      gunlukTekrarSiniri: etkinTekrarSiniri(g),
+    );
+  }
+
+  /// Telafi planını uygular. Taşınan iş sayısını döner.
+  int telafiPlaniUygula(DateTime bugun) {
+    final plan = telafiPlani(bugun);
+    if (plan.bos) return 0;
+    final yeni = plan.uygula(_calismalar);
+    _calismalar
+      ..clear()
+      ..addAll(yeni);
+    _degisti();
+    return plan.calismaSayisi + plan.tekrarSayisi;
   }
 
   /// "Tekrar yaptım". Önceki tekrarlar yapılmadıysa veya çalışma bitmediyse false döner.
@@ -670,6 +896,30 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
+  void gunlukYeniKonuSinirBelirle(int sayi) {
+    gunlukYeniKonuSiniri = sayi < 1 ? 1 : (sayi > 20 ? 20 : sayi);
+    _degisti();
+  }
+
+  Map<String, int> get gunlukSorular => Map.unmodifiable(_gunlukSorular);
+
+  int soruSayisiGun(DateTime gun) => _gunlukSorular[tarihAnahtari(gun)] ?? 0;
+
+  void soruSayisiAyarla(DateTime gun, int adet) {
+    final anahtar = tarihAnahtari(gun);
+    final yeni = math.max(0, adet);
+    if (yeni == 0) {
+      _gunlukSorular.remove(anahtar);
+    } else {
+      _gunlukSorular[anahtar] = yeni;
+    }
+    _degisti();
+  }
+
+  void soruEkle(DateTime gun, int fark) {
+    soruSayisiAyarla(gun, soruSayisiGun(gun) + fark);
+  }
+
   void ftAyarBelirle(FtAyarlari ayar) {
     ftAyar = ayar;
     _degisti();
@@ -690,6 +940,7 @@ class PlanDeposu extends ChangeNotifier {
 
   /// Tüm ders, konu, çalışma ve odak kayıtlarını sıfırlayıp karşılama ekranına döndürür.
   Future<void> tumVerileriSifirla() async {
+    _bilinmeyenAlanlar = {};
     _sonId = 0;
     _dersler.clear();
     _konular.clear();
@@ -702,14 +953,28 @@ class PlanDeposu extends ChangeNotifier {
     _zincirler.clear();
     _vakaKartlari.clear();
     _uykular.clear();
+    _kitaplar.clear();
     _kurtarmaModuAktif = false;
     _hedefYatisSaati = '23:30';
     _hedefKalkisSaati = '07:30';
     sinavTarihi = resmiSinavTarihi;
+    aktifGrupId = null;
     karsilamaTamam = false;
+    misafirModu = false;
     turSayisi = 3;
     gunlukTekrarSiniri = 10;
+    gunlukYeniKonuSiniri = 4;
+    _gunlukSorular.clear();
+    _zorGun = null;
     ftAyar = const FtAyarlari();
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Hesapsız misafir modunu ayarlar.
+  Future<void> misafirModunuAyarla(bool deger) async {
+    if (misafirModu == deger) return;
+    misafirModu = deger;
     _degisti();
     await hemenKaydet();
   }
@@ -796,6 +1061,42 @@ class PlanDeposu extends ChangeNotifier {
     return puanAraligi(bas, gunEkle(bas, 7));
   }
 
+  /// Aktif çalışma grubu kimliğini ayarlar ve kaydeder.
+  void aktifGrupAyarla(String? grupId) {
+    if (aktifGrupId == grupId) return;
+    aktifGrupId = grupId;
+    _degisti();
+  }
+
+  /// Grup Puanlama Modeli (Seçenek C: Konu ve Soru Modeli):
+  /// Pazartesi başlangıçlı o hafta tamamlanan konu sayısı.
+  int haftalikTamamlananKonuSayisi(DateTime gun) {
+    final bas = haftaBasi(gun);
+    final son = gunEkle(bas, 7);
+    var sayi = 0;
+    for (final c in tumCalismalar()) {
+      if (c.tamam && !c.tarih.isBefore(bas) && c.tarih.isBefore(son)) {
+        sayi++;
+      }
+    }
+    return sayi;
+  }
+
+  /// Pazartesi başlangıçlı o hafta çözülen toplam soru sayısı.
+  int haftalikCozulenSoruSayisi(DateTime gun) {
+    final bas = haftaBasi(gun);
+    var toplam = 0;
+    for (var i = 0; i < 7; i++) {
+      toplam += soruSayisiGun(gunEkle(bas, i));
+    }
+    return toplam;
+  }
+
+  /// Haftalık Grup Puanı = (10 * Konu) + (1 * Soru).
+  int haftalikGrupPuani(DateTime gun) {
+    return (haftalikTamamlananKonuSayisi(gun) * 10) + haftalikCozulenSoruSayisi(gun);
+  }
+
   /// Odak sonrası "Çalıştım" onayı: konunun bekleyen en erken yerleştirmesini
   /// bugüne alıp çalışıldı yapar; hiç bekleyeni yoksa bugüne yeni bir tane açar.
   bool konuCalistimIsaretle(int konuId, DateTime bugun) {
@@ -838,13 +1139,34 @@ class PlanDeposu extends ChangeNotifier {
     return _yazmaKuyrugu;
   }
 
+  /// Kayıt hatasından sonra ("Tekrar dene") verinin tamamını yeniden yazar.
+  Future<void> kaydetmeyiYenidenDene() {
+    _kirli = true;
+    return hemenKaydet();
+  }
+
   Future<void> _yaz(String icerik) async {
     try {
       await _kayit.yaz(icerik);
-      kayitHatasi = false;
+      if (kayitHatasi) {
+        kayitHatasi = false;
+        _bildir();
+      }
     } catch (_) {
-      kayitHatasi = true;
+      // Yazılamadı (ör. tarayıcı deposu dolu). Sessiz kalmayız: ekranda uyarı
+      // çıkar. Veri bellekte durur ve bir sonraki kayıtta yeniden denenir.
+      _kirli = true;
+      if (!kayitHatasi) {
+        kayitHatasi = true;
+        _bildir();
+      }
     }
+  }
+
+  bool _atildi = false;
+
+  void _bildir() {
+    if (!_atildi) notifyListeners();
   }
 
 
@@ -1115,8 +1437,256 @@ class PlanDeposu extends ChangeNotifier {
   }
 
 
+  // ---------------------------------------------------------------- kÃ¼tÃ¼phane
+
+  List<Kitap> get kitaplar => List.unmodifiable(_kitaplar);
+
+  /// Mevcut kitaplarda tanımlı olan benzersiz klasör adlarını sırasıyla döner.
+  List<String> get kitapKlasorleri {
+    final gorulen = <String>{};
+    final sonuc = <String>[];
+    for (final k in _kitaplar) {
+      final ad = k.klasorAdi?.trim();
+      if (ad != null && ad.isNotEmpty && gorulen.add(ad)) {
+        sonuc.add(ad);
+      }
+    }
+    return sonuc;
+  }
+
+  /// Tek bir kitabın klasörünü değiştirir (null veya boş ise klasörden çıkarır).
+  Future<void> kitapKlasoruDegistir(String kitapId, String? yeniKlasor) async {
+    final idx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (idx == -1) return;
+    final temiz = yeniKlasor?.trim();
+    _kitaplar[idx] = (temiz == null || temiz.isEmpty)
+        ? _kitaplar[idx].kopya(klasoruTemizle: true)
+        : _kitaplar[idx].kopya(klasorAdi: temiz);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Bir klasörün adını tüm kitaplarda yeniden adlandırır veya klasörü kaldırır.
+  Future<void> klasorYenidenAdlandir(String eskiAd, String? yeniAd) async {
+    final temizEski = eskiAd.trim();
+    final temizYeni = yeniAd?.trim();
+    var degistiMi = false;
+    for (var i = 0; i < _kitaplar.length; i++) {
+      if (_kitaplar[i].klasorAdi?.trim() == temizEski) {
+        _kitaplar[i] = (temizYeni == null || temizYeni.isEmpty)
+            ? _kitaplar[i].kopya(klasoruTemizle: true)
+            : _kitaplar[i].kopya(klasorAdi: temizYeni);
+        degistiMi = true;
+      }
+    }
+    if (degistiMi) {
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
+  Kitap? kitapBul(String id) {
+    for (final k in _kitaplar) {
+      if (k.id == id) return k;
+    }
+    return null;
+  }
+
+  /// Son 14 günde tamamlanan kitap bölümlerinin sayfa toplamından günlük ortalama okuma hızı.
+  double get otomatikGunlukSayfaHizi {
+    final sinir = DateTime.now().subtract(const Duration(days: 14));
+    var toplamSayfa = 0;
+    for (final k in _kitaplar) {
+      for (final b in k.bolumler) {
+        if (b.tamamlandi &&
+            b.tamamlanmaTarihi != null &&
+            b.tamamlanmaTarihi!.isAfter(sinir)) {
+          toplamSayfa += b.sayfaSayisi ?? 15;
+        }
+      }
+    }
+    if (toplamSayfa <= 0) return 0.0;
+    return toplamSayfa / 14.0;
+  }
+
+  /// Kitaba özel günlük sayfa okuma hedefi belirler (null veya <=0 ise kaldırır).
+  Future<void> kitapGunlukSayfaHedefiBelirle(String kitapId, int? hedef) async {
+    final idx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (idx == -1) return;
+    _kitaplar[idx] = (hedef == null || hedef <= 0)
+        ? _kitaplar[idx].kopya(hedefiTemizle: true)
+        : _kitaplar[idx].kopya(gunlukSayfaHedefi: hedef);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapEkle(Kitap kitap) async {
+    _kitaplar.insert(0, kitap);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapGuncelle(Kitap kitap) async {
+    final idx = _kitaplar.indexWhere((k) => k.id == kitap.id);
+    if (idx != -1) {
+      _kitaplar[idx] = kitap;
+      _degisti();
+      await hemenKaydet();
+    }
+  }
+
+  Future<void> kitapSil(String id) async {
+    _kitaplar.removeWhere((k) => k.id == id);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Kütüphaneye zengin örnek bir TUS kitabı yükler.
+  Future<void> ornekKitapYukle() async {
+    final ornek = ornekKitapUret();
+    if (_kitaplar.any((k) => k.id == ornek.id)) return;
+    _kitaplar.insert(0, ornek);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  /// Belirtilen hazır klasörün tüm kitapları kütüphanede mevcut mu?
+  bool hazirKlasorYukluMu(String klasorId) {
+    HazirKlasor? hedef;
+    for (final kl in hazirKutuphaneKlasorleri) {
+      if (kl.id == klasorId) {
+        hedef = kl;
+        break;
+      }
+    }
+    if (hedef == null) return false;
+    final ornekler = hedef.kitaplarUret();
+    if (ornekler.isEmpty) return false;
+    final mevcutIdler = _kitaplar.map((k) => k.id).toSet();
+    return ornekler.every((ok) => mevcutIdler.contains(ok.id));
+  }
+
+  /// Seçilen hazır klasördeki kitapları (daha önce eklenmemiş olanları) kütüphaneye indirir/ekler.
+  /// Eklenen yeni kitap sayısını döner.
+  Future<int> hazirKlasorYukle(String klasorId) async {
+    HazirKlasor? hedef;
+    for (final kl in hazirKutuphaneKlasorleri) {
+      if (kl.id == klasorId) {
+        hedef = kl;
+        break;
+      }
+    }
+    if (hedef == null) return 0;
+    final yeniKitaplar = hedef.kitaplarUret();
+    final mevcutIdler = _kitaplar.map((k) => k.id).toSet();
+    var eklenen = 0;
+    for (final kitap in yeniKitaplar) {
+      if (!mevcutIdler.contains(kitap.id)) {
+        _kitaplar.add(kitap);
+        eklenen++;
+      }
+    }
+    if (eklenen > 0) {
+      _degisti();
+      await hemenKaydet();
+    }
+    return eklenen;
+  }
+
+  Future<void> kitapBolumDurumuDegistir(
+    String kitapId,
+    String bolumId,
+    bool tamamlandi,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        yeniBolumler.add(
+          b.kopya(
+            tamamlandi: tamamlandi,
+            tamamlanmaTarihi: tamamlandi ? DateTime.now() : null,
+          ),
+        );
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapBolumNotuEkle(
+    String kitapId,
+    String bolumId,
+    BolumNotu not,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        final guncelNotlar = List<BolumNotu>.from(b.notlar)..insert(0, not);
+        yeniBolumler.add(b.kopya(notlar: guncelNotlar));
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapBolumNotuGuncelle(
+    String kitapId,
+    String bolumId,
+    BolumNotu guncelNot,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        final guncelNotlar = b.notlar.map((n) => n.id == guncelNot.id ? guncelNot : n).toList();
+        yeniBolumler.add(b.kopya(notlar: guncelNotlar));
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
+
+  Future<void> kitapBolumNotuSil(
+    String kitapId,
+    String bolumId,
+    String notId,
+  ) async {
+    final kIdx = _kitaplar.indexWhere((k) => k.id == kitapId);
+    if (kIdx == -1) return;
+    final kitap = _kitaplar[kIdx];
+    final yeniBolumler = <KitapBolumu>[];
+    for (final b in kitap.bolumler) {
+      if (b.id == bolumId) {
+        final guncelNotlar = b.notlar.where((n) => n.id != notId).toList();
+        yeniBolumler.add(b.kopya(notlar: guncelNotlar));
+      } else {
+        yeniBolumler.add(b);
+      }
+    }
+    _kitaplar[kIdx] = kitap.kopya(bolumler: yeniBolumler);
+    _degisti();
+    await hemenKaydet();
+  }
   @override
   void dispose() {
+    _atildi = true;
     _zamanlayici?.cancel();
     super.dispose();
   }
@@ -1135,6 +1705,12 @@ class DepoKapsami extends InheritedNotifier<PlanDeposu> {
     final kapsam = context.dependOnInheritedWidgetOfExactType<DepoKapsami>();
     assert(kapsam != null, 'DepoKapsami bulunamadı');
     return kapsam!.notifier!;
+  }
+
+  /// Güvenli okuma: kapsam yoksa null döner.
+  static PlanDeposu? belki(BuildContext context) {
+    final kapsam = context.dependOnInheritedWidgetOfExactType<DepoKapsami>();
+    return kapsam?.notifier;
   }
 
   /// initState gibi yerlerde kullan: değişince yenilenmez.

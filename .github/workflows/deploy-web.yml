@@ -1,13 +1,15 @@
-# MY TUS Web ve iPhone (PWA) Canlı Test Dağıtımı
-# Her gönderimde veya elle tetiklendiğinde: analiz + test + Flutter Web derlemesi.
-# Sonuç doğrudan GitHub Pages (https://sirfurkansahin.github.io/mytus/) üzerine yayınlanır.
-name: Web ve iPhone (PWA) Dağıt
+# MY TUS Web Mobil (PWA): testler her dalda, canlı yayın YALNIZ main'den.
+# Her gönderimde (tüm dallar) veya elle tetiklendiğinde: kod analizi + birim/widget/uçtan uca testler
+# + Flutter Web derlemesi (derlenebildiğini doğrulamak için).
+# Canlı yayın (https://sirfurkansahin.github.io/mytus/) yalnızca main dalında yapılır
+# (25 Kasım 2026 kullanıcı kararı: "Siteyi yalnız main yayınlasın").
+# Başka dallara gönderim siteyi DEĞİŞTİRMEZ.
+name: Web Mobil (PWA) Test ve Dağıt
 
 on:
   push:
     branches:
-      - main
-      - 'model2/*'
+      - '**'
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -18,14 +20,14 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Aynı dala art arda gönderimde eski test çalışması iptal edilir.
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
 
@@ -48,16 +50,28 @@ jobs:
         run: flutter test --reporter expanded
 
       - name: Flutter Web derle (GitHub Pages alt yolu /mytus/)
-        run: flutter build web --release --base-href "/mytus/"
+        run: >
+          flutter build web --release --base-href "/mytus/"
+          --dart-define=FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+          --dart-define=FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          --dart-define=FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          --dart-define=FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          --dart-define=FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
 
-      - name: GitHub Pages için artefakt yükle
+      - name: GitHub Pages için artefakt yükle (yalnız main)
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
 
   deploy:
+    # Canlı yayın yalnız main dalında.
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
