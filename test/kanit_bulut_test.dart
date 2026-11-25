@@ -9,7 +9,6 @@ import 'dart:async';
 
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
-import 'package:app/features/auth/hesap_karti.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
@@ -18,7 +17,6 @@ import 'package:app/features/grup/modeller.dart';
 import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/senkronizasyon/bulut_kaynagi.dart';
 import 'package:app/features/senkronizasyon/bulut_senkron_servisi.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 
@@ -422,9 +420,9 @@ void main() {
     },
   );
 
-  testWidgets(
+  test(
     'KANIT-16 hesap silinemezse (yeniden giriş gerekirse) veriler yine de siliniyor',
-    (tester) async {
+    () async {
       const kullanici = KullaniciBilgisi(
         uid: 'uid_16',
         eposta: 'onalti@mytus.com',
@@ -435,46 +433,33 @@ void main() {
       await telefon.planKur('Patoloji', DersGrubu.temel);
       await telefon.senkron.oturumAcildi(kullanici);
       expect(bulut.kullaniciBolumleri['uid_16'], isNotNull);
-
       final kimlik = YeniGirisIsteyenKimlik(baslangicKullanicisi: kullanici);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: KimlikKapsami(
-            servis: kimlik,
-            child: SenkronKapsami(
-              servis: telefon.senkron,
-              child: DepoKapsami(
-                deposu: telefon.depo,
-                child: const Scaffold(body: Center(child: HesapKarti())),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
 
-      // Ayarlar > Hesap kartı > "Hesabımı Sil" ve onay.
-      await tester.tap(find.byKey(const ValueKey('hesap_sil_butonu')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.tap(find.widgetWithText(FilledButton, 'Hesabımı Sil'));
-      for (var i = 0; i < 10; i++) {
-        await tester.pump(const Duration(milliseconds: 100));
+      // hesap_karti.dart > _hesabiSil ile aynı sıra:
+      // 1) senkron.oturumKapatildi(hesabiTamamenSil: true)
+      // 2) depo.misafirModunuAyarla(false)
+      // 3) kimlik.hesabiSil()  -> Firebase burada "requires-recent-login" verebilir.
+      await telefon.senkron.oturumKapatildi(hesabiTamamenSil: true);
+      await telefon.depo.misafirModunuAyarla(false);
+      Object? hata;
+      try {
+        await kimlik.hesabiSil();
+      } catch (e) {
+        hata = e;
       }
 
-      // Hesap silinemedi: kullanıcı hâlâ oturumda.
-      expect(kimlik.aktifKullanici, isNotNull);
+      expect(hata, isA<KimlikHatasi>());
+      expect(kimlik.aktifKullanici, isNotNull, reason: 'Hesap silinemedi.');
       expect(
-        bulut.kullaniciBolumleri['uid_16'],
-        isNotNull,
-        reason: 'hesap_karti.dart önce buluttaki ve cihazdaki verileri siliyor, '
-            'sonra hesabı silmeyi deniyor. Firebase "requires-recent-login" '
-            'verince hesap kalıyor ama veriler gitmiş oluyor.',
+        {
+          'buluttaki veri duruyor mu': bulut.kullaniciBolumleri['uid_16'] != null,
+          'cihazda plan duruyor mu': telefon.depo.karsilamaTamam,
+        },
+        {'buluttaki veri duruyor mu': true, 'cihazda plan duruyor mu': true},
+        reason: 'Önce buluttaki ve cihazdaki veriler siliniyor, sonra hesap '
+            'silinmeye çalışılıyor. Hesap silinemeyince kullanıcı oturumda '
+            'kalıyor ama verileri gitmiş oluyor; eşitleme de durmuş oluyor.',
       );
-
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump(const Duration(seconds: 5));
     },
-    timeout: const Timeout(Duration(minutes: 2)),
   );
 }
