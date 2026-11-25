@@ -154,15 +154,19 @@ class _OzetKokpitKarti extends StatelessWidget {
                     baslik: 'Toplam Net',
                     deger: '${toplamNet.toStringAsFixed(2)} / 200',
                     altYazi: 'Hedef: 180+ Net',
+                    sigdir: true,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _MiniMetrik(
                     baslik: 'K Puanı',
                     deger: kPuan.toStringAsFixed(2),
                     altYazi: '0.4 Temel + 0.6 Klinik',
+                    sigdir: true,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _MiniMetrik(
                     baslik: 'Son Deneme',
@@ -184,11 +188,15 @@ class _MiniMetrik extends StatelessWidget {
     required this.baslik,
     required this.deger,
     required this.altYazi,
+    this.sigdir = false,
   });
 
   final String baslik;
   final String deger;
   final String altYazi;
+
+  /// Sayı gibi kesilmemesi gereken değerler küçültülerek sığdırılır.
+  final bool sigdir;
 
   @override
   Widget build(BuildContext context) {
@@ -203,14 +211,26 @@ class _MiniMetrik extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          deger,
-          style: tema.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
+        if (sigdir)
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              deger,
+              style: tema.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          )
+        else
+          Text(
+            deger,
+            style: tema.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
         Text(
           altYazi,
           style: tema.textTheme.bodySmall?.copyWith(
@@ -292,7 +312,9 @@ class _DenemeKarti extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '~${ebap.toStringAsFixed(1)} Puan (EBAP)',
+                        ebap < DenemeSinavi.yerlestirmeBaraji
+                            ? '~${ebap.toStringAsFixed(1)} Puan (baraj altı)'
+                            : '~${ebap.toStringAsFixed(1)} Puan (tahmini)',
                         style: tema.textTheme.bodySmall?.copyWith(
                           color: tema.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
@@ -447,7 +469,7 @@ class _BosDurum extends StatelessWidget {
                 MaterialPageRoute<void>(builder: (_) => const ProvaEkrani()),
               ),
               icon: const Icon(Icons.timer_outlined),
-              label: const Text('🎯 Sınav Provası Başlat (135 dk)'),
+              label: const Text('🎯 Sınav Provası (135 dk)'),
             ),
           ],
         ),

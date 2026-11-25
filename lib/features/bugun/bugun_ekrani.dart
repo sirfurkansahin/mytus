@@ -472,7 +472,7 @@ class BugunEkrani extends StatelessWidget {
                         );
                       },
                       icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                      label: Text('BAŞLA ( dk Odak)'),
+                      label: Text('BAŞLA (${depo.ftAyar.calismaDk} dk Odak)'),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
@@ -619,7 +619,7 @@ class BugunEkrani extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.nightlife_outlined, color: Colors.teal, size: 20),
+                  const Icon(Icons.medical_services_outlined, color: Colors.teal, size: 20),
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
@@ -644,7 +644,7 @@ class BugunEkrani extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: () => depo.zorGunBaslat(bugun),
-                icon: const Icon(Icons.nightlife_outlined, size: 16),
+                icon: const Icon(Icons.medical_services_outlined, size: 16),
                 label: const Text('Bugün nöbetteyim / Yoğun gün'),
                 style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
               ),

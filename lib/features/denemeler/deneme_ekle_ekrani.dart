@@ -64,18 +64,7 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
   double get _toplamNet => _temelNet + _klinikNet;
   double get _kPuan => (0.4 * _temelNet) + (0.6 * _klinikNet);
 
-  double get _tahminiEbap {
-    const double xOrtalama = 38.5;
-    const double sSapma = 17.0;
-    const double ebap = 85.0;
-
-    final pay = (7 * (_kPuan - xOrtalama)) - sSapma;
-    final payda = (7 * (ebap - xOrtalama)) - sSapma;
-
-    if (payda == 0) return 45.0;
-    final ham = 55.0 + 30.0 * (pay / payda);
-    return ham.clamp(45.0, 85.0);
-  }
+  double get _tahminiEbap => DenemeSinavi.tahminiTusPuani(_kPuan);
 
   Future<void> _tarihSec() async {
     final secilen = await showDatePicker(
@@ -326,7 +315,8 @@ class _CanliPuanKarti extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                Expanded(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -337,15 +327,21 @@ class _CanliPuanKarti extends StatelessWidget {
                         letterSpacing: 0.5,
                       ),
                     ),
-                    Text(
-                      '${toplamNet.toStringAsFixed(2)} / 200',
-                      style: tema.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: morAna,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${toplamNet.toStringAsFixed(2)} / 200',
+                        style: tema.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: morAna,
+                        ),
                       ),
                     ),
                   ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
@@ -370,14 +366,20 @@ class _CanliPuanKarti extends StatelessWidget {
                           fontSize: 20,
                         ),
                       ),
+                      if (ebapPuan < DenemeSinavi.yerlestirmeBaraji)
+                        const Text(
+                          'baraj (45) altı',
+                          style: TextStyle(color: Colors.white70, fontSize: 9),
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              spacing: 14,
+              runSpacing: 4,
               children: [
                 Text(
                   'Temel: ${temelNet.toStringAsFixed(2)} net',
@@ -392,6 +394,11 @@ class _CanliPuanKarti extends StatelessWidget {
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                 ),
               ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Tahmini puan kabadır: ÖSYM oturum ortalamasını açıklamaz.',
+              style: tema.textTheme.bodySmall?.copyWith(fontSize: 10.5),
             ),
           ],
         ),

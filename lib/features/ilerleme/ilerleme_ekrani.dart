@@ -589,7 +589,7 @@ class _DenemelerIlerlemeKarti extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       sonDeneme != null
-                          ? 'Son:  ( net · ~ Puan)'
+                          ? 'Son: ${sonDeneme!.ad} (${sonDeneme!.toplamNet.toStringAsFixed(1)} net · ~${sonDeneme!.tahminiEbapPuani.toStringAsFixed(1)} Puan)'
                           : 'Henüz deneme girilmedi. Eklemek için dokun.',
                       style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                     ),

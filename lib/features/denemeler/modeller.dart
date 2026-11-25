@@ -188,25 +188,28 @@ class DenemeSinavi {
     return (0.6 * temel.net) + (0.4 * klinik.net);
   }
 
-  /// ÖSYM 85 EBAP (En Büyük Ağırlıklı Puan) tavan ölçekleme modeli (Rapor Bölüm 2.1).
-  /// Sınav Puanı = 55 + 30 * [7(AP - X) - S] / [7(EBAP - X) - S]
-  /// Referans: X (Ortalama) ≈ 38.5, S (Standart Sapma) ≈ 17.0, EBAP = 85.0.
-  double get tahminiEbapPuani {
+  /// ÖSYM yerleştirmesinde alt sınır (baraj): puanı 45'ten düşük olanlar
+  /// yerleştirmeye dahil edilmez (ÖSYM TUS tercih kılavuzu).
+  static const double yerlestirmeBaraji = 45.0;
+
+  /// KABA tahmini TUS puanı (en çok 85). ÖSYM oturumun ortalamasını ve standart
+  /// sapmasını açıklamadığı için X ≈ 38,5 ve S ≈ 17 varsayımdır, kesin değildir.
+  /// 45'in altındaki sonuçlar artık 45'e yükseltilmez: baraj altı olduğu görünür.
+  /// Puan = 55 + 30 * [7(AP - X) - S] / [7(EBAP - X) - S]
+  static double tahminiTusPuani(double agirlikliNet) {
     const double xOrtalama = 38.5;
     const double sSapma = 17.0;
     const double ebap = 85.0;
-
-    final ap = klinikAgirlikliPuan;
-    final pay = (7 * (ap - xOrtalama)) - sSapma;
+    final pay = (7 * (agirlikliNet - xOrtalama)) - sSapma;
     final payda = (7 * (ebap - xOrtalama)) - sSapma;
-
-    if (payda == 0) return 45.0;
     final ham = 55.0 + 30.0 * (pay / payda);
-
-    if (ham < 45.0) return 45.0;
-    if (ham > 85.0) return 85.0;
-    return double.parse(ham.toStringAsFixed(2));
+    return double.parse(ham.clamp(0.0, 85.0).toStringAsFixed(2));
   }
+
+  double get tahminiEbapPuani => tahminiTusPuani(klinikAgirlikliPuan);
+
+  /// Tahmin yerleştirme barajının (45) altında mı?
+  bool get barajAltinda => tahminiEbapPuani < yerlestirmeBaraji;
 
   /// A–F sınıflarına göre hata adetleri dağılımı.
   Map<HataSinifi, int> get hataDagilimi {

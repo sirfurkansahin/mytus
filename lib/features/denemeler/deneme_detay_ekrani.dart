@@ -294,6 +294,11 @@ class _PuanNetKarti extends StatelessWidget {
                           fontSize: 22,
                         ),
                       ),
+                      if (ebap < DenemeSinavi.yerlestirmeBaraji)
+                        const Text(
+                          'baraj (45) altı',
+                          style: TextStyle(color: Colors.white70, fontSize: 9),
+                        ),
                       const Text(
                         'EBAP 85 Tavanı',
                         style: TextStyle(
