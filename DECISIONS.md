@@ -210,3 +210,22 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 
 
 
+
+## Denetim Sonrası Kararlar (25 Kasım 2026 - Kullanıcı Kararı)
+Denetim raporundaki karar sorularına kullanıcının cevapları. Bu bölüm, aşağıda sayılan önceki kararların yerini alır.
+
+| Konu | Karar |
+|---|---|
+| Sınav tarihi | 27 Mart 2027 ile 22 Ağustos 2027 (ÖSYM 2027 TUS 1. ve 2. dönem) arasında seçim yapılır. "22 Ağustos 2027 sabit" kararının yerini alır. |
+| Bilişsel, uyku, kafein, nefes içerikleri | Bölümlerin tamamı kaldırılır (Bilişsel & Uyku ekranı, nefes/panik aracı, uyku-kafein kuralları ve bunları anlatan Rehber metinleri). İlk "tıbbi içerik yok" kararına dönülür. |
+| %70 Kurtarma Modu | Kaldırılır. Yoğun günler için "Zor gün / nöbetteyim" düğmesi kalır. |
+| Canlı yayın | Siteyi yalnız `main` yayınlar. Önce A1–A3 ayrı dallarda düzeltilir, sonra zincir kullanıcının açık onayıyla `main`'e alınır. `github-pages` ortamı yalnız `main`'e kısıtlanır. |
+| Tekrar tablosu (R1–R4) | Koddaki (3 Kasım 2026) tablo kalır. Kullanıcı "sen öner" dedi; Claude'un önerisine itiraz etmedi. Tablo (sınava kalan gün: tekrar günleri): 7: 1, 3, 6 · 14: 1, 4, 7, 12 · 30: 1, 7, 15, 25 · 60: 1, 7, 21, 45 · 120: 1, 7, 30, 60 · 180: 1, 7, 30, 75 · 300: 1, 7, 30, 90. Kanıtlanmış kesin değerler değildir (16 Ekim'deki ilk tablo da ara değerlemeydi). |
+| "Tekrarları affet & dağıt" | Geciken tekrarlar "yapıldı" sayılmaz; önümüzdeki günlere dağıtılır. |
+| Son çalışılan ders paylaşımı | İsteğe bağlı: Ayarlar'dan açılır, varsayılan KAPALI. |
+| Puan | Her yerde Seçenek C (1 soru = 1, 1 konu = 10 puan). "1 dakika = 1 puan" ifadesi kaldırılır. |
+| Örnek kitap (TUSDATA Patoloji) | Özellik kaldırılır ve mevcut kütüphanelerden de silinir (kullanıcı geri alınamayacağını bilerek seçti). |
+| Dal temizliği | İçeriği `main`'de olan 14 dal ve `claude/s2-giris-yedek` silinir; kanıt dalları düzeltmeler bitince silinir. |
+| Diğer bulgular | A4, A5, A6, A8, C4, B1, B2, B5, A9, A11 düzeltilir; B4 (Bugün ekranı simgeleri) için önce taslak gösterilir. |
+| Kayıt sürümü | Kayıt biçimi sürüm 2: tanınmayan alanlar korunur (eski/yeni sürüm geçişinde veri silinmesin diye). |
+| Bulut eşitleme | Gönderilemeyen bölümler cihazda saklanır; bulut okunamazsa "boş" sayılmaz; cihazda ve hesapta farklı veri varsa sorulur, seçilmeyen taraf yedeklenir ve Ayarlar > hesap kartından geri getirilebilir. Aktif çalışma grubu hesapla birlikte eşitlenir. |
