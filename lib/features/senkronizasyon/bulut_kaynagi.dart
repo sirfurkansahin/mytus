@@ -12,7 +12,9 @@ abstract class BulutKaynagi {
     String? takmaAd,
   });
 
-  /// Kullanıcının tüm bölüm belgelerini (`kullanicilar/{uid}/bolumler/{bolumId}`) okur.
+  /// Kullanıcının tüm bölüm belgelerini (`kullanicilar/{uid}/bolumler/{bolumId}`)
+  /// SUNUCUDAN okur. Çevrimdışıysa boş sonuç DÖNMEZ, hata fırlatır (yoksa
+  /// "bulut boş" sanılıp başka cihazın verisi silinebilir).
   Future<Map<String, String>> bolumleriOku(String uid);
 
   /// Yalnızca değişen bölümleri buluta yazar.
@@ -22,7 +24,9 @@ abstract class BulutKaynagi {
     required String cihazId,
   });
 
-  /// Başka cihazlardan gelen değişiklikleri gerçek zamanlı dinler.
+  /// Buluttaki bölümlerin sunucuda onaylanmış hâlini gerçek zamanlı dinler
+  /// (her olayda tüm bölümler gelir). Hangi bölümün değiştiği içerik
+  /// karşılaştırılarak bulunur; `sonCihazId` yalnız bilgi amaçlıdır.
   Stream<({Map<String, String> bolumler, String? sonCihazId})> bolumleriDinle(
     String uid,
   );
@@ -63,7 +67,9 @@ class FirestoreBulutKaynagi implements BulutKaynagi {
 
   @override
   Future<Map<String, String>> bolumleriOku(String uid) async {
-    final snap = await _bolumlerRef(uid).get();
+    // Önbellekten değil sunucudan: çevrimdışıysa hata fırlatır.
+    final snap =
+        await _bolumlerRef(uid).get(const GetOptions(source: Source.server));
     final sonuc = <String, String>{};
     for (final doc in snap.docs) {
       final veri = doc.data()['veri'];
@@ -99,7 +105,16 @@ class FirestoreBulutKaynagi implements BulutKaynagi {
   Stream<({Map<String, String> bolumler, String? sonCihazId})> bolumleriDinle(
     String uid,
   ) {
-    return _bolumlerRef(uid).snapshots().map((snap) {
+    // Yalnız sunucuda onaylanmış görüntüler: önbellekten gelen (çevrimdışı) ya
+    // da henüz gönderilmemiş yerel yazma içeren görüntüler atlanır.
+    // Bağlantı gelince de bir olay gelsin diye üst veri değişiklikleri dahil.
+    return _bolumlerRef(uid)
+        .snapshots(includeMetadataChanges: true)
+        .where(
+          (snap) =>
+              !snap.metadata.isFromCache && !snap.metadata.hasPendingWrites,
+        )
+        .map((snap) {
       final sonuc = <String, String>{};
       String? sonCihaz;
       for (final doc in snap.docs) {

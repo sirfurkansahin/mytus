@@ -20,6 +20,8 @@ class BolumAyirici {
       'surum',
       'sonId',
       'karsilamaTamam',
+      // Hesaba bağlı çalışma grubu: tüm cihazlarda aynı olmalı.
+      'aktifGrupId',
       'sinavTarihi',
       'temaSecimi',
       'mufredatTuru',
@@ -121,57 +123,95 @@ class BolumAyirici {
   }
 
   /// Buluttan gelen bölümleri ve cihazdaki fotoğrafları tek bir PlanDeposu JSON metninde birleştirir.
+  /// (Cihazdaki diğer bilgiler korunmaz; tamamen buluttaki veri kullanılır.)
   static String birlestir({
     required Map<String, String> bolumler,
     Map<String, String> fotograflar = const {},
   }) {
     final birlesik = <String, dynamic>{};
     for (final bolumJson in bolumler.values) {
-      if (bolumJson.isEmpty) continue;
-      try {
-        final cozulmus = jsonDecode(bolumJson);
-        if (cozulmus is Map<String, dynamic>) {
-          birlesik.addAll(cozulmus);
-        }
-      } catch (_) {}
+      final cozulmus = _coz(bolumJson);
+      if (cozulmus != null) birlesik.addAll(cozulmus);
     }
-
-    // Cihazdaki fotoğrafları ilgili notlara geri yerleştir.
-    if (fotograflar.isNotEmpty && birlesik['kitaplar'] is List) {
-      final hamKitaplar = birlesik['kitaplar'] as List;
-      final guncelKitaplar = <Map<String, dynamic>>[];
-      for (final k in hamKitaplar) {
-        if (k is! Map) continue;
-        final kitapMap = Map<String, dynamic>.from(k);
-        final hamBolumler = kitapMap['bolumler'];
-        if (hamBolumler is List) {
-          final guncelBolumler = <Map<String, dynamic>>[];
-          for (final b in hamBolumler) {
-            if (b is! Map) continue;
-            final bolumMap = Map<String, dynamic>.from(b);
-            final hamNotlar = bolumMap['notlar'];
-            if (hamNotlar is List) {
-              final guncelNotlar = <Map<String, dynamic>>[];
-              for (final n in hamNotlar) {
-                if (n is! Map) continue;
-                final notMap = Map<String, dynamic>.from(n);
-                final notId = notMap['id'] as String?;
-                if (notId != null && fotograflar.containsKey(notId)) {
-                  notMap['resimBase64'] = fotograflar[notId];
-                }
-                guncelNotlar.add(notMap);
-              }
-              bolumMap['notlar'] = guncelNotlar;
-            }
-            guncelBolumler.add(bolumMap);
-          }
-          kitapMap['bolumler'] = guncelBolumler;
-        }
-        guncelKitaplar.add(kitapMap);
-      }
-      birlesik['kitaplar'] = guncelKitaplar;
-    }
-
+    _fotograflariYerlestir(birlesik, fotograflar);
     return jsonEncode(birlesik);
+  }
+
+  /// Buluttan gelen DEĞİŞEN bölümleri cihazdaki veriye uygular.
+  /// Yalnız o bölümlere ait alanlar değişir; cihaza özel bilgiler (misafir modu,
+  /// tanınmayan yeni alanlar vb.) ve diğer bölümler olduğu gibi kalır.
+  static String yereleUygula({
+    required Map<String, dynamic> yerel,
+    required Map<String, String> bolumler,
+    Map<String, String> fotograflar = const {},
+  }) {
+    final birlesik = Map<String, dynamic>.from(yerel);
+    for (final e in bolumler.entries) {
+      final cozulmus = _coz(e.value);
+      if (cozulmus == null) continue;
+      final alanlar = _bolumAlanlari[e.key];
+      if (alanlar == null) {
+        // Daha yeni bir sürümün bölümü: tüm alanlarını al.
+        birlesik.addAll(cozulmus);
+        continue;
+      }
+      for (final alan in alanlar) {
+        if (cozulmus.containsKey(alan)) birlesik[alan] = cozulmus[alan];
+      }
+    }
+    _fotograflariYerlestir(birlesik, fotograflar);
+    return jsonEncode(birlesik);
+  }
+
+  static Map<String, dynamic>? _coz(String bolumJson) {
+    if (bolumJson.isEmpty) return null;
+    try {
+      final cozulmus = jsonDecode(bolumJson);
+      if (cozulmus is Map<String, dynamic>) return cozulmus;
+    } catch (_) {}
+    return null;
+  }
+
+  /// Cihazdaki fotoğrafları ilgili notlara geri yerleştirir (not kimliğine göre).
+  static void _fotograflariYerlestir(
+    Map<String, dynamic> birlesik,
+    Map<String, String> fotograflar,
+  ) {
+    if (fotograflar.isEmpty || birlesik['kitaplar'] is! List) return;
+    final hamKitaplar = birlesik['kitaplar'] as List;
+    final guncelKitaplar = <Map<String, dynamic>>[];
+    for (final k in hamKitaplar) {
+      if (k is! Map) continue;
+      final kitapMap = Map<String, dynamic>.from(k);
+      final hamBolumler = kitapMap['bolumler'];
+      if (hamBolumler is List) {
+        final guncelBolumler = <Map<String, dynamic>>[];
+        for (final b in hamBolumler) {
+          if (b is! Map) continue;
+          final bolumMap = Map<String, dynamic>.from(b);
+          final hamNotlar = bolumMap['notlar'];
+          if (hamNotlar is List) {
+            final guncelNotlar = <Map<String, dynamic>>[];
+            for (final n in hamNotlar) {
+              if (n is! Map) continue;
+              final notMap = Map<String, dynamic>.from(n);
+              final notId = notMap['id'] as String?;
+              final mevcutResim = notMap['resimBase64'];
+              if (notId != null &&
+                  fotograflar.containsKey(notId) &&
+                  (mevcutResim is! String || mevcutResim.isEmpty)) {
+                notMap['resimBase64'] = fotograflar[notId];
+              }
+              guncelNotlar.add(notMap);
+            }
+            bolumMap['notlar'] = guncelNotlar;
+          }
+          guncelBolumler.add(bolumMap);
+        }
+        kitapMap['bolumler'] = guncelBolumler;
+      }
+      guncelKitaplar.add(kitapMap);
+    }
+    birlesik['kitaplar'] = guncelKitaplar;
   }
 }

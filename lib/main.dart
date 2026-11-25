@@ -10,6 +10,7 @@ import 'package:app/features/ft_time/ft_native.dart';
 import 'package:app/features/karsilama/karsilama_ekrani.dart';
 import 'package:app/features/senkronizasyon/bulut_kaynagi.dart';
 import 'package:app/features/senkronizasyon/bulut_senkron_servisi.dart';
+import 'package:app/features/senkronizasyon/cakisma_dialogu.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -74,7 +75,29 @@ class _MyTusAppState extends State<MyTusApp> {
       _deposu.yukle();
     }
     widget.kimlikServisi?.addListener(_oturumDegisti);
+    widget.senkronServisi?.addListener(_senkronDegisti);
     _oturumDegisti();
+  }
+
+  bool _cakismaSoruluyor = false;
+
+  /// Girişte cihaz ile hesap arasında çakışma çıkarsa kullanıcıya sorar.
+  void _senkronDegisti() {
+    final senkron = widget.senkronServisi;
+    final cakisma = senkron?.bekleyenCakisma;
+    if (senkron == null || cakisma == null || _cakismaSoruluyor) return;
+    _cakismaSoruluyor = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final baglam = _navigatorKey.currentContext;
+      if (!mounted || baglam == null) {
+        _cakismaSoruluyor = false;
+        return;
+      }
+      final cihazdaki = await cakismaDialoguGoster(baglam, cakisma);
+      await senkron.cakismayiCoz(cihazdakiKalsin: cihazdaki);
+      _cakismaSoruluyor = false;
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   void _oturumDegisti() {
@@ -94,6 +117,7 @@ class _MyTusAppState extends State<MyTusApp> {
   @override
   void dispose() {
     widget.kimlikServisi?.removeListener(_oturumDegisti);
+    widget.senkronServisi?.removeListener(_senkronDegisti);
     if (widget.deposu == null) {
       _deposu.dispose();
     }

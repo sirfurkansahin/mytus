@@ -67,6 +67,40 @@ class _HesapKartiState extends State<HesapKarti> {
     }
   }
 
+  /// Girişte seçilmeyen veri cihazda yedek olarak durur; kullanıcı isterse
+  /// yer değiştirir (şu anki veri yedeğe geçer, hiçbir şey silinmez).
+  Future<void> _yedegiGetir(
+    BuildContext context,
+    BulutSenkronServisi senkron,
+  ) async {
+    final onay = await onayDialogu(
+      context,
+      baslik: 'Cihazdaki yedek geri getirilsin mi?',
+      metin:
+          'Girişte seçmediğin veri bu cihazda yedek olarak duruyor. Geri '
+          'getirirsen şu anki verin onun yerine yedeğe geçer (hiçbir şey '
+          'silinmez) ve geri getirdiğin veri hesabına gönderilir.',
+      eylem: 'Yedeği Getir',
+    );
+    if (!onay || !context.mounted) return;
+    setState(() => _islemSuruyor = true);
+    try {
+      final oldu = await senkron.yedegiGeriYukle();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              oldu ? 'Yedek geri getirildi.' : 'Geri getirilecek yedek yok.',
+            ),
+          ),
+        );
+    } finally {
+      if (mounted) setState(() => _islemSuruyor = false);
+    }
+  }
+
   Future<void> _hesabiSil(
     BuildContext context,
     KimlikServisi kimlik,
@@ -171,6 +205,15 @@ class _HesapKartiState extends State<HesapKarti> {
                 icon: const Icon(Icons.logout_rounded, size: 18),
                 label: const Text('Çıkış Yap'),
               ),
+              if (senkron != null && senkron.yedekVar)
+                TextButton.icon(
+                  key: const ValueKey('hesap_yedek_butonu'),
+                  onPressed: _islemSuruyor
+                      ? null
+                      : () => _yedegiGetir(context, senkron),
+                  icon: const Icon(Icons.restore_rounded, size: 18),
+                  label: const Text('Cihazdaki yedeği getir'),
+                ),
               TextButton.icon(
                 onPressed: () => kvkkAydinlatmaDialoguGoster(context),
                 icon: const Icon(Icons.privacy_tip_outlined, size: 18),
