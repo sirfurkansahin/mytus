@@ -43,6 +43,13 @@ class PlanDeposu extends ChangeNotifier {
   /// Ekranın üstünde uyarı şeridi gösterilir.
   bool kayitHatasi = false;
 
+  /// Kayıt biçiminin sürümü. 2: tanınmayan alanlar kaydederken korunur.
+  static const int kayitSurumu = 2;
+
+  /// Kayıtta olup bu sürümün tanımadığı alanlar (daha yeni bir sürümün
+  /// yazdığı bilgiler). Silinmez, kaydederken olduğu gibi geri yazılır.
+  Map<String, Object?> _bilinmeyenAlanlar = {};
+
   DateTime? sinavTarihi;
   String? aktifGrupId;
   bool karsilamaTamam = false;
@@ -316,9 +323,9 @@ class PlanDeposu extends ChangeNotifier {
             kitaplar.add(Kitap.fromJson(e));
           }
         }
-      } else {
-        kitaplar.add(ornekKitapUret());
       }
+      // Not: Kayıtta "kitaplar" alanı yoksa (ör. eski sürüm yazmış) kütüphaneye
+      // kendiliğinden örnek kitap EKLENMEZ; kullanıcının verisine dokunulmaz.
       _kitaplar
         ..clear()
         ..addAll(kitaplar);
@@ -327,14 +334,26 @@ class PlanDeposu extends ChangeNotifier {
       _hedefKalkisSaati = veri['hedefKalkisSaati'] as String? ?? '07:30';
 
       _sonId = math.max(_sonId, enBuyuk);
+      final bilinen = _temelJson().keys.toSet();
+      _bilinmeyenAlanlar = {
+        for (final e in veri.entries)
+          if (!bilinen.contains(e.key)) e.key: e.value,
+      };
       return true;
     } on FormatException {
       return false;
     }
   }
 
+  /// Kaydedilecek veri. Tanınmayan (daha yeni sürümün yazdığı) alanlar da
+  /// korunur; böylece eski/yeni sürümler arasında geçişte veri silinmez.
   Map<String, Object?> toJson() => {
-        'surum': 1,
+        ..._bilinmeyenAlanlar,
+        ..._temelJson(),
+      };
+
+  Map<String, Object?> _temelJson() => {
+        'surum': kayitSurumu,
         'sonId': _sonId,
         'karsilamaTamam': karsilamaTamam,
         'misafirModu': misafirModu,
@@ -921,6 +940,7 @@ class PlanDeposu extends ChangeNotifier {
 
   /// Tüm ders, konu, çalışma ve odak kayıtlarını sıfırlayıp karşılama ekranına döndürür.
   Future<void> tumVerileriSifirla() async {
+    _bilinmeyenAlanlar = {};
     _sonId = 0;
     _dersler.clear();
     _konular.clear();
