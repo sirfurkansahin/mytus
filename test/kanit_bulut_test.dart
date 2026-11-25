@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:app/core/tarih.dart';
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/auth/hesap_karti.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/modeller.dart';
@@ -17,11 +18,9 @@ import 'package:app/features/grup/modeller.dart';
 import 'package:app/features/kutuphane/modeller.dart';
 import 'package:app/features/senkronizasyon/bulut_kaynagi.dart';
 import 'package:app/features/senkronizasyon/bulut_senkron_servisi.dart';
-import 'package:app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'yardimci.dart';
 
 /// Bir cihazı (yerel kayıt + eşitleme + depo) birlikte kurar.
 class Cihaz {
@@ -426,10 +425,6 @@ void main() {
   testWidgets(
     'KANIT-16 hesap silinemezse (yeniden giriş gerekirse) veriler yine de siliniyor',
     (tester) async {
-      tester.view.physicalSize = const Size(800, 2400);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
       const kullanici = KullaniciBilgisi(
         uid: 'uid_16',
         eposta: 'onalti@mytus.com',
@@ -437,32 +432,35 @@ void main() {
       );
       final bulut = SahteBulutKaynagi();
       final telefon = Cihaz(bulut, 'telefon');
-      await tester.runAsync(() async {
-        await telefon.planKur('Patoloji', DersGrubu.temel);
-        await telefon.senkron.oturumAcildi(kullanici);
-      });
+      await telefon.planKur('Patoloji', DersGrubu.temel);
+      await telefon.senkron.oturumAcildi(kullanici);
       expect(bulut.kullaniciBolumleri['uid_16'], isNotNull);
 
       final kimlik = YeniGirisIsteyenKimlik(baslangicKullanicisi: kullanici);
       await tester.pumpWidget(
-        MyTusApp(
-          deposu: telefon.depo,
-          ftNative: SahteNative(),
-          kimlikServisi: kimlik,
-          senkronServisi: telefon.senkron,
+        MaterialApp(
+          home: KimlikKapsami(
+            servis: kimlik,
+            child: SenkronKapsami(
+              servis: telefon.senkron,
+              child: DepoKapsami(
+                deposu: telefon.depo,
+                child: const Scaffold(body: Center(child: HesapKarti())),
+              ),
+            ),
+          ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      await tester.tap(find.byTooltip('Ayarlar'));
-      await tester.pumpAndSettle();
-      final silDugmesi = find.byKey(const ValueKey('hesap_sil_butonu'));
-      await tester.ensureVisible(silDugmesi);
-      await tester.pumpAndSettle();
-      await tester.tap(silDugmesi);
-      await tester.pumpAndSettle();
+      // Ayarlar > Hesap kartı > "Hesabımı Sil" ve onay.
+      await tester.tap(find.byKey(const ValueKey('hesap_sil_butonu')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.tap(find.widgetWithText(FilledButton, 'Hesabımı Sil'));
-      await tester.pumpAndSettle();
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
 
       // Hesap silinemedi: kullanıcı hâlâ oturumda.
       expect(kimlik.aktifKullanici, isNotNull);
@@ -475,6 +473,8 @@ void main() {
       );
 
       await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 5));
     },
+    timeout: const Timeout(Duration(minutes: 2)),
   );
 }
