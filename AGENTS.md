@@ -21,7 +21,9 @@ Bu dosyayi her oturumun basinda oku. Sonra `HANDOFF.md` (durum, siradaki adim) v
 
 ## Derleme ortami (ONEMLI)
 - Bulut gelistirme ortaminda Flutter/pub.dev araclarina erisim engellidir. Kod orada DERLENEMEZ ve calistirilamaz.
-- Derleme, test ve canli yayin GitHub Actions'ta yapilir: `.github/workflows/deploy-web.yml` (kod analizi + birim/widget/uctan uca testler + Web Mobil PWA dagitimi).
+- Derleme ve testler GitHub Actions'ta HER DALDA calisir: `.github/workflows/deploy-web.yml` (kod analizi + birim/widget/uctan uca testler + Web derlemesi).
+- Canli yayin YALNIZ `main` dalindan yapilir (25 Kasim 2026 kullanici karari). Baska dallara gonderim siteyi DEGISTIRMEZ. `main`'e birlestirme her seferinde kullanicinin acik izniyle yapilir.
+- GitHub ayarlarinda `github-pages` ortami yalniz `main`'e izin verecek sekilde kisitlanmalidir (eski dallardaki eski is akislari siteyi yayinlayamasin diye).
 - Hatalari Actions gunluklerinden (log) oku. Ara adimlarda yerelde kal, yalnizca is bittiginde veya kullanici istediginde gonder/derle.
 
 ## Kod kurallari
