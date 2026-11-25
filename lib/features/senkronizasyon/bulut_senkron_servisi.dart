@@ -17,8 +17,12 @@ enum SenkronDurumu {
 }
 
 /// Yerel `VeriKaydi` ile `BulutKaynagi` (Firestore) arasında çalışan Offline-First köprü.
-/// - Her yazma işlemi önce anında yerel hafızaya (`localStorage`) yapılır.
-/// - Fotoğraflar buluta gönderilmez; cihazda `mytus_photos_{uid}` anahtarında saklanır.
+/// - Her yazma işlemi önce anında yerel hafızaya (`localStorage`) yapılır. Cihaza
+///   yazılamasa (depo dolu) bile değişiklik buluta gönderilmeye devam eder; hata
+///   sonra yukarı bildirilir ki ekranda uyarı çıksın.
+/// - Fotoğraflar buluta gönderilmez. Oturum açıkken yalnız ana kayıtta durur
+///   (tek kopya). Çıkışta hesaba özel `mytus_photos_{uid}` anahtarına taşınır,
+///   aynı hesapla girişte geri yerleştirilir ve o anahtar silinir.
 /// - Yalnızca değişen veri bölümleri kısa bir gecikmeyle (veya hemen) Firestore'a yazılır.
 /// - İnternet kesilirse değişiklikler kuyrukta bekler, bağlantı gelince gönderilir.
 class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
@@ -74,13 +78,31 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
 
   @override
   Future<void> yaz(String icerik) async {
-    // 1. Her zaman önce yerel hafızaya yaz (Offline-First).
-    await _yerel.yaz(icerik);
+    // 1. Her zaman önce yerel hafızaya yaz (Offline-First). Yazılamazsa
+    //    (ör. tarayıcı deposu dolu) buluta göndermeyi yine de sürdürürüz;
+    //    hata en sonda yeniden fırlatılır ki kullanıcı uyarılsın.
+    Object? yerelHata;
+    StackTrace? yerelYigin;
+    try {
+      await _yerel.yaz(icerik);
+    } catch (e, yigin) {
+      yerelHata = e;
+      yerelYigin = yigin;
+    }
 
     final kullanici = _aktifKullanici;
-    if (kullanici == null || _uzaktanYukleniyor) return;
+    if (kullanici != null && !_uzaktanYukleniyor) {
+      await _bulutKuyrugunaEkle(icerik);
+    }
 
-    // 2. Fotoğrafları ayıkla ve hesaba özel yerel anahtarda koru.
+    if (yerelHata != null) {
+      Error.throwWithStackTrace(yerelHata, yerelYigin ?? StackTrace.current);
+    }
+  }
+
+  /// Tam JSON metnindeki değişen bölümleri bulut kuyruğuna ekler ve gönderir.
+  /// Fotoğraflar ayıklanır, buluta gitmez (ana kayıtta durur).
+  Future<void> _bulutKuyrugunaEkle(String icerik) async {
     Map<String, dynamic> cozulmus;
     try {
       final ham = jsonDecode(icerik);
@@ -91,9 +113,8 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
     }
 
     final ayrilmis = BolumAyirici.ayir(cozulmus);
-    await _fotograflariBirlestirVeKaydet(kullanici.uid, ayrilmis.fotograflar);
 
-    // 3. Yalnızca değişen bölümleri bulut kuyruğuna ekle.
+    // Yalnızca değişen bölümleri bulut kuyruğuna ekle.
     for (final entry in ayrilmis.bolumler.entries) {
       if (_sonGonderilenBolumler[entry.key] != entry.value) {
         _bekleyenBolumler[entry.key] = entry.value;
@@ -129,16 +150,55 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
     return {};
   }
 
-  Future<Map<String, String>> _fotograflariBirlestirVeKaydet(
+  /// Tam JSON metnindeki (ana kayıttaki) not fotoğrafları: not kimliği -> fotoğraf.
+  static Map<String, String> _metindekiFotograflar(String? metin) {
+    if (metin == null || metin.isEmpty) return {};
+    try {
+      final v = jsonDecode(metin);
+      if (v is Map<String, dynamic>) return BolumAyirici.ayir(v).fotograflar;
+    } catch (_) {}
+    return {};
+  }
+
+  /// Buluttan gelen veriye geri yerleştirilecek fotoğraflar: çıkışta hesaba özel
+  /// anahtara taşınmış olanlar + şu an cihazdaki ana kayıtta duranlar.
+  Future<Map<String, String>> _yerlestirilecekFotograflar(
     String uid,
-    Map<String, String> yeniFotolar,
+    String? yerelMetin,
   ) async {
-    final mevcut = await _mevcutFotograflariOku(uid);
-    if (yeniFotolar.isNotEmpty) {
-      mevcut.addAll(yeniFotolar);
-      await _yerel.anahtarliYaz(_fotoAnahtari(uid), jsonEncode(mevcut));
+    final fotolar = await _mevcutFotograflariOku(uid);
+    fotolar.addAll(_metindekiFotograflar(yerelMetin));
+    return fotolar;
+  }
+
+  /// Fotoğraflar ana kayda geri yerleştirildikten sonra hesaba özel kopyayı siler
+  /// (aynı fotoğraf iki kez saklanmasın).
+  Future<void> _fotoAnahtariniTemizle(String uid) async {
+    try {
+      await _yerel.anahtarliSil(_fotoAnahtari(uid));
+    } catch (_) {}
+  }
+
+  /// Çıkışta cihazdaki fotoğrafları hesaba özel anahtara taşır. Yalnız şu an
+  /// cihazdaki notların fotoğrafları taşınır (silinen notların fotoğrafı kalmaz).
+  Future<void> _fotograflariHesabaTasi(String uid, String? yerelMetin) async {
+    if (!_anlamliVeriVarMi(yerelMetin)) return;
+    final fotolar = _metindekiFotograflar(yerelMetin);
+    final anahtar = _fotoAnahtari(uid);
+    if (fotolar.isEmpty) {
+      await _fotoAnahtariniTemizle(uid);
+      return;
     }
-    return mevcut;
+    final metin = jsonEncode(fotolar);
+    try {
+      await _yerel.anahtarliYaz(anahtar, metin);
+    } catch (_) {
+      // Depo dolu: ana kaydı (çıkışta zaten temizlenecek) boşaltıp yeniden dene.
+      try {
+        await _yerel.yaz('{}');
+      } catch (_) {}
+      await _yerel.anahtarliYaz(anahtar, metin);
+    }
   }
 
   /// Kullanıcı giriş yaptığında çağrılır:
@@ -181,31 +241,24 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
     if (bulutOkundu && bulutDolu) {
       // Cihazda da önceden veri varsa kaybolmaması için hesaba özel yedek anahtarına kaydet.
       if (yerelDolu && yerelMetin != null) {
-        final yerelHarita = jsonDecode(yerelMetin) as Map<String, dynamic>;
-        final yerelAyrilmis = BolumAyirici.ayir(yerelHarita);
-        await _fotograflariBirlestirVeKaydet(
-          kullanici.uid,
-          yerelAyrilmis.fotograflar,
-        );
         await _yerel.anahtarliYaz(_yedekAnahtari(kullanici.uid), yerelMetin);
       }
 
       _sonGonderilenBolumler.addAll(bulutBolumleri);
-      final fotolar = await _mevcutFotograflariOku(kullanici.uid);
+      final fotolar =
+          await _yerlestirilecekFotograflar(kullanici.uid, yerelMetin);
       final birlesikMetin = BolumAyirici.birlestir(
         bolumler: bulutBolumleri,
         fotograflar: fotolar,
       );
       await _uzaktanVeriyiUygula(birlesikMetin);
+      await _fotoAnahtariniTemizle(kullanici.uid);
       _durumGuncelle(SenkronDurumu.esitlendi);
     } else if (yerelDolu && yerelMetin != null) {
       // İlk Giriş Göçü: Bulut boş ama cihazda yerel veri var -> Buluta aktar!
+      // (Fotoğraflar ana kayıtta kalır, buluta gitmez.)
       final yerelHarita = jsonDecode(yerelMetin) as Map<String, dynamic>;
       final ayrilmis = BolumAyirici.ayir(yerelHarita);
-      await _fotograflariBirlestirVeKaydet(
-        kullanici.uid,
-        ayrilmis.fotograflar,
-      );
       _bekleyenBolumler.addAll(ayrilmis.bolumler);
       await bekleyenleriSimdiGonder();
     }
@@ -226,12 +279,16 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
         }
         if (!degisiklikVar) return;
 
-        final fotolar = await _mevcutFotograflariOku(kullanici.uid);
+        final fotolar = await _yerlestirilecekFotograflar(
+          kullanici.uid,
+          await _yerel.oku(),
+        );
         final birlesik = BolumAyirici.birlestir(
           bolumler: _sonGonderilenBolumler,
           fotograflar: fotolar,
         );
         await _uzaktanVeriyiUygula(birlesik);
+        await _fotoAnahtariniTemizle(kullanici.uid);
         _durumGuncelle(SenkronDurumu.esitlendi);
       },
       onError: (_) => _durumGuncelle(SenkronDurumu.cevrimdisi),
@@ -287,6 +344,9 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
         await _yerel.anahtarliSil(_yedekAnahtari(kullanici.uid));
       } else {
         await bekleyenleriSimdiGonder();
+        // Fotoğraflar buluta gitmez: hesaba özel anahtara taşınır, aynı hesapla
+        // tekrar girildiğinde geri gelir.
+        await _fotograflariHesabaTasi(kullanici.uid, await _yerel.oku());
       }
     }
 

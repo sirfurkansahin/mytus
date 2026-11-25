@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('BulutSenkronServisi ve Göç / Çoklu Cihaz Testleri', () {
     test(
-      'İlk giriş göçü: cihazdaki yerel veriler yeni açılan bulut hesabına aktarılır ve fotoğraflar cihazda korunur',
+      'İlk giriş göçü: cihazdaki yerel veriler yeni açılan bulut hesabına aktarılır ve fotoğraflar cihazda (tek kopya) korunur',
       () async {
         final yerel = BellekKaydi();
         final bulut = SahteBulutKaynagi();
@@ -66,11 +66,10 @@ void main() {
           buluttakiBolumler['kutuphane']!.contains('BASE64_FOTO_VERISI'),
           isFalse,
         );
-        // Ama cihazda hesaba özel anahtarda saklanmış olmalı!
-        expect(
-          yerel.ekAnahtarlar['mytus_photos_uid_furkan'],
-          contains('BASE64_FOTO_VERISI'),
-        );
+        // Oturum açıkken fotoğraf cihazda TEK kopya: yalnız ana kayıtta durur
+        // (hesaba özel anahtara ancak çıkışta taşınır).
+        expect(yerel.icerik, contains('BASE64_FOTO_VERISI'));
+        expect(yerel.ekAnahtarlar['mytus_photos_uid_furkan'], isNull);
 
         // Kullanıcı çıkış yapar -> cihazdaki çalışma verisi sıfırlanır ama fotoğraflar korunur.
         await senkron.oturumKapatildi(hesabiTamamenSil: false);
@@ -88,6 +87,8 @@ void main() {
         final bolum1 = kitap.bolumler.firstWhere((b) => b.id == 'b_ornek_1');
         expect(bolum1.notlar.first.metin, 'Önemli patoloji notu');
         expect(bolum1.notlar.first.resimBase64, 'BASE64_FOTO_VERISI');
+        // Fotoğraf ana kayda geri döndü; hesaba özel kopya silindi.
+        expect(yerel.ekAnahtarlar['mytus_photos_uid_furkan'], isNull);
       },
     );
 

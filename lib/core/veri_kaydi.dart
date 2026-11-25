@@ -8,13 +8,14 @@ abstract class VeriKaydi {
   /// Kayıtlı metni okur. Hiç kayıt yoksa null döner. Okuma başarısızsa hata fırlatır.
   Future<String?> oku();
 
-  /// Metni yazar (eskisinin yerine geçer).
+  /// Metni yazar (eskisinin yerine geçer). Yazılamazsa (ör. tarayıcı deposu
+  /// dolu) hata fırlatır.
   Future<void> yaz(String icerik);
 
   /// İsteğe bağlı anahtarlı yerel okuma (ör. hesaba özel fotoğraflar veya yedekler).
   Future<String?> anahtarliOku(String anahtar) async => null;
 
-  /// İsteğe bağlı anahtarlı yerel yazma.
+  /// İsteğe bağlı anahtarlı yerel yazma. Yazılamazsa hata fırlatır.
   Future<void> anahtarliYaz(String anahtar, String icerik) async {}
 
   /// İsteğe bağlı anahtarlı yerel silme.
@@ -71,10 +72,13 @@ class DosyaKaydi implements VeriKaydi {
 
 /// Testler için bellekte tutan kayıt.
 class BellekKaydi implements VeriKaydi {
-  BellekKaydi({this.icerik, this.okumaHatasi = false});
+  BellekKaydi({this.icerik, this.okumaHatasi = false, this.yazmaHatasi = false});
 
   String? icerik;
   bool okumaHatasi;
+
+  /// true iken her yazma, dolu bir tarayıcı deposu gibi hata fırlatır.
+  bool yazmaHatasi;
   int yazmaSayisi = 0;
   final Map<String, String> ekAnahtarlar = {};
 
@@ -86,6 +90,7 @@ class BellekKaydi implements VeriKaydi {
 
   @override
   Future<void> yaz(String icerik) async {
+    if (yazmaHatasi) throw StateError('yazma hatası (depo dolu)');
     this.icerik = icerik;
     yazmaSayisi++;
   }
@@ -95,6 +100,7 @@ class BellekKaydi implements VeriKaydi {
 
   @override
   Future<void> anahtarliYaz(String anahtar, String deger) async {
+    if (yazmaHatasi) throw StateError('yazma hatası (depo dolu)');
     ekAnahtarlar[anahtar] = deger;
   }
 

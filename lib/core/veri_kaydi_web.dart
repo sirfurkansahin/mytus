@@ -10,10 +10,14 @@ String? webDepoOku([String anahtar = 'mytus_data.json']) {
   }
 }
 
+/// Yazar. Tarayıcı deposu doluysa ya da erişilemiyorsa HATA FIRLATIR:
+/// hata sessizce yutulmaz, kullanıcı kaydın yapılamadığını görmelidir.
 void webDepoYaz(String icerik, [String anahtar = 'mytus_data.json']) {
   try {
     html.window.localStorage[anahtar] = icerik;
-  } catch (_) {}
+  } catch (e) {
+    throw StateError('Tarayıcı deposuna yazılamadı ($anahtar): $e');
+  }
 }
 
 void webDepoSil([String anahtar = 'mytus_data.json']) {

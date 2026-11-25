@@ -1,4 +1,5 @@
 import 'package:app/app/ana_iskelet.dart';
+import 'package:app/app/kayit_hatasi_seridi.dart';
 import 'package:app/core/firebase_ayarlari.dart';
 import 'package:app/core/renkler.dart';
 import 'package:app/core/veri_kaydi.dart';
@@ -190,6 +191,26 @@ class _MyTusAppState extends State<MyTusApp> {
             final kimlik = widget.kimlikServisi;
             if (kimlik != null) {
               icerik = KimlikKapsami(servis: kimlik, child: icerik);
+            }
+            // Cihaza kaydedilemediyse (ör. tarayıcı deposu dolu) tüm ekranların
+            // üstünde uyarı şeridi gösterilir; hata sessiz kalmaz.
+            if (_deposu.kayitHatasi) {
+              icerik = Column(
+                children: [
+                  KayitHatasiSeridi(
+                    yenidenDene: () {
+                      _deposu.kaydetmeyiYenidenDene();
+                    },
+                  ),
+                  Expanded(
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: icerik,
+                    ),
+                  ),
+                ],
+              );
             }
             return icerik;
           },

@@ -38,6 +38,9 @@ class PlanDeposu extends ChangeNotifier {
 
   YuklemeDurumu durum = YuklemeDurumu.yukleniyor;
   String? hataMesaji;
+
+  /// Son kayıt cihaza yazılamadıysa true (ör. tarayıcı deposu dolu).
+  /// Ekranın üstünde uyarı şeridi gösterilir.
   bool kayitHatasi = false;
 
   DateTime? sinavTarihi;
@@ -1116,13 +1119,34 @@ class PlanDeposu extends ChangeNotifier {
     return _yazmaKuyrugu;
   }
 
+  /// Kayıt hatasından sonra ("Tekrar dene") verinin tamamını yeniden yazar.
+  Future<void> kaydetmeyiYenidenDene() {
+    _kirli = true;
+    return hemenKaydet();
+  }
+
   Future<void> _yaz(String icerik) async {
     try {
       await _kayit.yaz(icerik);
-      kayitHatasi = false;
+      if (kayitHatasi) {
+        kayitHatasi = false;
+        _bildir();
+      }
     } catch (_) {
-      kayitHatasi = true;
+      // Yazılamadı (ör. tarayıcı deposu dolu). Sessiz kalmayız: ekranda uyarı
+      // çıkar. Veri bellekte durur ve bir sonraki kayıtta yeniden denenir.
+      _kirli = true;
+      if (!kayitHatasi) {
+        kayitHatasi = true;
+        _bildir();
+      }
     }
+  }
+
+  bool _atildi = false;
+
+  void _bildir() {
+    if (!_atildi) notifyListeners();
   }
 
 
@@ -1642,6 +1666,7 @@ class PlanDeposu extends ChangeNotifier {
   }
   @override
   void dispose() {
+    _atildi = true;
     _zamanlayici?.cancel();
     super.dispose();
   }
