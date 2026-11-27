@@ -39,6 +39,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1. Tıbbın Temelleri'), findsOneWidget);
 
+    // Sınav dönemi seçimi eklendiği için liste uzadı: düğme görünür olsun.
+    await tester.ensureVisible(find.text('Tümünü kaldır'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Tümünü kaldır'));
     await tester.pumpAndSettle();
     final basla = tester.widget<FilledButton>(
