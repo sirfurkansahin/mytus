@@ -84,7 +84,8 @@ void main() {
   });
 
   testWidgets('Yeni deneme ekranı 320 px genişlikte taşmaz', (tester) async {
-    tester.view.physicalSize = const Size(320, 640);
+    // Genişlik küçük telefon (320 px); yükseklik tüm alanlar çizilsin diye uzun.
+    tester.view.physicalSize = const Size(320, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final depo = await doluDepo(tester);
