@@ -1,12 +1,20 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 27 Kasım 2026, Claude (denetim sonrası düzeltmeler, 2. aşama bitti).
+Son guncelleme: 27 Kasım 2026, Claude (denetim sonrası 2. aşama; `model2/github-temizlik` ile birleştirildi).
 
 ## Durum
-- 1. aşama (A1–A3 + "yalnız main yayınlar") 25 Kasım 2026'da kullanıcı onayıyla `main`'e
-  alındı ve canlıda (`3dcd6de`).
-- 2. aşama: kullanıcının 25 Kasım kararları ve onayladığı bulgular ayrı dallarda, zincir
-  halinde yapıldı; hepsi GitHub Actions'ta geçti. `main`'e henüz ALINMADI.
+- **27 Kasım 2026, GitHub temizliği (`model2/github-temizlik`, PR #21 ile `main`'de):**
+  - `github-pages` ortamı yalnızca `main` dalına kısıtlandı (`claude/*` ve `model2/*` yayın izinleri kaldırıldı).
+  - PR birleşince otomatik dal silme (`delete_branch_on_merge`) açıldı.
+  - İçeriği zaten `main`'e alınmış 29 eski dal + gereksiz `claude/s2-giris-yedek` dalı silindi (birleşmemiş aktif dallar ve kanıt dalları korundu).
+  - Kullanılmayan 5 eski Secret (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_TESTERS`, `FIREBASE_WEB_APP_ID`) silindi; yalnızca aktif 5 Firebase Web anahtarı kaldı.
+  - Eski Android döneminden kalan `.github/workflows/bootstrap-android.yml` kaldırıldı ve `README.md` güncel Web Mobil (PWA) durumuna göre yenilendi.
+  - Not (Claude): dal silme `git ls-remote` ile doğrulandı. Ortam kısıtı ve Secret silme bu ortamdan görülemiyor (doğrulanmadı).
+- **25 Kasım 2026, denetim 1. aşama (PR #20 ile `main`'de):** `claude/yayin-yalniz-main`,
+  `claude/kayit-hatasi-uyari`, `claude/bulut-esitleme-onarim`, `claude/kayit-alan-koruma`
+  (A1–A3 ve "yalnız main yayınlar").
+- **27 Kasım 2026, denetim 2. aşama:** kullanıcının 25 Kasım kararları ve onayladığı bulgular
+  ayrı dallarda, zincir halinde yapıldı; hepsi GitHub Actions'ta geçti:
 
 | Dal | İçerik | CI |
 |---|---|---|
@@ -18,40 +26,29 @@ Son guncelleme: 27 Kasım 2026, Claude (denetim sonrası düzeltmeler, 2. aşama
 | `claude/ders-paylasimi-istege-bagli` | Karar 7: son ders paylaşımı Ayarlar'dan açılır, varsayılan kapalı | #101 geçti |
 | `claude/puan-secenek-c` | Karar 8: puan her yerde 1 konu = 10, 1 soru = 1; odak süresi "dk"; sabit "22 Ağustos" metinleri seçilen tarihe bağlandı | #102 geçti (212 test) |
 | `claude/ornek-kitap-kaldir` | Karar 9: örnek kitap kaldırıldı; cihazdan, yedekten ve buluttan da siliniyor | #104 geçti (217 test) |
-| `claude/belgeler-guncel` | A11: DECISIONS/README güncel; A9: kalan kanıt testleri kalıcı testlere alındı; bu dosya | #105 geçti (220 test) |
+| `claude/belgeler-guncel` | A11: DECISIONS/README güncel; A9: kalan kanıt testleri kalıcı testlere alındı; `main` (PR #21) ile birleştirildi | #105 geçti (220 test) |
 
-Zincir: `main` ← yukarıdaki dallar, tablo sırasıyla (her dal bir öncekinin üstünde).
-`main` zincirin atasıdır; birleştirme "ileri sarma" ile çakışmasız olur.
+Zincir: `main` ← yukarıdaki dallar, tablo sırasıyla. Son dal `main`'i (PR #21) de içerir.
 
 ## Sıradaki adım
-1. B4 (Bugün ekranının üstündeki 6 simge): kullanıcıya taslak gösterildi, seçimi bekleniyor.
-   Seçime göre ayrı dalda (`claude/bugun-ust-simgeler`) yapılacak.
-2. `main`'e birleştirme: kullanıcının AÇIK izniyle (birleştirme siteyi yayınlar). Sonra canlı
-   sitede doğrulama.
-3. Birleştirmeden sonra: 2. aşama dalları ve kanıt dalları silinebilir (bkz. aşağı).
+1. 2. aşamayı `main`'e almak: kullanıcı 27 Kasım'da onayladı; aynı saatlerde `model2` de
+   `main`'e yazdığı için Claude birleştirmeden önce kullanıcıya bir kez daha soruyor.
+2. Onaylananlar, ayrı dallarda: B4 (Bugün üstü: "A · Kısayol şeridi" seçildi) ve F.T. time
+   gizliyken Tanıtım turu/Rehber anlatımı ile İlerleme'deki odak kutularının gizlenmesi.
+   Her biri için `main`'e birleştirme ayrıca sorulur.
+3. Birleştirmeden sonra: 2. aşama dalları ve kanıt dalları (`claude/kanit-testleri-main`,
+   `claude/kanit-testleri-uc`) silinebilir. Bu ortamdan dal silinemiyor (403).
 
 ## Kanıt testleri (A9)
 KANIT-01…17'nin karşılığı artık kalıcı testlerde. KANIT-03 (%70 Kurtarma Modu) özellik
-kaldırıldığı için düştü. Kanıt dalları (`claude/kanit-testleri-main`, `claude/kanit-testleri-uc`)
-artık gerekmiyor.
+kaldırıldığı için düştü.
 
 ## Bilinen sorunlar / notlar
-- Bu ortamdan dal SİLİNEMİYOR (git push --delete: 403, ağ politikası). Kullanıcının silmeyi
-  onayladığı, içeriği main'de olan dallar: claude/ders-konu-not, claude/ft-ayarlar-puan,
-  claude/ft-sayac-prototip, claude/ft-time-sadelestirme, claude/ilerleme, claude/imza-ve-dagitim,
-  claude/kapanis, claude/on-plan-servisi, claude/takvim-tekrar, claude/uctan-uca-test,
-  model2/ft-time-temizlik, model2/ios-web-test, model2/rapor-tekrar-sistemi,
-  model2/speetus-mufredat; ayrıca claude/s2-giris-yedek (tek değişiklik 6c6c32eda6f1,
-  APK imza parmak izi; artık gereksiz). GitHub > Branches sayfasından silinebilir.
-- GitHub ayarı: `github-pages` ortamı yalnız `main`'e izin verecek şekilde kısıtlanmalı
-  (kullanıcıya adımlar verildi; buradan API ile değiştirilemiyor).
+- 27 Kasım'da iki model aynı saatlerde depoya yazdı (`model2`: GitHub temizliği; Claude:
+  2. aşama). Kod çakışması olmadı; README ve HANDOFF elle birleştirildi.
 - Bulut eşitlemesinin Firestore tarafı (sunucudan okuma, önbellek olaylarını atlama) gerçek
   Firebase'de denenmedi; testler sahte bulutla.
-- F.T. time gizli (`ftTimeAcik = false`), ama Tanıtım turu (2. slayt) ve Rehber (3. kategori)
-  onu anlatıyor. Karar sorusu olarak kullanıcıya iletildi.
 - `kurtarmaModuAktif` alanı eski kayıtlarla uyum için kayıtta duruyor; hiçbir şeyi etkilemiyor.
-- `.github/workflows/bootstrap-android.yml` her `main` gönderiminde çalışıyor ama `android/`
-  klasörü olduğu için hiçbir şey yapmıyor. APK kaldırıldığından silinebilir (kullanıcıya sorulmadı).
 - Arka planda süre bitince bildirim gelmemesi (17 Ekim 2026 notu) planın dışında.
 
 ## Calisma kurali

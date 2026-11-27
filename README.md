@@ -1,9 +1,23 @@
 # MY TUS
 
-Kisisel TUS calisma sureci takibi ve planlama uygulamasi: telefonda tarayicidan calisan Web Mobil uygulama (PWA, Flutter). Soru bankasi degildir; tibbi icerik yoktur (yalniz kucuk, salt-okunur "Referans" bolumu).
+Kişisel TUS çalışma süreci takibi ve planlama uygulaması (**Web Mobil / PWA**, Flutter). Soru bankası değildir; tıbbi içerik üretmez (yalnız küçük, salt-okunur "Referans" bölümü var).
 
-Canli adres: https://sirfurkansahin.github.io/mytus/ (yalniz `main` dalindan yayinlanir).
+**Canlı Adres:** https://sirfurkansahin.github.io/mytus/
 
-Akis: sinav donemini sec (27 Mart veya 22 Agustos 2027), ders ve konu ekle, ozel notlar yaz, takvime yerlestir, tekrarlari (R1-R4) yap, denemelerini ve kitaplarini takip et. Istersen hesap acip verini buluta esitle ve calisma grubunda haftalik puan tablosunda arkadaslarinla karsilastir (1 biten konu = 10 puan, 1 cozulen soru = 1 puan).
+## Temel Özellikler
+- **Plan:** Sınav dönemi seçimi (27 Mart veya 22 Ağustos 2027), günlük yeni konu ve tekrar sınırı.
+- **Bugün & Takvim:** Konu yerleştirme, R0–R4 aralıklı tekrar motoru, gecikme kayması, telafi planı ve "Tekrarları affet & dağıt".
+- **Dersler:** Klasik Branşlar veya SpeeTUS Sarmal Sistem müfredat seçimi, kişisel konu notları (notlar özeldir, paylaşılmaz).
+- **Denemeler:** Net, kabaca tahmini TUS puanı (45 barajı altı açıkça yazılır) ve hata analizi.
+- **Kütüphane:** Kitap ve bölüm ilerleme takibi, fotoğraflı/etiketli bölüm notları, takvim köprüsü.
+- **Misafir Modu & Bulut Eşitleme:** Hesap açmadan yerel kullanım veya e-posta/şifre ile bulut yedekleme (Firebase Spark).
+- **Çalışma Grubu:** Davet koduyla 2–10 kişilik çalışma grubu, haftalık puan tablosu ve ortak hedef takibi. Puan: 1 biten konu = 10, 1 çözülen soru = 1. Son çalışılan ders adı yalnız Ayarlar'dan açılırsa görünür.
 
-Durum: Surum 2 (hesap, bulut esitleme, calisma grubu). Ayrintilar icin `HANDOFF.md`, kararlar icin `DECISIONS.md`, calisma kurallari icin `AGENTS.md`.
+## Geliştirme ve Yayın
+- Kod analizi, testler ve Flutter Web derlemesi GitHub Actions (`.github/workflows/deploy-web.yml`) üzerinden her dalda otomatik çalışır.
+- Canlı yayın yalnızca `main` dalından GitHub Pages üzerine yapılır; `main`'e birleştirme kullanıcının açık izniyle.
+
+## Proje Belgeleri
+- Güncel durum ve sıradaki adım: `HANDOFF.md`
+- Onaylı ürün ve teknik kararlar: `DECISIONS.md`
+- Çalışma kuralları: `AGENTS.md`
