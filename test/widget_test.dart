@@ -3,7 +3,6 @@ import 'package:app/core/veri_kaydi.dart';
 import 'package:app/features/dersler/hazir_dersler.dart';
 import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
-import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/ft_time/ft_ekrani.dart';
 import 'package:app/features/ft_time/ft_kontrol.dart';
 import 'package:app/main.dart';
@@ -140,9 +139,7 @@ void main() {
   takvimTestleri();
   denemeTestleri();
   defterlerTestleri();
-  bilisselTestleri();
   provaTestleri();
-  kokpitTestleri();
   rehberTestleri();
   kutuphaneTestleri();
 }
@@ -519,39 +516,8 @@ void defterlerTestleri() {
   });
 }
 
-void bilisselTestleri() {
-  testWidgets('Bugün ekranından Bilişsel & Uyku Yönetimi açılır ve öğeler listelenir',
-      (tester) async {
-    tester.view.physicalSize = const Size(800, 2000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byTooltip('Bilişsel & Uyku'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Bilişsel & Uyku Yönetimi'), findsOneWidget);
-    expect(find.textContaining('Zor Bilişsel İş Tavanı'), findsOneWidget);
-    // K1: sirkadiyen grafik ve günlük uyku girişi gizli; hedef/kafein kartı açık.
-    expect(find.textContaining('Sirkadiyen Odak'), findsNothing);
-    expect(find.text('Dün Geceki Uykuyu Kaydet'), findsNothing);
-    expect(find.textContaining('Uyku & Kafein Disiplini'), findsOneWidget);
-    expect(find.textContaining('Prefrontal Korteks (PFC) & Kurtarma'), findsOneWidget);
-
-    // Kurtarma Modu anahtarına tıkla
-    await tester.tap(find.byType(SwitchListTile));
-    await tester.pumpAndSettle();
-    expect(depo.kurtarmaModuAktif, isTrue);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
-}
-
 void provaTestleri() {
-  testWidgets('Denemeler ekranından Sınav Provası açılır, başlar ve panik protokolü çalışır',
+  testWidgets('Denemeler ekranından Sınav Provası açılır ve başlar',
       (tester) async {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
@@ -573,14 +539,8 @@ void provaTestleri() {
     expect(find.text('1. Oturum: TTBT (10:15)'), findsOneWidget);
     expect(find.text('2. Oturum: KTBT (14:45)'), findsOneWidget);
 
-    // Panik protokolü butonuna tıkla
-    await tester.tap(find.byTooltip('90 sn Panik / Nefes'));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('90 sn Döngüsel İç Çekme'), findsOneWidget);
-    expect(find.textContaining('Bilişsel Yeniden Değerlendirme'), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle();
+    // Nefes/panik aracı kaldırıldı (25 Kasım 2026 kararı).
+    expect(find.byTooltip('90 sn Panik / Nefes'), findsNothing);
 
     // Provayı başlat
     await tester.tap(find.text('Provayı Başlat (135 Dakika)'));
@@ -589,57 +549,6 @@ void provaTestleri() {
     expect(find.text('KALAN SÜRE'), findsOneWidget);
     expect(find.textContaining('Soru: 1 / 100'), findsOneWidget);
     expect(find.text('Provayı Bitir'), findsOneWidget);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
-}
-
-void kokpitTestleri() {
-  testWidgets('Bugün ekranından Master Kokpit açılır ve 8+4 göstergeler görünür',
-      (tester) async {
-    tester.view.physicalSize = const Size(800, 2000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    final depo = await doluDepo(tester);
-    await tester.pumpWidget(MyTusApp(deposu: depo, ftNative: SahteNative()));
-    await tester.pumpAndSettle();
-
-    // K2: Bugün ekranında Master Kokpit gizlidir
-    expect(find.byTooltip('Master Kokpit'), findsNothing);
-
-    // Doğrudan Kokpit ekranı açılır
-    await tester.pumpWidget(
-      MaterialApp(
-        home: DepoKapsami(
-          deposu: depo,
-          child: const KokpitEkrani(),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Master Yönetim Kokpiti'), findsOneWidget);
-    expect(find.text('BİLİŞSEL SAĞLIK & KOKPİT SKORU'), findsOneWidget);
-    expect(find.text('Otomatik "Eğer–O Zaman" Kararları'), findsOneWidget);
-    expect(find.text('8 Bilişsel Gösterge (Haftalık Teşhis)'), findsOneWidget);
-    expect(find.text('4 Sınav & Net Göstergesi'), findsOneWidget);
-
-    // 8 Göstergenin başlıkları
-    expect(find.text('Kalibrasyon Farkı'), findsOneWidget);
-    expect(find.text('Uyku Düzeni & Sapma'), findsOneWidget);
-    expect(find.text('Prefrontal Korteks (PFC)'), findsOneWidget);
-    expect(find.text('Test Kaygısı'), findsOneWidget);
-    expect(find.text('R1 Tekrar Geçişi'), findsOneWidget);
-    expect(find.text('R3 Tekrar Geçişi'), findsOneWidget);
-    expect(find.text('Odak & Bilişsel Tavan'), findsOneWidget);
-
-    // Hızlı araç: Beklenen Değer kartını aç
-    await tester.tap(find.text('Beklenen Değer (EV)'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Beklenen Değer (EV)'), findsWidgets);
-    await tester.tap(find.text('Anladım'));
-    await tester.pumpAndSettle();
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

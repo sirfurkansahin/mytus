@@ -104,37 +104,6 @@ class _BeklenenDegerDialogState extends State<BeklenenDegerDialog> {
               onChanged: (v) => setState(() => _elenenSik = v.round()),
             ),
             const SizedBox(height: 12),
-            // Altın Cevap Değiştirme Kuralları (Rapor 5.3)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: tema.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.rule, size: 16, color: Colors.amber[800]),
-                      const SizedBox(width: 6),
-                      const Text(
-                        'Cevap Değiştirme Altın Kuralı',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    '⚠️ Adayların kaygıyla değiştirdiği cevapların %57.8\'i net kaybına yol açar.\n\n'
-                    'Sadece 2 durumda cevap değiştirin:\n'
-                    '1. Soruda kaçırdığınız somut bir klinik bulguyu/öncülü fark ettiyseniz.\n'
-                    '2. İlk işaretleme "Kararsız" olup yeni şık net bir mekanizma zinciriyle doğrulanıyorsa.',
-                    style: TextStyle(fontSize: 11, height: 1.3),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

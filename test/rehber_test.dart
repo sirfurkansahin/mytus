@@ -32,7 +32,7 @@ void main() {
       // 2. Slayta ilerle
       await tester.tap(find.text('İlerle'));
       await tester.pumpAndSettle();
-      expect(find.text('2. F.T. Time & Bilişsel Kapasite (3–4 Saat Kuralı)'), findsOneWidget);
+      expect(find.text('2. F.T. Time (Odak Sayacı)'), findsOneWidget);
       expect(find.text('Geri'), findsOneWidget);
 
       // Geri dön
@@ -49,11 +49,11 @@ void main() {
 
       await tester.tap(find.text('İlerle'));
       await tester.pumpAndSettle();
-      expect(find.text('4. Sınav Anı, Panik Protokolü & Provalar'), findsOneWidget);
+      expect(find.text('4. Sınav Provası & Stratejiler'), findsOneWidget);
 
       await tester.tap(find.text('İlerle'));
       await tester.pumpAndSettle();
-      expect(find.text('5. Master Yönetim Kokpiti & Karar Asistanı'), findsOneWidget);
+      expect(find.text('5. İlerleme, Çalışma Grubu & Bulut'), findsOneWidget);
       expect(find.text('Anladım, Başla!'), findsOneWidget);
       expect(find.text('Atla'), findsNothing);
 
@@ -81,10 +81,10 @@ void main() {
       // Kategoriler
       expect(find.text('1. Hızlı Başlangıç & Günlük Kullanım'), findsOneWidget);
       expect(find.text('2. Akıllı Tekrar Motoru (R1–R4)'), findsOneWidget);
-      expect(find.text('3. F.T. Time & Nörobiyolojik Performans'), findsOneWidget);
+      expect(find.text('3. F.T. Time (Odak Sayacı)'), findsOneWidget);
       expect(find.text('4. Deneme Analizi & Özel Defterler'), findsOneWidget);
-      expect(find.text('5. Sınav Anı, Panik ve Stratejiler'), findsOneWidget);
-      expect(find.text('6. Master Yönetim Kokpiti & Karar Asistanı'), findsOneWidget);
+      expect(find.text('5. Sınav Anı Stratejileri'), findsOneWidget);
+      expect(find.textContaining('Kokpit'), findsNothing);
 
       // Bir soruyu tıkla ve cevabı gör
       await tester.tap(find.text('R0 Akşam Tekrarı (Beyaz Sayfa) nedir?'));

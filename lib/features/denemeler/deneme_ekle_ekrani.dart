@@ -29,7 +29,9 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
   int _klinikYanlis = 0;
   int _klinikBos = 0;
 
-  double _kaygiPuani = 3.0; // 0-10 skalası
+  /// Eski kayıtlardaki kaygı puanı korunur; yeni girişte sorulmaz
+  /// (bilişsel içerikler 25 Kasım 2026 kararıyla kaldırıldı).
+  int? _kaygiPuani;
 
   @override
   void initState() {
@@ -48,7 +50,7 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
       _klinikYanlis = d.klinik.yanlis;
       _klinikBos = d.klinik.bos;
 
-      _kaygiPuani = (d.kaygiPuani ?? 3).toDouble();
+      _kaygiPuani = d.kaygiPuani;
     }
   }
 
@@ -98,7 +100,7 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
         bos: _klinikBos,
       ),
       soruHatalari: widget.duzenlenecek?.soruHatalari ?? const [],
-      kaygiPuani: _kaygiPuani.round(),
+      kaygiPuani: _kaygiPuani,
       notlar: _notlarKontrol.text.trim(),
     );
 
@@ -206,61 +208,6 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
               onBosDegisti: (v) => setState(() => _klinikBos = v),
             ),
             const SizedBox(height: 20),
-            Card(
-              elevation: 0,
-              color: tema.colorScheme.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: tema.colorScheme.outlineVariant),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.sentiment_neutral_outlined, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Sınav Öncesi Test Kaygısı (0–10)',
-                            style: tema.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${_kaygiPuani.round()} / 10',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: _kaygiPuani >= 7 ? Colors.red : morAna,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Rapor Bölüm 5.2: Test kaygısı kurul başarısının bağımsız negatif belirleyicisidir. Düzenli izlenmelidir.',
-                      style: tema.textTheme.bodySmall?.copyWith(
-                        color: tema.colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                    Slider(
-                      value: _kaygiPuani,
-                      min: 0,
-                      max: 10,
-                      divisions: 10,
-                      label: '${_kaygiPuani.round()}',
-                      activeColor: _kaygiPuani >= 7 ? Colors.red : morAna,
-                      onChanged: (v) => setState(() => _kaygiPuani = v),
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _notlarKontrol,

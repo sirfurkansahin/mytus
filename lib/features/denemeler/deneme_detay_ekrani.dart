@@ -485,7 +485,7 @@ class _KalibrasyonKarti extends StatelessWidget {
                 Icon(Icons.tune_rounded, size: 18, color: tema.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Bilişsel Kalibrasyon & Güven Matrisi',
+                  'Kalibrasyon & Güven Matrisi',
                   style: tema.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],

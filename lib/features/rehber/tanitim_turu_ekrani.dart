@@ -22,7 +22,7 @@ class TanitimSlayti {
 }
 
 /// MY TUS Görsel Tanıtım Turu: 5 Tematik Slayt ile Uygulama Mantığı.
-/// (Master Araştırma Raporu Nörobiyolojik ve Psikometrik Temelleri)
+/// (Uygulamanın temel akışları)
 class TanitimTuruEkrani extends StatefulWidget {
   const TanitimTuruEkrani({super.key});
 
@@ -37,29 +37,27 @@ class _TanitimTuruEkraniState extends State<TanitimTuruEkrani> {
   static const List<TanitimSlayti> _slaytlar = [
     TanitimSlayti(
       baslik: '1. Akıllı Planlama & Tekrar Sistemi (R0–R4)',
-      altBaslik: 'Soru Merkezli Döngü & Sistem Konsolidasyonu',
+      altBaslik: 'Soru Merkezli Döngü & Aralıklı Tekrar',
       ikon: Icons.event_repeat,
       renk: Colors.purple,
       maddeler: [
         '📅 Konunu Ekle: Dersler ekranından konunu seç ve takvimde istediğin güne yerleştir.',
-        '🌙 R0 Akşam Tekrarı: Bir konuyu çalıştığında, uyku öncesi 15-20 dakikalık R0 beyaz sayfa hatırlatması Bugün ekranına düşer.',
+        '🌙 R0 Akşam Tekrarı: Bir konuyu çalıştığında, günün sonunda 15-20 dakikalık R0 beyaz sayfa hatırlatması Bugün ekranına düşer.',
         '🔁 R1–R4 Aralıklı Tekrarlar: Sınava kalan gün sayısına göre (G+1, G+7, G+30 vb.) tekrarlar otomatik hesaplanır ve takvime dizilir.',
         '⏩ Gecikme Kayması: Bir tekrar gecikirse sonraki adımlar silinmez; aralıklar korunarak ileri kayar.',
       ],
-      ozet: 'Beyin bilgiyi uykuda pekiştirir. Tekrar aralıklarını ezberlemenize gerek yok, sistem sizin yerinize yönetir.',
+      ozet: 'Tekrar aralıklarını ezberlemenize gerek yok, sistem sizin yerinize yönetir.',
     ),
     TanitimSlayti(
-      baslik: '2. F.T. Time & Bilişsel Kapasite (3–4 Saat Kuralı)',
-      altBaslik: 'Derin Odaklanma & Tükenmeyi Önleme',
+      baslik: '2. F.T. Time (Odak Sayacı)',
+      altBaslik: 'Bloklarla Odaklı Çalışma',
       ikon: Icons.timer_outlined,
       renk: Colors.indigo,
       maddeler: [
         '⏱️ Blok Presetleri: Klasik Pomodoro (25/5 dk) veya derin çalışma (50/10 dk) bloklarını tek dokunuşla başlat.',
-        '⭐ Blok Sonu Puanı: Her çalışma bitiminde 1-5 arası odak puanı vererek kendi verim eğrini gör.',
-        '🧠 3–4 Saat Kuralı: Nitelikli "zor analitik iş" (yeni konu, ağır soru) için günlük referans tavan 180-240 dakikadır.',
-        '☕ Kafein Disiplini: Yatış saatinden 8 saat önce otomatik kafein kesilme uyarısıyla derin yavaş dalga uykunu koru.',
+        '⏸️ Molalar: Kısa ve uzun molalar sayaçta sırayla gelir.',
       ],
-      ozet: 'TUS günde 12 saat oturmakla değil; 3-4 saat yüksek odaklı zor iş ve kaliteli uykuyla kazanılır.',
+      ozet: 'Süreyi sayaç tutar; sen konuya odaklan.',
     ),
     TanitimSlayti(
       baslik: '3. Deneme Analizi & Özel Defterler',
@@ -75,30 +73,27 @@ class _TanitimTuruEkraniState extends State<TanitimTuruEkrani> {
       ozet: '"Emin işaretleyip yanlış yaptığın" sorular en tehlikeli kör noktalardır; aynı gün Çeldirici Bankası\'na işlenir.',
     ),
     TanitimSlayti(
-      baslik: '4. Sınav Anı, Panik Protokolü & Provalar',
-      altBaslik: '135 Dk Gerçek Saat Provası & Vagal Tonus',
-      ikon: Icons.air,
+      baslik: '4. Sınav Provası & Stratejiler',
+      altBaslik: '135 Dk Gerçek Saat Provası',
+      ikon: Icons.timer,
       renk: Colors.deepOrange,
       maddeler: [
-        '🫁 90 sn Panik / Nefes Protokolü: Çarpıntı veya kilitlenme anında 84 saniyelik görsel Döngüsel İç Çekme (Cyclic Sighing) rehberiyle sempatik uyarılmayı sakinleştir.',
         '⏱️ 135 Dk Sınav Provası: Resmi süreyle deneme provası yap; 25, 50, 75 ve 100. sorularda çeyrek dilim tempo durumunu kontrol et.',
-        '🥪 135 Dk Ara Protokolü: TTBT ile KTBT oturumları arasında cevap tartışmadan sıfırlanma rehberi.',
         '🎲 Beklenen Değer (EV) Kartı: 2 şık elediğinde işaretlemek istatistiksel olarak +0.167 net kazandırır; asla boş bırakma!',
       ],
-      ozet: 'Stres vücudun göreve hazırlandığını gösterir. Doğru nefes ve önceden kararlaştırılmış kurallarla avantajına çevir.',
+      ozet: 'Sınav gününü önceden aynı süre ve düzenle prova et.',
     ),
     TanitimSlayti(
-      baslik: '5. Master Yönetim Kokpiti & Karar Asistanı',
-      altBaslik: 'Haftalık 8 Bilişsel Gösterge & "Eğer–O Zaman" Motoru',
-      ikon: Icons.dashboard_customize_outlined,
+      baslik: '5. İlerleme, Çalışma Grubu & Bulut',
+      altBaslik: 'Haftalık Özet, Grup Puanı & Eşitleme',
+      ikon: Icons.groups_outlined,
       renk: Colors.blue,
       maddeler: [
-        '🧭 8 Bilişsel Gösterge: Kalibrasyon farkı, aşırı güven, uyku düzeni, okuma hatası payı, kaygı ve tekrar tamamlama oranlarını izle.',
-        '🛡️ %70 Kurtarma Modu: Okuma hatası > %15 olduğunda tek tıkla prefrontal korteksi dinlendirme moduna geç.',
-        '⚡ Otomatik Strateji Motoru: Teşhis edilen risklere göre anında butonlu eylem önerileri (Örn: "Yeni konuyu kıs", "Çeldiriciye tersini düşün").',
-        '🏆 0–100 Bilişsel Sağlık Skoru: Hedef referans aralığına ve Türkiye 1.liği performans hattına göre genel durumunu gör.',
+        '📈 İlerleme: Haftalık özetini, konu ilerlemeni ve son denemeni tek ekranda gör.',
+        '👥 Çalışma Grubu: 2-10 kişilik grubunla haftalık puan tablosu ve ortak hedef (1 soru = 1 puan, 1 konu = 10 puan).',
+        '☁️ Bulut Hesabı: İstersen hesap açıp verilerini telefon ve tabletinde eşitle; misafir modunda veriler yalnız bu cihazda kalır.',
       ],
-      ozet: 'Tüm çalışmaların, uykun ve denemelerin tek bir akıllı karar merkezine bağlanır; sana en doğru rotayı gösterir.',
+      ozet: 'Notların ve kişisel çalışma içeriğin grupta asla paylaşılmaz.',
     ),
   ];
 

@@ -6,13 +6,11 @@ import 'package:app/features/takvim/calisma.dart';
 import 'package:app/features/takvim/gun_siniri.dart';
 import 'package:app/features/takvim/tekrar_motoru.dart';
 import 'package:app/features/ayarlar/ayarlar_ekrani.dart';
-import 'package:app/features/bilissel/bilissel_ekrani.dart';
 import 'package:app/features/defterler/defterler_ekrani.dart';
 import 'package:app/features/denemeler/denemeler_ekrani.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/grup/grup_ekrani.dart';
 import 'package:app/features/ilerleme/ilerleme_ekrani.dart';
-import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/rehber/rehber_ekrani.dart';
 import 'package:app/features/takvim/konu_sec_ekrani.dart';
 import 'package:app/features/takvim/takvim_ogeleri.dart';
@@ -127,23 +125,6 @@ class BugunEkrani extends StatelessWidget {
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  if (kokpitAcik)
-                    IconButton(
-                      tooltip: 'Master Kokpit',
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(Icons.dashboard_customize_outlined),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
-                      ),
-                    ),
-                  IconButton(
-                    tooltip: 'Bilişsel & Uyku',
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.psychology_outlined),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
-                    ),
-                  ),
                   IconButton(
                     tooltip: 'Özel Defterler',
                     visualDensity: VisualDensity.compact,
@@ -200,38 +181,6 @@ class BugunEkrani extends StatelessWidget {
             gunAdiIleTarih(bugun),
             style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
           ),
-          if (kokpitAcik) ...[
-            const SizedBox(height: 12),
-            InkWell(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
-              ),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: tema.colorScheme.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: tema.colorScheme.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.speed, color: tema.colorScheme.primary, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Master Kokpit · 8 Bilişsel Gösterge & Strateji',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: tema.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, color: tema.colorScheme.primary, size: 18),
-                  ],
                 ),
               ),
             ),
@@ -270,61 +219,6 @@ class BugunEkrani extends StatelessWidget {
               ),
             ),
           ),
-          if (depo.kurtarmaModuAktif) ...[
-            const SizedBox(height: 12),
-            InkWell(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
-              ),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.teal.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.teal.withValues(alpha: 0.5)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.shield_rounded, color: Colors.teal, size: 22),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '🛡️ %70 Kurtarma Modu Aktif (PFC Dinlendirme)',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.teal),
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, color: Colors.teal, size: 20),
-                  ],
-                ),
-              ),
-            ),
-          ] else if (sertTavanUyarisiAcik && depo.zorBilisselTavanAsildi) ...[
-            const SizedBox(height: 12),
-            InkWell(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
-              ),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.block_rounded, color: Colors.red, size: 22),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '⛔ Günlük Zor Bilişsel Tavan (4 saat) Doldu!',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, color: Colors.red, size: 20),
-                  ],
                 ),
               ),
             ),
@@ -751,7 +645,7 @@ class BugunEkrani extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'R0 · Akşam uyku öncesi beyaz sayfa tekrarı',
+                    'R0 · Akşam beyaz sayfa tekrarı',
                     style: tema.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: tema.colorScheme.primary,
@@ -759,9 +653,8 @@ class BugunEkrani extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Uyumadan önce bu konuları nota bakmadan boş kağıda '
-                    'zincir olarak çiz (${bugunTamamKonular.join(', ')}). '
-                    'Yavaş dalga uykusunda kalıcı belleğe geçişi güçlendirir.',
+                    'Günü bitirmeden bu konuları nota bakmadan boş kağıda '
+                    'zincir olarak çiz (${bugunTamamKonular.join(', ')}).',
                     style: tema.textTheme.bodySmall?.copyWith(color: soluk),
                   ),
                 ],

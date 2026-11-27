@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:app/features/denemeler/deneme_ekle_ekrani.dart';
-import 'package:app/features/prova/ara_dinlenme_dialog.dart';
 import 'package:app/features/prova/beklenen_deger_dialog.dart';
 import 'package:app/features/prova/modeller.dart';
-import 'package:app/features/prova/panik_protokolu_dialog.dart';
 import 'package:flutter/material.dart';
 
 /// Gerçek Saat 135 Dakikalık TUS Sınav Provası Ekranı.
@@ -21,7 +19,6 @@ class _ProvaEkraniState extends State<ProvaEkrani> {
   bool _bitti = false;
 
   bool _temelMi = true; // true: TTBT (10:15), false: KTBT (14:45)
-  int _kaygiPuani = 3; // 0-10 sınav öncesi kaygı düzeyi
 
   static const int _toplamSureSaniye = 135 * 60; // 8100 saniye
   int _kalanSaniye = _toplamSureSaniye;
@@ -115,14 +112,6 @@ class _ProvaEkraniState extends State<ProvaEkrani> {
         ),
         actions: [
           IconButton(
-            tooltip: '90 sn Panik / Nefes',
-            icon: const Icon(Icons.air_rounded, color: Colors.teal),
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => const PanikProtokoluDialog(),
-            ),
-          ),
-          IconButton(
             tooltip: 'Beklenen Değer (EV) Kartı',
             icon: const Icon(Icons.calculate_outlined),
             onPressed: () => showDialog<void>(
@@ -193,31 +182,6 @@ class _ProvaEkraniState extends State<ProvaEkrani> {
           ],
           selected: {_temelMi},
           onSelectionChanged: (set) => setState(() => _temelMi = set.first),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Sınav Öncesi Kaygı Düzeyiniz (0 - 10):',
-          style: tema.textTheme.labelLarge,
-        ),
-        Slider(
-          value: _kaygiPuani.toDouble(),
-          min: 0,
-          max: 10,
-          divisions: 10,
-          label: 'Kaygı: $_kaygiPuani',
-          onChanged: (v) => setState(() => _kaygiPuani = v.round()),
-        ),
-        Center(
-          child: Text(
-            _kaygiPuani >= 7
-                ? '⚠️ Yüksek Kaygı: Sınava başlamadan önce üstteki 🫁 nefes protokolünü uygulamanız önerilir.'
-                : '✅ Dengeli uyarılma seviyesi.',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: _kaygiPuani >= 7 ? Colors.orange[800] : Colors.green[800],
-            ),
-          ),
         ),
         const SizedBox(height: 24),
         Card(
@@ -497,14 +461,6 @@ class _ProvaEkraniState extends State<ProvaEkrani> {
             label: const Text('Doğru/Yanlışları Gir & Analiz Et'),
           ),
           const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => const AraDinlenmeDialog(),
-            ),
-            icon: const Icon(Icons.restore_rounded),
-            label: const Text('135 Dk Sıfırlama Rehberi'),
-          ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

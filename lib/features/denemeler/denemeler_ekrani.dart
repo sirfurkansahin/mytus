@@ -4,7 +4,6 @@ import 'package:app/features/denemeler/deneme_detay_ekrani.dart';
 import 'package:app/features/denemeler/deneme_ekle_ekrani.dart';
 import 'package:app/features/denemeler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
-import 'package:app/features/prova/panik_protokolu_dialog.dart';
 import 'package:app/features/prova/prova_ekrani.dart';
 import 'package:flutter/material.dart';
 
@@ -30,14 +29,6 @@ class DenemelerEkrani extends StatelessWidget {
             icon: const Icon(Icons.timer_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const ProvaEkrani()),
-            ),
-          ),
-          IconButton(
-            tooltip: '90 sn Panik / Nefes',
-            icon: const Icon(Icons.air_rounded, color: Colors.teal),
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => const PanikProtokoluDialog(),
             ),
           ),
         ],
@@ -451,7 +442,7 @@ class _BosDurum extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Girdiğin deneme sınavlarının netlerini ve A–F hata sınıflarını buraya kaydederek bilişsel performansını ölçebilirsin.',
+              'Girdiğin deneme sınavlarının netlerini ve A–F hata sınıflarını buraya kaydederek gelişimini izleyebilirsin.',
               textAlign: TextAlign.center,
               style: tema.textTheme.bodyMedium?.copyWith(
                 color: tema.colorScheme.onSurfaceVariant,

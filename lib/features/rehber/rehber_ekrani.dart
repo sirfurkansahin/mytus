@@ -104,10 +104,7 @@ class RehberEkrani extends StatelessWidget {
           _SoruCevapKart(
             soru: 'R0 Akşam Tekrarı (Beyaz Sayfa) nedir?',
             cevap: 'Günün en son çalışma bloğudur (15-20 dk). O gün çalıştığınız konuları '
-                'kitaba bakmadan, boş bir beyaz kağıda zihninizden ana hatlarıyla dökme ritüelidir. '
-                'Bilimsel kanıtlar, uykudan hemen önce yapılan bu kısa geri çağırmanın '
-                'gece yavaş dalga uykusunda kalıcı bellek aktarımını (sistem konsolidasyonu) '
-                'en üst düzeye çıkardığını gösterir.',
+                'kitaba bakmadan, boş bir beyaz kağıda zihninizden ana hatlarıyla dökme ritüelidir.',
           ),
           _SoruCevapKart(
             soru: 'Geciken görevleri nasıl düzenlerim?',
@@ -148,8 +145,8 @@ class RehberEkrani extends StatelessWidget {
 
           // Bölüm 3: F.T. Time & Nörobiyoloji
           _KategoriBasligi(
-            ikon: Icons.psychology_outlined,
-            baslik: '3. F.T. Time & Nörobiyolojik Performans',
+            ikon: Icons.timer_outlined,
+            baslik: '3. F.T. Time (Odak Sayacı)',
             renk: Colors.teal,
           ),
           _SoruCevapKart(
@@ -159,28 +156,6 @@ class RehberEkrani extends StatelessWidget {
                 '• Klasik (25 dk çalışma, 5 dk mola): Hızlı soru çözümü, tablo turu veya '
                 'kart tekrarları için idealdir.\n'
                 'Her iki hazır ayarı da F.T. time ekranından tek dokunuşla seçebilirsiniz.',
-          ),
-          _SoruCevapKart(
-            soru: 'Ağır Analitik Bilişsel Tavan (3–4 Saat) kuralı nedir?',
-            cevap: 'Bilişsel psikoloji araştırmaları (Ericsson ve Newport kanıtları), '
-                'insan beyninin günde en fazla 3–4 saat (180–240 dk) yüksek odaklı "zor bilişsel iş" '
-                '(yeni konu, hata analizi, deneme) yapabildiğini doğrular. 4 saatten sonra zor iş '
-                'yapmak net kazandırmaz, yorar. Kalan çalışma sürenizi hafif işlere '
-                '(kart kuyruğu, tablo tekrarı, video izleme) ayırmalısınız.',
-          ),
-          _SoruCevapKart(
-            soru: 'Kafein kesilme saati neden yatıştan 8 saat önce?',
-            cevap: 'Kafeinin vücuttaki yarılanma ömrü ortalama 5–8 saattir. Yatmadan önce '
-                'alınan kafein uykuya dalsanız bile hipokampal bellek pekiştirmesi için '
-                'hayati olan "yavaş dalga uykusu (SWS)" mimarisini bozar. Sistem hedef yatış '
-                'saatinizden 8 saat önce otomatik kafein kesilme uyarısı üretir.',
-          ),
-          _SoruCevapKart(
-            soru: '%70 Kurtarma Modu ne işe yarar?',
-            cevap: 'Son denemelerinizde C tipi (okuma/dikkat) hataları %15\'i aştığında '
-                'prefrontal korteks aşırı yorgun demektir. %70 Kurtarma Modu açıldığında '
-                'o gün yeni konu eklenmez, çalışma yükü %70\'e çekilir ve yalnızca R1–R2 '
-                'tekrarları yapılır.',
           ),
           const SizedBox(height: 14),
 
@@ -215,19 +190,11 @@ class RehberEkrani extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // Bölüm 5: Sınav Anı, Panik & Taktikler
+          // Bölüm 5: Sınav Anı Stratejileri
           _KategoriBasligi(
             ikon: Icons.speed,
-            baslik: '5. Sınav Anı, Panik ve Stratejiler',
+            baslik: '5. Sınav Anı Stratejileri',
             renk: Colors.blue,
-          ),
-          _SoruCevapKart(
-            soru: '90 sn Panik / Nefes Protokolü nasıl çalışır?',
-            cevap: 'Huberman Lab protokolüdür (7 döngü x 12 sn = 84 sn). '
-                'Burundan 1 derin nefes + hemen ardından 1 kısa nefes daha alınır (alveolleri açar), '
-                'ağızdan yavaşça uzun verilir (vagal tonusu uyarır ve kalp atışını yavaşlatır). '
-                'Ekranda "Bu heyecan tehlike değil, odaklanmamı artıran bir hazırlıktır" '
-                'bilişsel yeniden değerlendirme mesajı eşlik eder.',
           ),
           _SoruCevapKart(
             soru: 'Beklenen Değer (EV) Kuralı: İki şık arasında kalınca ne yapmalıyım?',
@@ -235,34 +202,6 @@ class RehberEkrani extends StatelessWidget {
                 '• 2 şık elediğinizde kalan 3 şıktan birini işaretlemek istatistiksel olarak '
                 '+0.167 net kazandırır. Bu sebeple 2 şık elenen sorular ASLA boş bırakılmamalıdır!\n'
                 '• Hiçbir şık elenmediğinde ise kör tahmin 0.00 net getirir; boş bırakılmalıdır.',
-          ),
-          _SoruCevapKart(
-            soru: 'Cevap değiştirmek doğru mu, yanlış mı?',
-            cevap: 'Psikometri araştırmaları kararsız soruların %57.8 oranında yanlışa '
-                'döndüğünü doğrular. Bu nedenle kural şudur: "Yalnızca ilk işaretlemeniz '
-                'Kararsız olup soruda yeni somut bir öncül/bulgu fark ettiyseniz değiştirin; '
-                'kaygıyla asla değiştirmeyin."',
-          ),
-          const SizedBox(height: 14),
-
-          // Bölüm 6: Master Yönetim Kokpiti
-          _KategoriBasligi(
-            ikon: Icons.dashboard_customize_outlined,
-            baslik: '6. Master Yönetim Kokpiti & Karar Asistanı',
-            renk: Colors.amber.shade900,
-          ),
-          _SoruCevapKart(
-            soru: 'Bilişsel Sağlık Skoru (0–100) neye göre hesaplanır?',
-            cevap: 'Kalibrasyon farkınız (±%5 hedefi), uyku düzenliliğiniz (7–9 sa, ±30 dk sapma), '
-                'prefrontal korteks okuma hatası payı (< %10), R1 tekrar geçiş oranınız (>= %75) '
-                've odak kalitenizin ağırlıklı bileşimidir. 85 üstü "Optimal Zirve" hattıdır.',
-          ),
-          _SoruCevapKart(
-            soru: 'Otomatik "Eğer–O Zaman" Kararları nasıl yardımcı olur?',
-            cevap: 'Sistem deneme, uyku ve tekrar verilerinizi sürekli analiz eder. '
-                'Örneğin aşırı güven tespit ederse "Çeldiriciye tersini düşün", '
-                'okuma hatası tespit ederse "Kurtarma Modunu Aç", tempo düşüşü tespit ederse '
-                '"135 Dk Sınav Provası Başlat" gibi anında tıklanabilir çözümler sunar.',
           ),
           const SizedBox(height: 24),
 
@@ -294,10 +233,9 @@ class RehberEkrani extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'MY TUS uygulamasındaki tüm bilişsel algoritmalar, uyku protokolleri, '
-                    'R0–R4 aralıklı tekrar formülleri ve sınav anı stratejileri; Dr. Furkan tarafından '
-                    'hazırlanan 32 sayfalık "TUS Türkiye 1.liği ve Maksimum Bilişsel Performans '
-                    'Master Araştırma Raporu" (30 Eylül 2026) verilerine dayanarak geliştirilmiştir.',
+                    'R0–R4 aralıklı tekrar takvimi ve sınav provası, Dr. Furkan tarafından '
+                    'hazırlanan "TUS Master Araştırma Raporu" (30 Eylül 2026) temel alınarak '
+                    'kurulmuştur. Tekrar aralıkları planlama içindir; kesin bilimsel değerler değildir.',
                     style: tema.textTheme.bodySmall?.copyWith(
                       color: tema.colorScheme.onSurfaceVariant,
                       height: 1.35,

@@ -1,13 +1,10 @@
 import 'dart:convert';
 
-import 'package:app/core/gizli_ozellikler.dart';
 import 'package:app/core/tarih.dart';
 import 'package:app/features/auth/giris_ekrani.dart';
 import 'package:app/features/auth/hesap_karti.dart';
 import 'package:app/features/auth/kimlik_servisi.dart';
 import 'package:app/features/ayarlar/ayar_ogeleri.dart';
-import 'package:app/features/bilissel/bilissel_ekrani.dart';
-import 'package:app/features/kokpit/kokpit_ekrani.dart';
 import 'package:app/features/rehber/rehber_ekrani.dart';
 import 'package:app/features/rehber/tanitim_turu_ekrani.dart';
 import 'package:app/features/dersler/dialoglar.dart';
@@ -328,33 +325,6 @@ class AyarlarEkrani extends StatelessWidget {
             baslik: 'Tema',
             deger: _temaEtiketi(depo.temaSecimi),
             onTap: () => _temaSec(context, depo),
-          ),
-          _baslik(context, 'BİLİŞSEL PERFORMANS & UYKU'),
-          if (kokpitAcik) ...[
-            // K2: Master Kokpit gizli (gizli_ozellikler.dart)
-            ListTile(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              leading: const Icon(Icons.dashboard_customize_outlined, color: Colors.purple),
-              title: const Text('Master Yönetim Kokpiti'),
-              subtitle: const Text('8 bilişsel gösterge, eğer–o zaman karar motoru ve netler.'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const KokpitEkrani()),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-          ListTile(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            tileColor: tema.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            leading: const Icon(Icons.psychology_outlined, color: Colors.indigo),
-            title: const Text('Bilişsel & Uyku Yönetimi'),
-            subtitle: const Text('Zor bilişsel tavan, hedef uyku saati, kafein kesilme ve PFC koruma.'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const BilisselEkrani()),
-            ),
           ),
           _baslik(context, 'KULLANIM REHBERİ & DESTEK'),
           ListTile(
