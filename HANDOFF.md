@@ -1,10 +1,16 @@
 # HANDOFF.md: Devir notu
 
-Son guncelleme: 25 Kasım 2026, Claude (denetim raporu sonrası düzeltmeler, 1. aşama).
+Son guncelleme: 27 Kasım 2026, GitHub temizliği (`model2/github-temizlik`).
 
 ## Durum
-25 Kasım 2026'da tüm dallar denetlendi (rapor sohbette verildi). Kullanıcının kararlarıyla
-1. aşama düzeltmeleri ayrı dallarda, zincir halinde yapıldı; hepsi GitHub Actions'ta geçti:
+- **27 Kasım 2026 (GitHub temizliği — `main`'de):**
+  - GitHub `github-pages` ortamı yalnızca `main` dalına kısıtlandı (`claude/*` ve `model2/*` yayın izinleri kaldırıldı).
+  - PR birleşince otomatik dal silme (`delete_branch_on_merge`) açıldı.
+  - İçeriği zaten `main`'e alınmış 29 eski dal + gereksiz `claude/s2-giris-yedek` dalı silindi (birleşmemiş aktif dallar ve kanıt dalları korundu).
+  - Kullanılmayan 5 eski Secret (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_TESTERS`, `FIREBASE_WEB_APP_ID`) silindi; yalnızca aktif 5 Firebase Web anahtarı kaldı.
+  - Eski Android döneminden kalan `.github/workflows/bootstrap-android.yml` kaldırıldı ve `README.md` güncel Web Mobil (PWA) durumuna göre yenilendi.
+- **25 Kasım 2026 (Denetim 1. aşama — PR #20 ile `main`'de yayında):**
+  1. aşama düzeltmeleri (`claude/yayin-yalniz-main`, `claude/kayit-hatasi-uyari`, `claude/bulut-esitleme-onarim`, `claude/kayit-alan-koruma`) `main` dalına birleştirilip canlıya alındı.
 
 | Dal | İçerik | CI |
 |---|---|---|
@@ -13,33 +19,14 @@ Son guncelleme: 25 Kasım 2026, Claude (denetim raporu sonrası düzeltmeler, 1.
 | `claude/bulut-esitleme-onarim` | A2: gönderilemeyen bölümler kalıcı; bulut okunamazsa hiçbir şey gönderilmez; cihaz/hesap farklıysa kullanıcıya sorulur + yedeği geri getirme; bölüm içeriğine göre eşitleme; aktif grup korunur | #83 geçti (203 test) |
 | `claude/kayit-alan-koruma` | A3: kayıt sürümü 2, tanınmayan alanlar korunur; eksik "kitaplar" alanında örnek kitap eklenmez | #84 geçti (206 test) |
 
-Zincir: `main` ← `claude/esnek-giris-bulut` (önceki 11 dallık iş zinciri) ← yukarıdaki 4 dal.
-`main` bu zincirin atasıdır; birleştirme "ileri sarma" ile çakışmasız olur.
-Canlı site şu an hâlâ 13 Kasım'daki `claude/esnek-giris-bulut` sürümünü gösteriyor.
-
 ## Kullanıcı kararları (25 Kasım 2026)
 DECISIONS.md'ye "Denetim Sonrası Kararlar" başlığıyla yazıldı.
 
 ## Sıradaki adım
-1. `main`'e birleştirme: kullanıcının AÇIK izniyle (birleştirme siteyi yayınlar).
-2. 2. aşama (onaylandı, her biri ayrı dalda): sınav tarihi seçimi (27 Mart / 22 Ağustos 2027),
-   bilişsel/uyku/kafein/nefes bölümlerinin tamamen kaldırılması (Kurtarma Modu dahil),
-   "Tekrarları affet & dağıt" gecikenleri dağıtsın, son ders paylaşımı isteğe bağlı (varsayılan kapalı),
-   puan her yerde Seçenek C, TUSDATA örnek kitabının kaldırılıp mevcut kütüphanelerden de silinmesi,
-   A4 (sıfırla/müfredat/hesap silme/yedek), A5, A6, A8, C4 (45 puan), B1, B2, B5, A9, A11,
-   B4 (önce taslak göster).
+1. 2. aşama dalları (`claude/ekran-metin-duzeltmeleri`, `claude/veri-hesap-duzeltmeleri`, `claude/sinav-tarihi-secimi`, `claude/bilissel-icerik-kaldir`, `claude/affet-dagit`, `claude/ders-paylasimi-istege-bagli`, `claude/puan-secenek-c`) tamamlanıp testleri geçtikten sonra `main`'e alınacak.
 
 ## Bilinen sorunlar / notlar
-- Bu ortamdan dal SİLİNEMİYOR (git push --delete: 403, ağ politikası). Kullanıcının silmeyi
-  onayladığı, içeriği main'de olan dallar: claude/ders-konu-not, claude/ft-ayarlar-puan,
-  claude/ft-sayac-prototip, claude/ft-time-sadelestirme, claude/ilerleme, claude/imza-ve-dagitim,
-  claude/kapanis, claude/on-plan-servisi, claude/takvim-tekrar, claude/uctan-uca-test,
-  model2/ft-time-temizlik, model2/ios-web-test, model2/rapor-tekrar-sistemi,
-  model2/speetus-mufredat; ayrıca claude/s2-giris-yedek (tek değişiklik 6c6c32eda6f1,
-  APK imza parmak izi; artık gereksiz). GitHub > Branches sayfasından silinebilir.
 - Kanıt dalları (`claude/kanit-testleri-main`, `claude/kanit-testleri-uc`) düzeltmeler bitince silinecek.
-- GitHub ayarı: `github-pages` ortamı yalnız `main`'e izin verecek şekilde kısıtlanmalı
-  (kullanıcıya adımlar verildi; buradan API ile değiştirilemiyor).
 - Bulut eşitlemesinin Firestore tarafı (sunucudan okuma, önbellek olaylarını atlama) gerçek
   Firebase'de denenmedi; testler sahte bulutla.
 
