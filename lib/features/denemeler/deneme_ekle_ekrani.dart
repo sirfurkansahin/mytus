@@ -123,8 +123,6 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
