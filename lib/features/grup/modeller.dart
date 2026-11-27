@@ -154,7 +154,8 @@ class GrupUyesi {
         'konuSayisi': konuSayisi,
         'soruSayisi': soruSayisi,
         'puan': puan,
-        if (sonDers != null) 'sonDers': sonDers,
+        // Her zaman yazılır: paylaşım kapatılınca (null) gruptan da silinir.
+        'sonDers': sonDers,
         'guncellemeTarihi': guncellemeTarihi.toIso8601String(),
       };
 

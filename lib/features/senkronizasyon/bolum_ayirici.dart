@@ -22,6 +22,7 @@ class BolumAyirici {
       'karsilamaTamam',
       // Hesaba bağlı çalışma grubu: tüm cihazlarda aynı olmalı.
       'aktifGrupId',
+      'sonDersPaylas',
       'sinavTarihi',
       'temaSecimi',
       'mufredatTuru',

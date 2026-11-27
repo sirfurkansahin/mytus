@@ -56,7 +56,10 @@ class _GrupEkraniState extends State<GrupEkrani> {
     final soruSayisi = depo.haftalikCozulenSoruSayisi(bugun);
     final sonCalisma = depo.tumCalismalar().where((c) => c.tamam).lastOrNull;
     final sonKonu = sonCalisma != null ? depo.konuBul(sonCalisma.konuId) : null;
-    final sonDers = sonKonu != null ? depo.dersBul(sonKonu.dersId)?.ad : null;
+    // Son ders adı yalnız kullanıcı Ayarlar'dan açtıysa paylaşılır.
+    final sonDers = depo.sonDersPaylas && sonKonu != null
+        ? depo.dersBul(sonKonu.dersId)?.ad
+        : null;
     final takmaAd = kimlik?.aktifKullanici?.takmaAd ?? 'Meslektaşımız';
 
     try {

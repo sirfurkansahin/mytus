@@ -52,6 +52,10 @@ class PlanDeposu extends ChangeNotifier {
 
   DateTime? sinavTarihi;
   String? aktifGrupId;
+
+  /// Son çalışılan dersin adı çalışma grubunda gösterilsin mi? Varsayılan
+  /// KAPALI (25 Kasım 2026 kararı: paylaşım isteğe bağlı).
+  bool sonDersPaylas = false;
   bool karsilamaTamam = false;
   bool misafirModu = false;
   MufredatTuru mufredatTuru = MufredatTuru.speetus;
@@ -181,6 +185,7 @@ class PlanDeposu extends ChangeNotifier {
       final tarih = veri['sinavTarihi'];
       sinavTarihi = tarih is String ? tarihCoz(tarih) : null;
       aktifGrupId = veri['aktifGrupId'] as String?;
+      sonDersPaylas = veri['sonDersPaylas'] == true;
       karsilamaTamam = veri['karsilamaTamam'] == true;
       misafirModu = veri['misafirModu'] == true;
       final temaAdi = veri['temaSecimi'];
@@ -373,6 +378,7 @@ class PlanDeposu extends ChangeNotifier {
         'misafirModu': misafirModu,
         'sinavTarihi': sinavTarihi == null ? null : tarihAnahtari(sinavTarihi!),
         'aktifGrupId': aktifGrupId,
+        'sonDersPaylas': sonDersPaylas,
         'temaSecimi': temaSecimi.name,
         'mufredatTuru': mufredatTuru.name,
         'dersler': [for (final d in _dersler) d.toJson()],
@@ -949,6 +955,13 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
+  /// Son çalışılan dersin grupta gösterilmesini açar/kapatır.
+  void sonDersPaylasimiAyarla(bool acik) {
+    if (sonDersPaylas == acik) return;
+    sonDersPaylas = acik;
+    _degisti();
+  }
+
   void temaBelirle(TemaSecimi yeni) {
     if (temaSecimi == yeni) return;
     temaSecimi = yeni;
@@ -965,6 +978,7 @@ class PlanDeposu extends ChangeNotifier {
   /// Tüm ders, konu, çalışma ve odak kayıtlarını sıfırlayıp karşılama ekranına döndürür.
   Future<void> tumVerileriSifirla() async {
     _bilinmeyenAlanlar = {};
+    sonDersPaylas = false;
     _sonId = 0;
     _dersler.clear();
     _konular.clear();

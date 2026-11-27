@@ -255,6 +255,17 @@ class AyarlarEkrani extends StatelessWidget {
               MaterialPageRoute<void>(builder: (_) => const GrupEkrani()),
             ),
           ),
+          SwitchListTile(
+            key: const ValueKey('ayar_son_ders_paylas'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            title: const Text('Son çalıştığım dersi grupta göster'),
+            subtitle: const Text(
+              'Kapalıyken grupta yalnız takma adın, haftalık puanın, çözdüğün '
+              'soru ve bitirdiğin konu sayısı görünür.',
+            ),
+            value: depo.sonDersPaylas,
+            onChanged: depo.sonDersPaylasimiAyarla,
+          ),
           _baslik(context, 'PLAN'),
           AyarSatiri(
             baslik: 'Sınav tarihi',
