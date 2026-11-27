@@ -222,13 +222,15 @@ class _DenemeEkleEkraniState extends State<DenemeEkleEkrani> {
                       children: [
                         const Icon(Icons.sentiment_neutral_outlined, size: 20),
                         const SizedBox(width: 8),
-                        Text(
-                          'Sınav Öncesi Test Kaygısı (0–10)',
-                          style: tema.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: Text(
+                            'Sınav Öncesi Test Kaygısı (0–10)',
+                            style: tema.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 8),
                         Text(
                           '${_kaygiPuani.round()} / 10',
                           style: TextStyle(

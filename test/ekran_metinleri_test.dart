@@ -103,7 +103,12 @@ void main() {
     await tester.enterText(dogrular.at(1), '100');
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    final hata = tester.takeException();
+    expect(
+      hata,
+      isNull,
+      reason: hata is FlutterError ? hata.toStringDeep() : '$hata',
+    );
     expect(find.text('200.00 / 200'), findsOneWidget);
     expect(find.text('85.0'), findsOneWidget);
 
