@@ -181,10 +181,6 @@ class BugunEkrani extends StatelessWidget {
             gunAdiIleTarih(bugun),
             style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
           ),
-                ),
-              ),
-            ),
-          ],
           const SizedBox(height: 8),
           InkWell(
             onTap: () => Navigator.of(context).push(
@@ -219,10 +215,6 @@ class BugunEkrani extends StatelessWidget {
               ),
             ),
           ),
-                ),
-              ),
-            ),
-          ],
           const SizedBox(height: 16),
           Card(
             elevation: 0,
