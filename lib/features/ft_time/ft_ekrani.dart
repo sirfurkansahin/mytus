@@ -105,21 +105,21 @@ class _FtHazirlikState extends State<FtHazirlik> {
                   Row(
                     children: [
                       Expanded(
-                        child: _PuanKutusu(
+                        child: _OdakKutusu(
                           etiket: 'Bugün',
-                          puan: depo.puanGun(bugun),
+                          dakika: depo.puanGun(bugun),
                         ),
                       ),
                       Expanded(
-                        child: _PuanKutusu(
+                        child: _OdakKutusu(
                           etiket: 'Bu hafta',
-                          puan: depo.puanHafta(bugun),
+                          dakika: depo.puanHafta(bugun),
                         ),
                       ),
                       Expanded(
-                        child: _PuanKutusu(
+                        child: _OdakKutusu(
                           etiket: 'Toplam',
-                          puan: depo.toplamPuan,
+                          dakika: depo.toplamPuan,
                         ),
                       ),
                     ],
@@ -245,8 +245,9 @@ class _FtHazirlikState extends State<FtHazirlik> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Her tamamlanan döngü, çalışma süresi kadar puan kazandırır '
-            '(1 dakika = 1 puan). Yarım bırakılan döngü puan getirmez.',
+            'Biten her döngünün çalışma süresi odak süresine eklenir; yarım '
+            'bırakılan döngü sayılmaz. Puan ise biten konu (10) ve çözülen '
+            'sorudan (1) gelir.',
             style: tema.textTheme.bodySmall?.copyWith(color: soluk),
           ),
           const SizedBox(height: 16),
@@ -261,11 +262,12 @@ class _FtHazirlikState extends State<FtHazirlik> {
   }
 }
 
-class _PuanKutusu extends StatelessWidget {
-  const _PuanKutusu({required this.etiket, required this.puan});
+/// Odak süresi kutusu. Süre puana çevrilmez (Seçenek C, 25 Kasım 2026).
+class _OdakKutusu extends StatelessWidget {
+  const _OdakKutusu({required this.etiket, required this.dakika});
 
   final String etiket;
-  final int puan;
+  final int dakika;
 
   @override
   Widget build(BuildContext context) {
@@ -273,15 +275,18 @@ class _PuanKutusu extends StatelessWidget {
     final renk = tema.colorScheme.onPrimaryContainer;
     return Column(
       children: [
-        Text(
-          '$puan',
-          style: tema.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: renk,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            dakikaYaz(dakika),
+            style: tema.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: renk,
+            ),
           ),
         ),
         Text(
-          '$etiket puan',
+          '$etiket odak',
           style: tema.textTheme.labelMedium?.copyWith(color: renk),
         ),
       ],

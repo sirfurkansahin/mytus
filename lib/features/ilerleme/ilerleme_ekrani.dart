@@ -37,7 +37,7 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
 
     final metin = '''
 🎯 MY TUS · Haftalık Çalışma Raporu
-📅 Sınav: 22 Ağustos 2027 ($kalan gün kaldı)
+📅 Sınav: ${tarihYaz(sinav)} ($kalan gün kaldı)
 ⏱️ Odak Süresi: ${ozet.odakDakika ~/ 60} sa ${ozet.odakDakika % 60} dk
 📚 Tamamlanan Konu: ${genel.calisilanKonu}/${genel.toplamKonu} (%${genel.yuzde})
 🔄 Toplam Tekrar: ${genel.toplamTekrar}
@@ -270,7 +270,7 @@ class _IlerlemeEkraniState extends State<IlerlemeEkrani> {
           ),
           const SizedBox(height: 10),
           Text(
-            '${ozet.puan} puan kazandın (1 dakika = 1 puan)',
+            '${ozet.puan} puan kazandın (1 konu = 10 puan, 1 soru = 1 puan)',
             textAlign: TextAlign.center,
             style: tema.textTheme.bodyMedium?.copyWith(
               color: tema.colorScheme.primary,

@@ -81,7 +81,8 @@ void main() {
     final o = haftaOzetiHesapla(h.depo, hafta);
     expect(o.bitenDongu, 4);
     expect(o.odakDakika, 25 + 50 + 25 + 25);
-    expect(o.puan, o.odakDakika);
+    // Seçenek C: odak süresi puana çevrilmez; puan = 10 × konu + soru.
+    expect(o.puan, h.depo.haftalikGrupPuani(hafta));
     expect(o.aktifGun, 3);
     expect(o.gunlukDakika, [25, 0, 75, 0, 0, 0, 25]);
     expect(o.dersler.map((d) => d.ad), ['Fizyoloji', 'Biyokimya']);

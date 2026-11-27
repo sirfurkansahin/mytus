@@ -93,8 +93,8 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
       final onay = await onayDialogu(
         context,
         baslik: 'Oturum bitirilsin mi?',
-        metin: 'Yarım kalan döngü puan getirmez. Tamamlanan '
-            '${o.tamamlananDongu} döngü (${o.kazanilanDakika} puan) kalır.',
+        metin: 'Yarım kalan döngü sayılmaz. Tamamlanan '
+            '${o.tamamlananDongu} döngü (${o.kazanilanDakika} dk) kalır.',
         eylem: 'Bitir',
       );
       if (!onay || !mounted) return;
@@ -118,7 +118,7 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
       context,
       baslik: 'Konuyu çalıştım olarak işaretleyeyim mi?',
       metin: '"${konu.ad}" için ${ozet.tamamlananDongu} döngü '
-          '(${ozet.puan} puan) tamamladın. İşaretlersen tekrarların bugünden başlar.',
+          '(${ozet.dakika} dk) tamamladın. İşaretlersen tekrarların bugünden başlar.',
       eylem: 'Evet, işaretle',
     );
     if (evet) depo.konuCalistimIsaretle(konuId, gunBasi(DateTime.now()));
@@ -160,9 +160,9 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
 
     final String? bilgi;
     if (o.tamamlandi) {
-      bilgi = 'Tüm döngüler bitti · +${o.kazanilanDakika} puan kazandın';
+      bilgi = 'Tüm döngüler bitti · +${o.kazanilanDakika} dk odak';
     } else if (o.bolumBitti && calisma) {
-      bilgi = '+${o.donguPuani} puan kazandın';
+      bilgi = '+${o.donguPuani} dk odak eklendi';
     } else {
       bilgi = null;
     }
@@ -305,8 +305,8 @@ class _FtSayacEkraniState extends State<FtSayacEkrani>
                 ),
               const SizedBox(height: 24),
               Text(
-                'Her döngü sonunda puan kazanırsın · '
-                'Bugün ${depo.puanGun(bugun)} puan',
+                'Biten her döngü odak süresine eklenir · '
+                'Bugün ${dakikaYaz(depo.puanGun(bugun))}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: ftAcikYazi),
               ),

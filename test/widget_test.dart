@@ -357,7 +357,8 @@ void ftTestleri() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Oturum tamamlandı'), findsOneWidget);
-    expect(find.textContaining('+25 puan'), findsOneWidget);
+    expect(find.textContaining('+25 dk odak'), findsOneWidget);
+    expect(find.textContaining('puan kazandın'), findsNothing);
     expect(find.text('Alt ekstremite'), findsOneWidget);
 
     await tester.tap(find.text('Bitir'));
@@ -433,7 +434,11 @@ void ilerlemeTestleri() {
     expect(find.text('Biten döngü'), findsOneWidget);
     expect(find.text('25 dk'), findsWidgets);
     expect(find.text(ilkDers.ad), findsOneWidget);
-    expect(find.textContaining('25 puan'), findsOneWidget);
+    // Seçenek C: haftanın puanı konu (10) ve sorudan (1) gelir; 25 dakikalık
+    // odak puana çevrilmez.
+    final haftaPuani = depo.haftalikGrupPuani(DateTime.now());
+    expect(find.textContaining('$haftaPuani puan kazandın'), findsOneWidget);
+    expect(find.textContaining('1 dakika = 1 puan'), findsNothing);
 
     await tester.tap(find.byTooltip('Önceki hafta'));
     await tester.pumpAndSettle();

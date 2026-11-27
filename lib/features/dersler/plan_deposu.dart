@@ -1076,9 +1076,13 @@ class PlanDeposu extends ChangeNotifier {
     return true;
   }
 
+  // Not (25 Kasım 2026, Seçenek C): toplamPuan / puanAraligi / puanGun /
+  // puanHafta ODAK DAKİKASI döndürür; adları eski kaydı bozmamak için
+  // korunuyor. Ekranda "dk" olarak gösterilir, puan diye gösterilmez.
+  // Kullanıcının puanı haftalikGrupPuani'dir (1 konu = 10, 1 soru = 1).
   int get toplamPuan => _odaklar.fold(0, (t, o) => t + o.puan);
 
-  /// [bas] dahil, [son] hariç aralıktaki puan.
+  /// [bas] dahil, [son] hariç aralıktaki odak dakikası.
   int puanAraligi(DateTime bas, DateTime son) {
     var t = 0;
     for (final o in _odaklar) {

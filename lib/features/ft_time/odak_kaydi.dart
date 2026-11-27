@@ -1,6 +1,7 @@
 // Tamamlanan odak döngüsü kaydı (ft_oturum.dart içinden ayrıldı).
 
-/// Tamamlanan bir odak döngüsü. 1 dakika = 1 puan (onaylı kural).
+/// Tamamlanan bir odak döngüsü. Süresi odak istatistiğine eklenir; puana
+/// çevrilmez (25 Kasım 2026: her yerde Seçenek C, 1 konu = 10, 1 soru = 1).
 class OdakKaydi {
   const OdakKaydi({
     required this.anahtar,
@@ -25,6 +26,7 @@ class OdakKaydi {
   /// Ağır analitik iş mi? (Yeni konu, deneme, derin hata analizi = true; hafif tekrar, skor kartları = false).
   final bool zorBilissel;
 
+  /// Eski adla odak dakikası (puan değil; bkz. Seçenek C).
   int get puan => dakika;
 
   DateTime get tarih => DateTime.fromMillisecondsSinceEpoch(tarihMs);

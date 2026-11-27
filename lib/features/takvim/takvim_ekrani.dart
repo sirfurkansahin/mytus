@@ -610,7 +610,7 @@ class _TakvimEkraniState extends State<TakvimEkrani> {
                 gecmisGun
                     ? 'Geçmiş güne konu yerleştirilemez.'
                     : (sinavGunuMu
-                        ? 'Bugün resmi TUS sınav günü (22 Ağustos 2027).'
+                        ? 'Bu tarih TUS sınav günü (${tarihYaz(sinavGunu)}).'
                         : 'Sınav tarihinden sonraya konu yerleştirilemez.'),
                 style: tema.textTheme.bodySmall?.copyWith(
                   color: tema.colorScheme.onSurfaceVariant,

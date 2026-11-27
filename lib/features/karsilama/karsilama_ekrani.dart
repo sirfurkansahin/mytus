@@ -7,7 +7,8 @@ import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/rehber/tanitim_turu_ekrani.dart';
 import 'package:flutter/material.dart';
 
-/// İlk açılış: resmi sınav tarihi (22 Ağustos 2027) ve çalışılacak dersler (onaylı tasarım: Karşılama).
+/// İlk açılış: sınav dönemi (27 Mart veya 22 Ağustos 2027; 25 Kasım 2026
+/// kararı) ve çalışılacak dersler (onaylı tasarım: Karşılama).
 class KarsilamaEkrani extends StatefulWidget {
   const KarsilamaEkrani({super.key});
 

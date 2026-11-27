@@ -21,6 +21,7 @@ class HaftaOzeti {
     required this.aktifGun,
     required this.gunlukDakika,
     required this.dersler,
+    this.puan = 0,
   });
 
   /// Haftanın Pazartesi'si.
@@ -35,7 +36,7 @@ class HaftaOzeti {
   /// O hafta biten odak döngüsü sayısı.
   final int bitenDongu;
 
-  /// O haftaki toplam odak süresi (dakika). 1 dakika = 1 puan.
+  /// O haftaki toplam odak süresi (dakika). Puana çevrilmez (Seçenek C).
   final int odakDakika;
 
   /// O hafta en az bir görev veya odak yapılan gün sayısı (0-7).
@@ -47,7 +48,9 @@ class HaftaOzeti {
   /// Konuya bağlı odaklardan derse göre süre, çoktan aza.
   final List<DersOzeti> dersler;
 
-  int get puan => odakDakika;
+  /// O haftanın puanı (Seçenek C, 25 Kasım 2026 kararı): biten her konu
+  /// 10, çözülen her soru 1 puan. Odak süresi puana çevrilmez.
+  final int puan;
   DateTime get bitis => gunEkle(baslangic, 6);
   bool get bos => calisilanKonu == 0 && bitenTekrar == 0 && bitenDongu == 0;
 }
@@ -124,6 +127,7 @@ HaftaOzeti haftaOzetiHesapla(PlanDeposu depo, DateTime gun) {
 
   return HaftaOzeti(
     baslangic: bas,
+    puan: depo.haftalikGrupPuani(bas),
     calisilanKonu: konular.length,
     bitenTekrar: tekrarSayisi,
     bitenDongu: dongu,

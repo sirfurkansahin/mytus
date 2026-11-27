@@ -7,12 +7,14 @@ import 'package:app/features/ft_time/ft_timer.dart';
 class FtOzet {
   const FtOzet({
     required this.tamamlananDongu,
-    required this.puan,
+    required this.dakika,
     this.konuId,
   });
 
   final int tamamlananDongu;
-  final int puan;
+
+  /// Biten döngülerin toplam çalışma süresi (dakika). Puan değildir.
+  final int dakika;
   final int? konuId;
 }
 
@@ -84,7 +86,7 @@ class FtKontrol {
     if (o == null) return null;
     return FtOzet(
       tamamlananDongu: o.tamamlananDongu,
-      puan: o.kazanilanDakika,
+      dakika: o.kazanilanDakika,
       konuId: o.konuId,
     );
   }
