@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:app/features/kutuphane/modeller.dart';
+
 /// PlanDeposu JSON verisini Firestore'un 1 MB belge sınırına takılmaması için
 /// mantıksal bölümlere (`plan`, `denemeler`, `defterler`, `kutuphane`, `ayarlar`, `odak`)
 /// ayıran ve kütüphane fotoğraflarını cihazda hesaba özel tutmak üzere ayıklayan yardımcı.
@@ -74,6 +76,8 @@ class BolumAyirici {
       final temizKitaplar = <Map<String, dynamic>>[];
       for (final k in hamKitaplar) {
         if (k is! Map) continue;
+        // Kaldırılan örnek kitap (25 Kasım 2026 kararı) buluta gitmez.
+        if (k['id'] == kaldirilanOrnekKitapId) continue;
         final kitapMap = Map<String, dynamic>.from(k);
         final hamBolumler = kitapMap['bolumler'];
         if (hamBolumler is List) {
@@ -121,6 +125,26 @@ class BolumAyirici {
     }
 
     return (bolumler: bolumler, fotograflar: fotograflar);
+  }
+
+  /// Buluttan gelen bölümlerden kaldırılmış içeriği (örnek kitap, 25 Kasım
+  /// 2026 kararı) ayıklar. Değişmeyen bölümün metni olduğu gibi kalır; böylece
+  /// cihazdaki (zaten ayıklanmış) bölümlerle doğru karşılaştırılır.
+  static Map<String, String> kaldirilanlariAyikla(Map<String, String> bolumler) {
+    final kutuphane = bolumler['kutuphane'];
+    if (kutuphane == null || !kutuphane.contains(kaldirilanOrnekKitapId)) {
+      return bolumler;
+    }
+    final cozulmus = _coz(kutuphane);
+    final kitaplar = cozulmus?['kitaplar'];
+    if (cozulmus == null || kitaplar is! List) return bolumler;
+    final kalan = [
+      for (final k in kitaplar)
+        if (!(k is Map && k['id'] == kaldirilanOrnekKitapId)) k,
+    ];
+    if (kalan.length == kitaplar.length) return bolumler;
+    cozulmus['kitaplar'] = kalan;
+    return {...bolumler, 'kutuphane': jsonEncode(cozulmus)};
   }
 
   /// Buluttan gelen bölümleri ve cihazdaki fotoğrafları tek bir PlanDeposu JSON metninde birleştirir.

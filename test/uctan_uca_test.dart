@@ -320,7 +320,8 @@ void main() {
     await tester.tap(find.text('Kütüphane'));
     await tester.pumpAndSettle();
     expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
-    expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
+    expect(find.text('Kütüphaneniz Henüz Boş'), findsOneWidget);
+    expect(find.text('Örnek Kitap Yükle'), findsNothing);
 
     await tester.tap(find.text('Kitap Ekle'));
     await tester.pumpAndSettle();
@@ -340,7 +341,7 @@ void main() {
 
     expect(find.text('Dahiliye Konu Kitabı'), findsOneWidget);
     expect(find.textContaining('Sırada: Gastroenteroloji'), findsOneWidget);
-    expect(depo.kitaplar.length, 2);
+    expect(depo.kitaplar.length, 1);
 
     await tester.tap(find.text('Dahiliye Konu Kitabı'));
     await tester.pumpAndSettle();

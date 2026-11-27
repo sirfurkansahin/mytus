@@ -40,6 +40,14 @@ class _Cihaz {
       secilenDersler: const [HazirDers('Patoloji', DersGrubu.temel)],
       mufredatTuru: MufredatTuru.klasik,
     );
+    await depo.kitapEkle(
+      Kitap(
+        id: 'k_patoloji',
+        ad: 'Patoloji Notlarım',
+        eklenmeTarihi: DateTime(2026, 11, 25),
+        bolumler: const [KitapBolumu(id: 'b_1', ad: 'Hücre Hasarı')],
+      ),
+    );
   }
 }
 
@@ -143,8 +151,8 @@ void main() {
 
       final foto = List.filled(2000, 'QUJD').join();
       await telefon.depo.kitapBolumNotuEkle(
-        'k_ornek_patoloji',
-        'b_ornek_1',
+        'k_patoloji',
+        'b_1',
         BolumNotu(
           id: 'not_foto',
           metin: 'Tablo',
@@ -176,8 +184,8 @@ void main() {
 
       final foto = List.filled(2000, 'WFla').join();
       await telefon.depo.kitapBolumNotuEkle(
-        'k_ornek_patoloji',
-        'b_ornek_1',
+        'k_patoloji',
+        'b_1',
         BolumNotu(
           id: 'silinecek_not',
           resimBase64: foto,
@@ -185,8 +193,8 @@ void main() {
         ),
       );
       await telefon.depo.kitapBolumNotuSil(
-        'k_ornek_patoloji',
-        'b_ornek_1',
+        'k_patoloji',
+        'b_1',
         'silinecek_not',
       );
       expect(telefon.yerel.icerik, isNot(contains(foto)));

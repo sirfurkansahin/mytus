@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/core/veri_kaydi.dart';
+import 'package:app/features/dersler/modeller.dart';
 import 'package:app/features/dersler/plan_deposu.dart';
 import 'package:app/features/kutuphane/kitap_detay_ekrani.dart';
 import 'package:app/features/kutuphane/kutuphane_ekrani.dart';
@@ -282,28 +283,15 @@ void main() {
       expect(depo2.kitapBul('k_not')!.bolumler.first.notSayisi, 0);
     });
 
-    test('ornekKitapUret ve ornekKitapYukle kütüphaneye hazır kitap ekler', () async {
-      final kayit = BellekKaydi();
-      final depo = PlanDeposu(kayit: kayit, kayitGecikmesi: Duration.zero);
+    test('ilk kurulumda kütüphaneye örnek kitap eklenmez (25 Kasım 2026)',
+        () async {
+      final depo = PlanDeposu(kayit: BellekKaydi(), kayitGecikmesi: Duration.zero);
       await depo.yukle();
-
+      await depo.karsilamayiTamamla(
+        sinavTarihi: DateTime(2030, 4, 1),
+        secilenDersler: const [HazirDers('Patoloji', DersGrubu.temel)],
+      );
       expect(depo.kitaplar, isEmpty);
-
-      await depo.ornekKitapYukle();
-      expect(depo.kitaplar.length, 1);
-
-      final ornek = depo.kitaplar.first;
-      expect(ornek.ad, 'TUSDATA Patoloji Konu Kitabı');
-      expect(ornek.dersAdi, 'Patoloji');
-      expect(ornek.toplamBolumSayisi, 6);
-      expect(ornek.tamamlananBolumSayisi, 2);
-      expect(ornek.yuzde, 33);
-      expect(ornek.siradakiBolum?.ad, 'Hemodinamik Bozukluklar, Tromboz ve Şok');
-      expect(ornek.toplamNotSayisi, 1);
-
-      // Tekrar çağrılırsa mükerrer eklemez
-      await depo.ornekKitapYukle();
-      expect(depo.kitaplar.length, 1);
     });
   });
 

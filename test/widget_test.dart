@@ -607,7 +607,8 @@ void kutuphaneTestleri() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kütüphane İlerlemesi'), findsOneWidget);
-    expect(find.text('TUSDATA Patoloji Konu Kitabı'), findsOneWidget);
+    expect(find.text('Kütüphaneniz Henüz Boş'), findsOneWidget);
+    expect(find.text('Örnek Kitap Yükle'), findsNothing);
 
     // Hazır klasörler AppBar butonuyla açılır (ekrandan yer kaplayan kart kaldırılmıştır)
     await tester.tap(find.byTooltip('Hazır Klasörler'));

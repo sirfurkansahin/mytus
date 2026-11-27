@@ -91,6 +91,9 @@ class PlanDeposu extends ChangeNotifier {
   final List<VakaKarti> _vakaKartlari = [];
   final List<UykuKaydi> _uykular = [];
   final List<Kitap> _kitaplar = [];
+
+  /// Yüklenen kayıttan kaldırılmış bir içerik atıldı; temiz hâl kaydedilmeli.
+  bool _temizlikKaydiGerekli = false;
   bool _kurtarmaModuAktif = false;
   String _hedefYatisSaati = '23:30';
   String _hedefKalkisSaati = '07:30';
@@ -117,6 +120,11 @@ class PlanDeposu extends ChangeNotifier {
         return;
       }
       durum = YuklemeDurumu.hazir;
+      if (_temizlikKaydiGerekli) {
+        // Kayıttan atılan eski içerik (ör. örnek kitap) cihazdan da silinsin.
+        _temizlikKaydiGerekli = false;
+        _degisti(bildir: false);
+      }
     } catch (_) {
       durum = YuklemeDurumu.hata;
       hataMesaji = 'Veriler okunamadı.';
@@ -335,10 +343,16 @@ class PlanDeposu extends ChangeNotifier {
         ..addAll(uykular);
 
       final kitaplar = <Kitap>[];
+      var ornekKitapAtildi = false;
       final kitapListesi = veri['kitaplar'];
       if (kitapListesi is List) {
         for (final e in kitapListesi) {
           if (e is Map<String, dynamic>) {
+            // Kaldırılan örnek kitap (25 Kasım 2026 kararı) yüklenmez.
+            if (e['id'] == kaldirilanOrnekKitapId) {
+              ornekKitapAtildi = true;
+              continue;
+            }
             kitaplar.add(Kitap.fromJson(e));
           }
         }
@@ -348,6 +362,7 @@ class PlanDeposu extends ChangeNotifier {
       _kitaplar
         ..clear()
         ..addAll(kitaplar);
+      if (ornekKitapAtildi) _temizlikKaydiGerekli = true;
       _kurtarmaModuAktif = veri['kurtarmaModuAktif'] as bool? ?? false;
       _hedefYatisSaati = veri['hedefYatisSaati'] as String? ?? '23:30';
       _hedefKalkisSaati = veri['hedefKalkisSaati'] as String? ?? '07:30';
@@ -461,9 +476,6 @@ class PlanDeposu extends ChangeNotifier {
           _konuEkleIc(ders.id, k);
         }
       }
-    }
-    if (_kitaplar.isEmpty) {
-      _kitaplar.add(ornekKitapUret());
     }
     karsilamaTamam = true;
     _degisti();
@@ -971,7 +983,10 @@ class PlanDeposu extends ChangeNotifier {
   /// Yedek metnini (JSON) doğrular ve tüm veriyi yedekten geri yükler.
   bool yedektenYukle(String jsonMetni) {
     final tamam = _jsonYukle(jsonMetni);
-    if (tamam) _degisti();
+    if (tamam) {
+      _temizlikKaydiGerekli = false;
+      _degisti();
+    }
     return tamam;
   }
 
@@ -1579,15 +1594,6 @@ class PlanDeposu extends ChangeNotifier {
 
   Future<void> kitapSil(String id) async {
     _kitaplar.removeWhere((k) => k.id == id);
-    _degisti();
-    await hemenKaydet();
-  }
-
-  /// Kütüphaneye zengin örnek bir TUS kitabı yükler.
-  Future<void> ornekKitapYukle() async {
-    final ornek = ornekKitapUret();
-    if (_kitaplar.any((k) => k.id == ornek.id)) return;
-    _kitaplar.insert(0, ornek);
     _degisti();
     await hemenKaydet();
   }

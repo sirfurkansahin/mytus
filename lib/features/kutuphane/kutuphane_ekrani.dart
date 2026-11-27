@@ -429,15 +429,6 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
                 _hazirKlasorlerDialogu(depo);
               } else if (val == 'klasor') {
                 _yeniKlasorOlusturDialogu(depo);
-              } else if (val == 'ornek') {
-                depo.ornekKitapYukle();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Örnek Patoloji kitabı kütüphaneye yüklendi.'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
               }
             },
             itemBuilder: (_) => [
@@ -458,16 +449,6 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
                     Icon(Icons.create_new_folder_outlined, size: 20),
                     SizedBox(width: 8),
                     Text('Klasör Oluştur / Kitapları Grupla'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'ornek',
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_stories_outlined, size: 20),
-                    SizedBox(width: 8),
-                    Text('Örnek Kitap Yükle'),
                   ],
                 ),
               ),
@@ -722,21 +703,6 @@ class _KutuphaneEkraniState extends State<KutuphaneEkrani> {
                         runSpacing: 8,
                         children: [
                           FilledButton.icon(
-                            onPressed: () {
-                              depo.ornekKitapYukle();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Örnek Patoloji kitabı kütüphaneye yüklendi.',
-                                  ),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.auto_stories_outlined),
-                            label: const Text('Örnek Kitap Yükle'),
-                          ),
-                          OutlinedButton.icon(
                             onPressed: () {
                               showDialog<void>(
                                 context: context,

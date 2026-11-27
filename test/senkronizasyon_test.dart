@@ -34,9 +34,17 @@ void main() {
           secilenDersler: const [HazirDers('Patoloji', DersGrubu.temel)],
           mufredatTuru: MufredatTuru.klasik,
         );
+        await depo.kitapEkle(
+          Kitap(
+            id: 'k_patoloji',
+            ad: 'Patoloji Notlarım',
+            eklenmeTarihi: DateTime(2026, 11, 8),
+            bolumler: const [KitapBolumu(id: 'b_1', ad: 'Hücre Hasarı')],
+          ),
+        );
         await depo.kitapBolumNotuEkle(
-          'k_ornek_patoloji',
-          'b_ornek_1',
+          'k_patoloji',
+          'b_1',
           BolumNotu(
             id: 'not_foto_1',
             metin: 'Önemli patoloji notu',
@@ -83,8 +91,8 @@ void main() {
         await senkron.oturumAcildi(kullanici);
         expect(depo.karsilamaTamam, isTrue);
         expect(depo.tumDersler.first.ad, 'Patoloji');
-        final kitap = depo.kitapBul('k_ornek_patoloji')!;
-        final bolum1 = kitap.bolumler.firstWhere((b) => b.id == 'b_ornek_1');
+        final kitap = depo.kitapBul('k_patoloji')!;
+        final bolum1 = kitap.bolumler.firstWhere((b) => b.id == 'b_1');
         expect(bolum1.notlar.first.metin, 'Önemli patoloji notu');
         expect(bolum1.notlar.first.resimBase64, 'BASE64_FOTO_VERISI');
         // Fotoğraf ana kayda geri döndü; hesaba özel kopya silindi.

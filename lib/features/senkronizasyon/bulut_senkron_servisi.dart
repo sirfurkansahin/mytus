@@ -91,6 +91,11 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
   SenkronCakismasi? _cakisma;
   bool _yedekVar = false;
   bool _uzaktanYukleniyor = false;
+
+  /// Bulutta kaldırılmış içerik (örnek kitap) taşıyan bölümlerin ayıklanmış
+  /// hâli. İlk eşitleme bitince buluta bir kez gönderilir; böylece içerik
+  /// buluttan da silinir (25 Kasım 2026 kararı).
+  Map<String, String> _buluttaTemizlenecek = {};
   bool _atildi = false;
   SenkronDurumu _durum = SenkronDurumu.esitlendi;
 
@@ -208,6 +213,7 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
     _bilinenBolumler.clear();
     _gonderimdekiBolumler.clear();
     _bekleyenBolumler.clear();
+    _buluttaTemizlenecek = {};
     _ilkEsitlemeTamam = false;
     _cakisma = null;
 
@@ -267,9 +273,15 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
 
   Future<void> _ilkEsitle(
     KullaniciBilgisi kullanici,
-    Map<String, String> bulutBolumleri,
+    Map<String, String> hamBulutBolumleri,
   ) async {
     if (_ilkEsitlemeTamam || _cakisma != null) return;
+    final bulutBolumleri =
+        BolumAyirici.kaldirilanlariAyikla(hamBulutBolumleri);
+    _buluttaTemizlenecek = {
+      for (final e in bulutBolumleri.entries)
+        if (hamBulutBolumleri[e.key] != e.value) e.key: e.value,
+    };
     final yerelMetin = await _yerel.oku();
     final yerelBolumler = _bolumlereAyir(yerelMetin) ?? {};
     final yerelDolu = _anlamliVeriVarMi(yerelMetin);
@@ -326,11 +338,22 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
       return;
     }
 
+    _kaldirilanlariBuluttanTemizle();
     if (_bekleyenBolumler.isNotEmpty) {
       await bekleyenleriSimdiGonder();
     } else {
       _durumGuncelle(SenkronDurumu.esitlendi);
     }
+  }
+
+  /// İlk eşitlemede bulutta görülen kaldırılmış içeriğin (örnek kitap)
+  /// ayıklanmış bölümünü gönderim sırasına alır. Cihazda o bölümde
+  /// gönderilmemiş değişiklik varsa zaten o gidecektir; dokunulmaz.
+  void _kaldirilanlariBuluttanTemizle() {
+    for (final e in _buluttaTemizlenecek.entries) {
+      _bekleyenBolumler.putIfAbsent(e.key, () => e.value);
+    }
+    _buluttaTemizlenecek = {};
   }
 
   Future<void> _esitlemeyiTamamla(KullaniciBilgisi kullanici) async {
@@ -370,6 +393,7 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
     _cakisma = null;
     await _esitlemeyiTamamla(kullanici);
     _bildir();
+    _kaldirilanlariBuluttanTemizle();
     if (_bekleyenBolumler.isNotEmpty) {
       await bekleyenleriSimdiGonder();
     } else {
@@ -404,15 +428,16 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
 
   Future<void> _buluttanGeldi(
     KullaniciBilgisi kullanici,
-    Map<String, String> bolumler,
+    Map<String, String> hamBolumler,
   ) async {
     if (_aktifKullanici?.uid != kullanici.uid) return;
+    final bolumler = BolumAyirici.kaldirilanlariAyikla(hamBolumler);
     if (!_ilkEsitlemeTamam) {
       // Girişte bulut okunamamıştı: bulutun gerçek hâli şimdi geldi.
       final suren = _ilkEsitlemeSuruyor;
       if (suren != null) await suren;
       if (!_ilkEsitlemeTamam && _cakisma == null) {
-        final islem = _ilkEsitle(kullanici, bolumler);
+        final islem = _ilkEsitle(kullanici, hamBolumler);
         _ilkEsitlemeSuruyor = islem;
         try {
           await islem;
@@ -584,6 +609,7 @@ class BulutSenkronServisi extends ChangeNotifier implements VeriKaydi {
     _bekleyenBolumler.clear();
     _ilkEsitlemeTamam = false;
     _cakisma = null;
+    _buluttaTemizlenecek = {};
     _yedekVar = false;
 
     if (veriBuHesabin || hesabiTamamenSil) {
