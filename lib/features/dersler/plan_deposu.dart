@@ -706,22 +706,23 @@ class PlanDeposu extends ChangeNotifier {
     _degisti();
   }
 
-  /// Geciken tekrarları "bugün yapıldı" sayar; sonraki tekrarlar mevcut kayma kuralıyla yeniden dağılır.
-  int gecikenTekrarlariSifirla(DateTime bugun) {
-    final g = gunBasi(bugun);
-    var sayac = 0;
-    for (var tur = 0; tur < 500; tur++) {
-      TekrarOgesi? hedef;
-      for (final t in tekrarlar(g)) {
-        if (t.eylemYapilabilir && t.tarih.isBefore(g)) {
-          hedef = t;
-          break;
-        }
-      }
-      if (hedef == null || !tekrarYapildi(hedef.calismaId, hedef.no, g)) break;
-      sayac++;
-    }
-    return sayac;
+  /// "Tekrarları affet & dağıt": geciken tekrarlar "yapıldı" SAYILMAZ
+  /// (25 Kasım 2026 kararı); bugünden başlayarak günlük tekrar sınırını
+  /// aşmadan önümüzdeki günlere dağıtılır. Geciken konulara dokunulmaz
+  /// (onlar için "Telafi planı" var). Dağıtılan tekrar sayısını döner.
+  int gecikenTekrarlariDagit(DateTime bugun) {
+    final plan = telafiPlani(bugun);
+    if (plan.ekErtelemeler.isEmpty) return 0;
+    final yalnizTekrarlar = TelafiPlani(
+      ekErtelemeler: plan.ekErtelemeler,
+      tekrarGunleri: plan.tekrarGunleri,
+    );
+    final yeni = yalnizTekrarlar.uygula(_calismalar);
+    _calismalar
+      ..clear()
+      ..addAll(yeni);
+    _degisti();
+    return plan.ekErtelemeler.length;
   }
 
   /// Konuyu bir güne yerleştirir. Aynı konu tekrar yerleştirilebilir (sonraki tur).

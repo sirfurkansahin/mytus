@@ -582,9 +582,14 @@ class BugunEkrani extends StatelessWidget {
                     if (gecikenTekrarlar.isNotEmpty)
                       TextButton(
                         onPressed: () {
-                          final n = depo.gecikenTekrarlariSifirla(bugun);
+                          final n = depo.gecikenTekrarlariDagit(bugun);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$n adet geciken tekrar bugünden itibaren yeniden dağıtıldı.')),
+                            SnackBar(
+                              content: Text(
+                                '$n geciken tekrar bugünden itibaren önümüzdeki '
+                                'günlere dağıtıldı (yapılmış sayılmadı).',
+                              ),
+                            ),
                           );
                         },
                         child: const Text('Tekrarları affet & dağıt'),
