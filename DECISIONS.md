@@ -1,11 +1,13 @@
 # DECISIONS.md: Kararlar
 
-Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degistirmeden once kullaniciya sor.
+Son guncelleme: 27 Kasim 2026 (en sondaki "Denetim Sonrası Kararlar" bölümü). Bu kararlar kullanici tarafindan onaylandi. Degistirmeden once kullaniciya sor.
+
+Not: Yerini yeni bir karara bırakan satırlar silinmedi; yanlarına **(Değişti, tarih: ...)** notu düşüldü. Çelişki varsa en yeni karar geçerlidir.
 
 | Konu | Karar |
 |---|---|
 | Urun | Calisma sureci takibi + planlama. Soru bankasi degil. Tibbi icerik yok; ISTISNA (6 Kasim 2026): kucuk, salt-okunur "Referans" (hazir skorlar, mekanizma sablonlari) serbest. |
-| Kullanicilar | Kullanicinin arkadaslari, 2-10 kisi, hepsi Android ve 18+. Ucretsiz. |
+| Kullanicilar | Kullanicinin arkadaslari, 2-10 kisi, hepsi Android ve 18+. Ucretsiz. **(Değişti, 6 Kasım 2026:** Web Mobil uygulama; iPhone ve Android tarayıcılarda çalışır.) |
 | Uygulama adi / modul | MY TUS / "F.T. time" (odak sayaci modulu) |
 | Paket adi | com.mytus.app |
 | Teknoloji | Flutter + Firebase Spark. Puan hesabi istemcide. |
@@ -13,16 +15,16 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Veri (Surum 2) | Takma ad + e-posta + calisma verisi. Notlar ozel, asla paylasilmaz. |
 | Puan tablosu | Haftalik sifirlanir |
 | Paylasim | Istege bagli (opt-in), yalnizca konu adlari |
-| Plan olusturma | Resmi TUS sinav tarihi `22 Agustos 2027` olarak sabitlendi (2 Kasim 2026 kullanici karari). |
+| Plan olusturma | Resmi TUS sinav tarihi `22 Agustos 2027` olarak sabitlendi (2 Kasim 2026 kullanici karari). **(Değişti, 25 Kasım 2026:** 27 Mart 2027 ile 22 Ağustos 2027 arasında seçilir.) |
 | Hazir icerik ve Mufredat | Çift Müfredat desteği (3 Kasım 2026 kullanıcı kararı): Başlangıç karşılama ekranında iki seçenek sunulur: 1) **Klasik Branşlar** (11 branş: Anatomi, Fizyoloji, Biyokimya, Patoloji, Farmakoloji, Mikrobiyoloji - Temel; Dahiliye, Pediatri, Genel Cerrahi, Kadın Doğum, Küçük Stajlar - Klinik; Dersler ekranında Temel/Klinik sekme ayrımı aktif). 2) **SpeeTUS Sarmal Sistem** (19 Sistem Paketi ve hazır video alt konuları; tek liste, sekmesiz). Kullanıcı ayrıca Ayarlar ekranından dilediği zaman müfredat tarzını değiştirebilir veya sıfırlayabilir. |
-| Dagitim | Android icin Firebase App Distribution (APK); iPhone ve tarayici testi icin GitHub Pages (Web / PWA: `https://sirfurkansahin.github.io/mytus/`) (3 Kasim 2026 kullanici karari - Secenek 1). |
+| Dagitim | Android icin Firebase App Distribution (APK); iPhone ve tarayici testi icin GitHub Pages (Web / PWA: `https://sirfurkansahin.github.io/mytus/`) (3 Kasim 2026 kullanici karari - Secenek 1). **(Değişti, 6 Kasım 2026:** APK kaldırıldı; yalnız Web Mobil, GitHub Pages.) |
 | KVKK | Hafif uyum: aydinlatma metni, ilk giriste onay, hesap/veri silme, minimum veri |
 | Gelir | Yok |
 | Derleme | GitHub Actions |
 | Yapay zeka ozelligi | Ileride dusunulecek |
 | Tasarim | Faz 3 ekran taslaklari ONAYLANDI (16 Ekim 2026). Kopya: `docs/tasarim/`. Ana renk mor, tema telefona uyar, alt menu Bugun/Dersler/Takvim/F.T. time. |
 | Takvime yerlestirme | Iki yol da olacak: konu detayinda "Takvime ekle" (gun secilir) ve takvimde gune dokunup "+ Konu yerlestir". |
-| Puan kurali | Tamamlanan odak suresi kadar puan (ornek: 1 dakika = 1 puan). Sure ayarindan bagimsiz. Yalnizca TAMAMLANAN donguler puan kazandirir (yarim birakilan puan getirmez), kullanici karari 16 Ekim 2026. |
+| Puan kurali | Tamamlanan odak suresi kadar puan (ornek: 1 dakika = 1 puan). Sure ayarindan bagimsiz. Yalnizca TAMAMLANAN donguler puan kazandirir (yarim birakilan puan getirmez), kullanici karari 16 Ekim 2026. **(Değişti, 25 Kasım 2026:** puan her yerde Seçenek C: 1 konu = 10, 1 soru = 1. Odak süresi puana çevrilmez, dakika olarak gösterilir.) |
 | F.T. time varsayilan sureler | 25 dk calisma, 5 dk kisa mola, 15 dk uzun mola, her 4 dongude bir uzun mola. Ayrica rapora uygun tek dokunusla **"Derin blok (50/10/20 dk)"** ve **"Klasik (25/5/15 dk)"** hazir secim cipleri eklendi (3 Kasim 2026). Kullanici degistirebilir. |
 | Firebase projesi | Ad: mytus, Spark plani, Google hesabi: kullanicinin kendi hesabi. Google Analytics ACIK (kullanici karari, 16 Ekim 2026). |
 | Analytics sonucu | Analytics, cihaz/kullanim verisi toplar. Uygulamaya eklendiginde aydinlatma metnine yazilmali ve ilk giriste onay alinmali. KARAR (16 Ekim 2026): Analytics SDK'si Surum 2'de, Google girisi ve KVKK ekranlariyla birlikte eklenecek. Surum 1 hicbir veriyi cihazdan cikarmaz. |
@@ -39,10 +41,10 @@ Son guncelleme: 3 Kasim 2026. Bu kararlar kullanici tarafindan onaylandi. Degist
 | Bilinen sinirlar | Telefon yeniden baslarsa alarm silinir (sayac acilinca bitis saatine bakilip "bitti" gosterilir). Zorla durdurulan (Force stop) uygulamada alarm calismaz. |
 | Veri saklama (Parca 2 & Web) | Android'de telefonun uygulama klasorunde (`mytus_data.json`), Web ortaminda ise tarayicinin `localStorage` alaninda saklanir (`lib/core/veri_kaydi.dart`). Yazma once gecici dosyaya, sonra yer degistirme (yazarken kapanirsa eski veri bozulmaz). Ek paket yok (Android'de Kotlin kanali `com.mytus.app/storage`, Web'de yerel browser storage). Dosya bozuksa/okunamazsa uygulama ustune yazmaz, "Tekrar dene" ekrani gosterir. |
 | Not yazma kaydi | Yazarken her tusta degil, 500 ms sessizlikten sonra veya sayfa kapanirken/uygulama arka plana giderken kaydedilir. |
-| Flutter surumu | `build-apk.yml` ve `deploy-web.yml` icinde 3.47.7'ye SABITLENDI (17 Ekim 2026). Neden: kod yerelde derlenemiyor, "stable" kaydiginda otomatik surum atlarsa gecen gun yesil olan derleme bozulabilir. Surum yukseltme bilincli yapilir ve once Actions'ta denenir. |
+| Flutter surumu | (`build-apk.yml` 6 Kasım 2026'da kaldırıldı; sürüm artık yalnız `deploy-web.yml` içinde.) `build-apk.yml` ve `deploy-web.yml` icinde 3.47.7'ye SABITLENDI (17 Ekim 2026). Neden: kod yerelde derlenemiyor, "stable" kaydiginda otomatik surum atlarsa gecen gun yesil olan derleme bozulabilir. Surum yukseltme bilincli yapilir ve once Actions'ta denenir. |
 | On plan servisi (17 Ekim 2026) | KULLANICI TESTI 6: pil ayari YAPILMADAN sure bitince bildirim GELMEDI (uygulamada sayac dogru bitmis gorunuyordu, bildirim izni aciktı). Karar (kullanici 3-a): sayac calisirken `TimerService` (on plan servisi, tur: specialUse) calisir ve "calisan sayac" bildirimini tutar; boylece sistem uygulama surecini oldurup alarmi silemez. Sure takibi yine `setAlarmClock` ile; sure bitince alici servisi durdurur ve "Sure bitti" bildirimini gosterir. Servis baslatilamazsa duz bildirime donulur. Sayac ekraninda pil kisitlamasi varsa kapatilabilir uyari + "Pil ayarlarini ac" dugmesi. SONUC (17 Ekim 2026): servisle de bildirim GELMEDI; neden olculmedi, sorun kullanici karariyla NOTA ALINDI (HANDOFF.md > Bilinen sorunlar). Servis dalda duruyor, ama calistigi kanitlanmadi. |
 | Ek Flutter paketi | Yalnizca `flutter_localizations` (Flutter'in kendi paketi): tarih secici ve sistem yazilari Turkce. |
-| Karsilama (Parca 2) | Sinav tarihi `22 Agustos 2027` sabit. Hazir dersler tek liste olarak baslangicta secili; istenmeyenin cipi kaldirilir; "+ Kendi dersimi ekle" ile ders eklenir. Temel/Klinik ayrimi yoktur. |
+| Karsilama (Parca 2) | Sinav tarihi `22 Agustos 2027` sabit. Hazir dersler tek liste olarak baslangicta secili; istenmeyenin cipi kaldirilir; "+ Kendi dersimi ekle" ile ders eklenir. Temel/Klinik ayrimi yoktur. **(Değişti:** 3 Kasım 2026'dan beri iki müfredat var, yukarıdaki "Hazir icerik ve Mufredat" satırı; Klasik Branşlar'da Temel/Klinik ayrımı vardır. 25 Kasım 2026'dan beri sınav tarihi iki dönemden biri seçilir.) |
 | Konu ekleme (Parca 2) | Hazir dersler kendi iclerindeki zengin alt konularla birlikte otomatik gelir; ayrica ders detayinda hizli ekleme kutusuyla kullanici kendi konusunu da ekleyebilir. |
 | Not bicimi (Parca 2) | Duz yazi, konu basina tek not alani (kullanici karari 4-a). |
 | Ders/konu kurallari | Ad bosluklari temizlenir, bos olamaz, en fazla 80 karakter. Ayni adli ders tekrar eklenemez (buyuk/kucuk harf ayirt edilmez, tum liste tekildir). Ayni derste ayni adli konu eklenemez. Ders silinince konulari ve notlari da silinir (onay sorulur). Ders ve konu adi degistirilebilir. |
@@ -56,7 +58,7 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 |---|---|
 | Her yerlestirme kendi serisi | Bir konu birden fazla gune yerlestirilebilir; her yerlestirme ("Calisma") kendi tekrar serisine sahiptir ("Tur 1/3, Tur 2/3, Tur 3/3"). Tur numarasi = ayni konunun yerlestirmeleri arasinda tarih sirasi. (ONAYLI) |
 | "Calistim" | Yerlestirmenin gunu bugune cekilir ve tekrar zinciri BUGUNDEN baslar. Geri alinabilir (yapilan tekrar kayitlari da silinir). (ONAYLI) |
-| R0 (Aksam tekrari) | Bugun en az 1 konu "Calistim" olarak isaretlendiginde Bugun ekraninda **"R0 · Aksam uyku oncesi beyaz sayfa tekrari"** hatirlatma karti gosterilir (uyku sirasinda hipokampal-neokortikal pekistirme oncesi 15-20 dk). (ONAYLI - 3 Kasim 2026) |
+| R0 (Aksam tekrari) | Bugun en az 1 konu "Calistim" olarak isaretlendiginde Bugun ekraninda **"R0 · Aksam uyku oncesi beyaz sayfa tekrari"** hatirlatma karti gosterilir (uyku sirasinda hipokampal-neokortikal pekistirme oncesi 15-20 dk). (ONAYLI - 3 Kasim 2026) **(Değişti, 25 Kasım 2026:** uyku/beyin açıklaması kaldırıldı; kart "R0 · Akşam beyaz sayfa tekrarı" adıyla kalır.) |
 | Tekrar gunleri (R1–R4) | Asagidaki R1–R4 tablosu; sinava kalan gun, ilk calismanin gununden hesaplanir. Tablodaki satirlar arasi degerlerde en yakin ALT satir kullanilir; 7 gunden azda 7 gunluk satir. (ONAYLI - 3 Kasim 2026) |
 | Gecikme kaymasi | Bir tekrar gec yapilirsa sonrakiler ayni gun sayisi kadar kayar (ornek: 1. tekrar 2 gun gec yapilirsa sonrakiler de 2 gun gecikir). Tekrarlar saklanmaz, taban tarih + birikmis gecikmeden TURETILIR. (ONAYLI) |
 | Sinav siniri | Hicbir tekrar sinavdan sonraya kalmaz; en gec sinavdan 1 gun once. (ONAYLI) |
@@ -91,14 +93,18 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 | 3 Dakikalık Vaka Kartı | Klinisyen/intörn adayların nöbet ve servisteki hastaları 3 dakikada TUS formatına dönüştürme aracı. |
 
 ## Sınav Anı, Panik Protokolü & Provalar (Modül 4, 4 Kasım 2026)
+**(Değişti, 25 Kasım 2026:** panik/nefes protokolü ve ara dinlenme protokolü kaldırıldı; prova ve beklenen değer kalır.)
+
 | Konu | Karar ve Neden |
 |---|---|
-| 90 sn Panik / Nefes Protokolü | Huberman Lab 84 sn (7 döngü x 12 sn) Döngüsel İç Çekme (Cyclic Sighing) animasyonlu rehberi + Jamieson bilişsel yeniden değerlendirme kartı. |
+| 90 sn Panik / Nefes Protokolü | Huberman Lab 84 sn (7 döngü x 12 sn) Döngüsel İç Çekme (Cyclic Sighing) animasyonlu rehberi + Jamieson bilişsel yeniden değerlendirme kartı. **(Kaldırıldı, 25 Kasım 2026.)** |
 | Gerçek Saat Sınav Provası (135 Dk) | 100 soru, 135 dk geri sayım, çeyrek dilim tempo kontrolü (25., 50., 75., 100. sorular), doğrudan Deneme Kaydetme ekranına aktarım. |
-| Ara Dinlenme Protokolü (135 Dk) | TTBT ve KTBT oturumları arasında cevap tartışmasını engelleyen sıfırlama rehberi. |
+| Ara Dinlenme Protokolü (135 Dk) | TTBT ve KTBT oturumları arasında cevap tartışmasını engelleyen sıfırlama rehberi. **(Kaldırıldı, 25 Kasım 2026.)** |
 | Beklenen Değer (EV) & Cevap Değiştirme | 2 şık elendiğinde işaretlemenin beklenen net kazancı (+0.167 net) ve cevap değiştirme kuralları. |
 
 ## Master Yönetim Kokpiti & "Eğer–O Zaman" Algoritmaları (Modül 5, 4 Kasım 2026)
+**(Kaldırıldı, 25 Kasım 2026:** Kokpit, bilişsel göstergeler ve %70 Kurtarma Modu kaldırıldı; yoğun günler için "Zor gün / nöbetteyim" kalır. Aşağıdaki satırlar yalnız geçmiş kayıttır.)
+
 | Konu | Karar ve Neden |
 |---|---|
 | Master Yönetim Kokpiti | Haftalık 8 Bilişsel + 4 Sınav Göstergesini ve 0-100 Kompozit Bilişsel Sağlık Skorunu tek ekranda birleştirir. |
@@ -109,8 +115,8 @@ Kullanici onayli kurallar ve TUS Birincilik ve Maksimum Bilissel Performans Rapo
 ## Kullanım Rehberi & Görsel Tanıtım Turu (4 Kasım 2026 - Kullanıcı Kararı: Seçenek 1 Hibrit Model)
 | Konu | Karar ve Neden |
 |---|---|
-| Görsel Tanıtım Turu (TanitimTuruEkrani) | 5 tematik slayt (1. Planlama & R0-R4 Tekrarlar, 2. F.T. time & 3-4 Saat Tavanı, 3. Denemeler & Özel Defterler, 4. Sınav Anı & 90 sn Nefes, 5. Master Kokpit). Karşılama ekranında, Bugün ekranında, Rehberde ve Ayarlarda tek dokunuşla izlenebilir. |
-| Kullanım Rehberi & SSS (RehberEkrani) | 6 ana kategoride pratik soru-cevap rehberi: İlk gün adımları, R0-R4 tekrar formülleri, gecikme kayması, kafein kesilme alarmı, %70 kurtarma modu, A-F hata kodlaması, 90 sn panik protokolü, Beklenen Değer (EV) kuralı ve Master Kokpit göstergeleri. |
+| Görsel Tanıtım Turu (TanitimTuruEkrani) | 5 tematik slayt (1. Planlama & R0-R4 Tekrarlar, 2. F.T. time & 3-4 Saat Tavanı, 3. Denemeler & Özel Defterler, 4. Sınav Anı & 90 sn Nefes, 5. Master Kokpit). Karşılama ekranında, Bugün ekranında, Rehberde ve Ayarlarda tek dokunuşla izlenebilir. **(Değişti, 25 Kasım 2026:** 2., 4. ve 5. slaytlar kaldırılan özelliklere göre yeniden yazıldı: "F.T. Time (Odak Sayacı)", "Sınav Provası & Stratejiler", "İlerleme, Çalışma Grubu & Bulut".) |
+| Kullanım Rehberi & SSS (RehberEkrani) | 6 ana kategoride pratik soru-cevap rehberi: İlk gün adımları, R0-R4 tekrar formülleri, gecikme kayması, kafein kesilme alarmı, %70 kurtarma modu, A-F hata kodlaması, 90 sn panik protokolü, Beklenen Değer (EV) kuralı ve Master Kokpit göstergeleri. **(Değişti, 25 Kasım 2026:** kafein, uyku, %70 kurtarma modu ve 90 sn panik maddeleri kaldırıldı; 6. kategori çıkarıldı.) |
 
 
 ## Sadelestirme ve Rakip Analizi Kararlari (6 Kasim 2026 - Kullanici Karari)
@@ -143,7 +149,7 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Fotoğraf Görüntüleme & Zoom | Eklenen fotoğrafa dokunulduğunda tam ekran açılır ve iki parmakla yakınlaştırma (pinch-to-zoom) yapılabilir (`InteractiveViewer`). |
 | Veri & Optimizasyon | Fotoğraflar okunabilirlik korunarak optimize edilir ve yerel JSON içinde Base64 olarak saklanır; böylece harici dosya kaybı riski olmadan yedeklenebilir. |
 | Test Soyutlaması | `ResimSecici` soyut arayüzü sayesinde testler `SahteResimSecici` ile çalışır; platform/kamera bağımlılığı testleri etkilemez. |
-| Örnek Kitap Desteği | İlk kurulumda veya kütüphane boşken/menüden tek dokunuşla yüklenebilen zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, 2 tamamlanmış bölüm ve örnek klinik not). |
+| Örnek Kitap Desteği | İlk kurulumda veya kütüphane boşken/menüden tek dokunuşla yüklenebilen zengin TUSDATA Patoloji Konu Kitabı (6 bölüm, 260 sayfa, 2 tamamlanmış bölüm ve örnek klinik not). **(Kaldırıldı, 25 Kasım 2026:** örnek kitap eklenmez ve mevcut kütüphanelerden de silinir.) |
 
 ## Web Mobil Uygulamaya Geçiş ve APK Derlemesinin Kaldırılması (6 Kasım 2026 - Kullanıcı Kararı)
 | Konu | Karar |
@@ -151,7 +157,7 @@ Kaynak: pazar analizi ve ozellik budama raporu (4 Kasim 2026). Plan ayrintilari 
 | Platform Stratejisi | Android APK derlemesi ve dağıtımı (`build-apk.yml`) planlardan ve iş akışlarından kaldırıldı. Proje tamamen **Web Mobil Uygulama** (PWA: Progressive Web App) olarak devam eder. |
 | Hedef Kitle & Cihazlar | Hem iPhone (iOS / Safari) hem de Android (Chrome / diğer) mobil tarayıcılardan doğrudan çalışır. "Ana Ekrana Ekle" seçeneğiyle tam ekran, adres çubuğu olmadan yerel uygulama gibi kullanılır. |
 | Dağıtım & Canlı Adres | GitHub Pages: `https://sirfurkansahin.github.io/mytus/` |
-| CI / CD İş Akışı | `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesi tek akışta çalışır, her başarılı gönderimde otomatik olarak yayına alınır. |
+| CI / CD İş Akışı | `.github/workflows/deploy-web.yml`: Kod analizi, tüm birim/widget/uçtan uca testler ve Flutter Web derlemesi tek akışta çalışır, her başarılı gönderimde otomatik olarak yayına alınır. **(Değişti, 25 Kasım 2026:** testler her dalda çalışır, yayına yalnız `main` alınır.) |
 | Veri Saklama | Tarayıcı yerel belleği (`window.localStorage`) üzerinden tam veri kalıcılığı ve güvenlik sağlanır (`lib/core/veri_kaydi.dart`). |
 
 ## Hesap ve Bulut Esitleme (6 Kasim 2026 - Kullanici Karari)
@@ -177,7 +183,7 @@ Not: Bu bolum, yukaridaki "Surum 2: Google girisi" ifadesini su an icin guncelle
 | Grup Modeli | 2-10 kişilik arkadaş/çalışma grubu. 6 karakterlik davet koduyla (`davetKoduUret()`, kafa karıştırmayan harf/sayılar) katılma. |
 | Puanlama Modeli | **Seçenek C (Konu ve Soru Modeli):** 1 Çözülen Soru = 1 Puan, 1 Tamamlanan Konu = 10 Puan. Süre sayılmaksızın hesaplanır. |
 | Puanlama Periyodu | Haftalık periyot (Pazartesi 00:00 - Pazar 23:59). Her hafta başında sıralama ve hedef sıfırdan başlar. |
-| Gizlilik Kuralı | Kişisel notlar, defterler ve detaylı çalışma içerikleri ASLA grupta paylaşılmaz; grupta yalnızca takma ad, haftalık puan, çözülen soru ve biten konu sayısı görünür. |
+| Gizlilik Kuralı | Kişisel notlar, defterler ve detaylı çalışma içerikleri ASLA grupta paylaşılmaz; grupta yalnızca takma ad, haftalık puan, çözülen soru ve biten konu sayısı görünür. **(Değişti, 25 Kasım 2026:** son çalışılan ders adı da yalnız kullanıcı Ayarlar'dan açarsa görünür; varsayılan kapalı.) |
 | Ortak Hedef Modu | Grubun ortak haftalık soru ve konu hedefine göre kümülatif ilerleme çubuğu ve yüzde hesabı (`GrupHedefDurumu`). |
 | Güvenlik Kuralları | Cloud Firestore Security Rules (`firestore.rules`): `gruplar/{grupId}`, `gruplar/{grupId}/uyeler/{uid}`, `davetKodlari/{kod}` koleksiyonları sıkı tip denetimi ve yetkilendirmeyle korundu. |
 
