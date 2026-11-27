@@ -661,7 +661,9 @@ class _GrupIcerigi extends StatelessWidget {
         StreamBuilder<List<GrupUyesi>>(
           stream: servis.uyeleriDinle(grup.id),
           builder: (context, snap) {
-            final uyeler = snap.data ?? [];
+            // Puan tablosu haftalık sıfırlanır: geçen haftanın sayıları sayılmaz.
+            final uyeler =
+                GrupUyesi.haftalikSirala(snap.data ?? [], DateTime.now());
             if (snap.connectionState == ConnectionState.waiting && uyeler.isEmpty) {
               return const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()));
             }

@@ -120,7 +120,20 @@ class PlanDeposu extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// JSON metnini yükler. Yükleme yarıda hata verirse (ör. bozuk bir alan)
+  /// veri yarım değişmiş kalmaz: önceki hâline döndürülür ve false döner.
   bool _jsonYukle(String metin) {
+    final onceki = jsonEncode(toJson());
+    try {
+      if (_jsonYukleIc(metin)) return true;
+    } catch (_) {}
+    try {
+      _jsonYukleIc(onceki);
+    } catch (_) {}
+    return false;
+  }
+
+  bool _jsonYukleIc(String metin) {
     try {
       final veri = jsonDecode(metin);
       if (veri is! Map<String, dynamic>) return false;
@@ -178,7 +191,8 @@ class PlanDeposu extends ChangeNotifier {
       final mufredatAdi = veri['mufredatTuru'];
       mufredatTuru = MufredatTuru.values.firstWhere(
         (m) => m.name == mufredatAdi,
-        orElse: () => _dersler.any((d) => d.grup == DersGrubu.klinik)
+        // Eski kayıtta alan yoksa: YÜKLENEN derslerde Klinik ders varsa Klasik.
+        orElse: () => dersler.any((d) => d.grup == DersGrubu.klinik)
             ? MufredatTuru.klasik
             : MufredatTuru.speetus,
       );

@@ -58,6 +58,23 @@ abstract class KimlikServisi extends ChangeNotifier {
 
   /// Aktif kullanıcı hesabını Firebase Auth üzerinden siler (KVKK uyumu).
   Future<void> hesabiSil();
+
+  /// Hassas işlemden (hesap silme) önce şifreyle kimliği yeniden doğrular.
+  /// Şifre yanlışsa [KimlikHatasi] fırlatır.
+  Future<void> yenidenDogrula({required String sifre});
+}
+
+/// Hesabı güvenli sırayla siler: ÖNCE şifreyle kimlik doğrulanır (doğrulanamazsa
+/// hiçbir şey silinmez), sonra veriler, en son hesap. Böylece Firebase'in
+/// "yakın zamanda giriş gerekli" hatası verileri silip hesabı bırakmaz.
+Future<void> hesabiGuvenliSil({
+  required KimlikServisi kimlik,
+  required String sifre,
+  required Future<void> Function() verileriSil,
+}) async {
+  await kimlik.yenidenDogrula(sifre: sifre);
+  await verileriSil();
+  await kimlik.hesabiSil();
 }
 
 /// Firebase Authentication tabanlı gerçek kimlik doğrulama servisi.
@@ -174,6 +191,22 @@ class FirebaseKimlikServisi extends KimlikServisi {
     await _auth.signOut();
     _aktifKullanici = null;
     notifyListeners();
+  }
+
+  @override
+  Future<void> yenidenDogrula({required String sifre}) async {
+    final user = _auth.currentUser;
+    final eposta = user?.email;
+    if (user == null || eposta == null) {
+      throw const KimlikHatasi('Oturum bulunamadı. Tekrar giriş yapın.');
+    }
+    try {
+      await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: eposta, password: sifre),
+      );
+    } on FirebaseAuthException catch (e) {
+      throw KimlikHatasi(firebaseHataMesaji(e.code), kod: e.code);
+    }
   }
 
   @override
@@ -334,6 +367,22 @@ class SahteKimlikServisi extends KimlikServisi {
     cikisSayisi++;
     _aktifKullanici = null;
     notifyListeners();
+  }
+
+  /// Son yeniden doğrulama başarılı mı (testler için).
+  bool yenidenDogrulandi = false;
+
+  @override
+  Future<void> yenidenDogrula({required String sifre}) async {
+    final aktif = _aktifKullanici;
+    if (aktif == null) {
+      throw const KimlikHatasi('Oturum bulunamadı. Tekrar giriş yapın.');
+    }
+    if (_kayitliSifreler[aktif.eposta.toLowerCase()] != sifre) {
+      yenidenDogrulandi = false;
+      throw const KimlikHatasi('Şifre hatalı.', kod: 'wrong-password');
+    }
+    yenidenDogrulandi = true;
   }
 
   @override

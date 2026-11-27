@@ -134,7 +134,8 @@ class AyarlarEkrani extends StatelessWidget {
       baslik: 'Müfredat tarzını değiştir?',
       metin: 'Mevcut tarzın "${depo.mufredatTuru.baslik}". "${hedef.baslik}" tarzına '
           'geçmek ders ve konu listeni yeni sisteme göre baştan kurar. '
-          'Mevcut çalışma ve not kayıtların sıfırlanır. Devam edilsin mi?',
+          'Mevcut dersler, konular, takvim planı, odak kayıtları ve DENEME '
+          'kayıtların silinir. Devam edilsin mi?',
       eylem: 'Değiştir',
     );
     if (!onay || !context.mounted) return;
@@ -153,11 +154,16 @@ class AyarlarEkrani extends StatelessWidget {
   }
 
   Future<void> _sifirla(BuildContext context, PlanDeposu depo) async {
+    final girisVar = KimlikKapsami.belki(context)?.aktifKullanici != null;
     final onay = await onayDialogu(
       context,
       baslik: 'Tüm veriler silinsin mi?',
-      metin: 'Dersler, konular, notlar, takvim planı ve F.T. time puanların '
-          'bu telefondan kalıcı olarak silinecek.',
+      metin: girisVar
+          ? 'Dersler, konular, notlar, denemeler, kütüphane ve takvim planın '
+              'bu cihazdan VE hesabından (buluttan) kalıcı olarak silinecek; '
+              'hesabına bağlı diğer cihazlarından da silinir.'
+          : 'Dersler, konular, notlar, denemeler, kütüphane ve takvim planın '
+              'bu cihazdan kalıcı olarak silinecek.',
       eylem: 'Sıfırla',
     );
     if (!onay || !context.mounted) return;

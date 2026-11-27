@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:app/core/tarih.dart';
+
 /// Davet kodlarında kafa karıştırabilecek 0, O, 1, I karakterleri çıkarılmış alfabe.
 const String _kodKarakterleri = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -101,6 +103,30 @@ class GrupUyesi {
   /// 1 Konu = 10 Puan, 1 Soru = 1 Puan
   int get puan => (konuSayisi * 10) + soruSayisi;
 
+  /// Bu üyenin bilgisi [bugun]'ün haftasına mı ait? (Puan tablosu haftalık
+  /// sıfırlanır: geçen haftanın sayıları bu haftaya sayılmaz.)
+  bool buHaftaMi(DateTime bugun) =>
+      haftaBaslangici == tarihAnahtari(haftaBasi(bugun));
+
+  /// Bu haftaya göre üye: geçen haftadan kalan sayılar sıfır sayılır.
+  GrupUyesi buHaftaya(DateTime bugun) => buHaftaMi(bugun)
+      ? this
+      : GrupUyesi(
+          uid: uid,
+          takmaAd: takmaAd,
+          haftaBaslangici: tarihAnahtari(haftaBasi(bugun)),
+          sonDers: sonDers,
+          guncellemeTarihi: guncellemeTarihi,
+        );
+
+  /// Üyeleri bu haftaya göre sıfırlayıp puana göre (çoktan aza) sıralar.
+  static List<GrupUyesi> haftalikSirala(
+    List<GrupUyesi> uyeler,
+    DateTime bugun,
+  ) =>
+      [for (final u in uyeler) u.buHaftaya(bugun)]
+        ..sort((a, b) => b.puan.compareTo(a.puan));
+
   GrupUyesi kopya({
     String? uid,
     String? takmaAd,
@@ -170,12 +196,18 @@ class GrupHedefDurumu {
   double get genelOran => ((konuOrani + soruOrani) / 2).clamp(0.0, 1.0);
   int get genelYuzde => (genelOran * 100).round();
 
+  /// Grubun bu haftaki ortak ilerlemesi (geçen haftanın sayıları sayılmaz).
   factory GrupHedefDurumu.hesapla({
     required List<GrupUyesi> uyeler,
     required Grup grup,
+    DateTime? bugun,
   }) {
-    final toplamKonu = uyeler.fold<int>(0, (toplam, u) => toplam + u.konuSayisi);
-    final toplamSoru = uyeler.fold<int>(0, (toplam, u) => toplam + u.soruSayisi);
+    final gun = bugun ?? DateTime.now();
+    final buHafta = [for (final u in uyeler) u.buHaftaya(gun)];
+    final toplamKonu =
+        buHafta.fold<int>(0, (toplam, u) => toplam + u.konuSayisi);
+    final toplamSoru =
+        buHafta.fold<int>(0, (toplam, u) => toplam + u.soruSayisi);
     return GrupHedefDurumu(
       toplamKonu: toplamKonu,
       toplamSoru: toplamSoru,

@@ -107,6 +107,8 @@ class _Ham {
 /// - Hiçbir tekrar sınavdan bir gün öncesinden sonraya taşmaz.
 /// - Bir güne düşen bekleyen tekrar sayısı [gunlukSinir]'ı aşarsa fazlası ertesi güne kayar
 ///   (sınır 0 veya eksiyse sınırsız). Geçmişte kalmış (geciken) tekrarlar sınıra sayılmaz.
+/// - Henüz "Çalıştım" yapılmamış çalışmaların tekrarları taslaktır: takvimde
+///   görünür ama günlük sınıra SAYILMAZ (gerçek tekrarları ileri itmesin).
 List<TekrarOgesi> tekrarlariHesapla({
   required List<Calisma> calismalar,
   required DateTime sinavTarihi,
@@ -158,6 +160,12 @@ List<TekrarOgesi> tekrarlariHesapla({
     final onceki = sonYerlesen[h.calisma.id];
     if (onceki != null && !gun.isAfter(onceki)) gun = gunEkle(onceki, 1);
     if (gun.isAfter(sonGun)) gun = sonGun;
+    if (!h.calisma.tamam) {
+      // Konu henüz çalışılmadı: taslak tekrar, sınıra sayılmaz.
+      sonYerlesen[h.calisma.id] = gun;
+      h.gun = gun;
+      continue;
+    }
     if (gunlukSinir > 0) {
       while ((yuk[gunAnahtari(gun)] ?? 0) >= gunlukSinir &&
           gun.isBefore(sonGun)) {

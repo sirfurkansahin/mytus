@@ -73,7 +73,11 @@ void main() {
         ),
       ];
 
-      final durum = GrupHedefDurumu.hesapla(uyeler: uyeler, grup: grup);
+      final durum = GrupHedefDurumu.hesapla(
+        uyeler: uyeler,
+        grup: grup,
+        bugun: DateTime(2026, 11, 4),
+      );
       // Toplam konu: 10/20 (%50), Toplam soru: 250/500 (%50) -> Genel %50
       expect(durum.toplamKonu, 10);
       expect(durum.toplamSoru, 250);

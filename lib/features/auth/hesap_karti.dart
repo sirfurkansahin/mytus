@@ -107,25 +107,24 @@ class _HesapKartiState extends State<HesapKarti> {
     PlanDeposu depo,
     BulutSenkronServisi? senkron,
   ) async {
-    final onay = await onayDialogu(
-      context,
-      baslik: 'Hesabın ve verilerin silinsin mi?',
-      metin:
-          'Bu işlem geri alınamaz! Hesabın, buluttaki tüm çalışma verilerin ve '
-          'bu cihazdaki kayıtların kalıcı olarak silinecek (KVKK kapsamında tam silme).',
-      eylem: 'Hesabımı Sil',
-    );
-    if (!onay || !context.mounted) return;
+    final sifre = await _silmeSifresiSor(context);
+    if (sifre == null || !context.mounted) return;
 
     setState(() => _islemSuruyor = true);
     try {
-      if (senkron != null) {
-        await senkron.oturumKapatildi(hesabiTamamenSil: true);
-      } else {
-        await depo.tumVerileriSifirla();
-      }
-      await depo.misafirModunuAyarla(false);
-      await kimlik.hesabiSil();
+      // Önce şifre doğrulanır; doğrulanamazsa hiçbir şey silinmez.
+      await hesabiGuvenliSil(
+        kimlik: kimlik,
+        sifre: sifre,
+        verileriSil: () async {
+          if (senkron != null) {
+            await senkron.oturumKapatildi(hesabiTamamenSil: true);
+          } else {
+            await depo.tumVerileriSifirla();
+          }
+          await depo.misafirModunuAyarla(false);
+        },
+      );
       if (!context.mounted) return;
       Navigator.of(context).popUntil((r) => r.isFirst);
     } on KimlikHatasi catch (e) {
@@ -137,6 +136,12 @@ class _HesapKartiState extends State<HesapKarti> {
       if (mounted) setState(() => _islemSuruyor = false);
     }
   }
+
+  /// Hesap silme onayı: geri alınamaz uyarısı ve şifre. Vazgeçilirse null.
+  Future<String?> _silmeSifresiSor(BuildContext context) => showDialog<String>(
+        context: context,
+        builder: (context) => const _SilmeSifresiDialogu(),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -234,6 +239,64 @@ class _HesapKartiState extends State<HesapKarti> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Hesap silme onay penceresi (şifre alanıyla).
+class _SilmeSifresiDialogu extends StatefulWidget {
+  const _SilmeSifresiDialogu();
+
+  @override
+  State<_SilmeSifresiDialogu> createState() => _SilmeSifresiDialoguState();
+}
+
+class _SilmeSifresiDialoguState extends State<_SilmeSifresiDialogu> {
+  final TextEditingController _sifre = TextEditingController();
+
+  @override
+  void dispose() {
+    _sifre.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Hesabın ve verilerin silinsin mi?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Bu işlem geri alınamaz! Hesabın, buluttaki tüm çalışma verilerin '
+            've bu cihazdaki kayıtların kalıcı olarak silinecek (KVKK kapsamında '
+            'tam silme). Onaylamak için şifreni gir.',
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            key: const ValueKey('hesap_sil_sifre'),
+            controller: _sifre,
+            obscureText: true,
+            autofocus: true,
+            decoration: const InputDecoration(labelText: 'Şifre'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Vazgeç'),
+        ),
+        FilledButton(
+          key: const ValueKey('hesap_sil_onay'),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () => Navigator.of(context).pop(_sifre.text),
+          child: const Text('Hesabımı Sil'),
+        ),
+      ],
     );
   }
 }
