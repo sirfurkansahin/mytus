@@ -16,7 +16,7 @@ class KarsilamaEkrani extends StatefulWidget {
 }
 
 class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
-  final DateTime _tarih = resmiSinavTarihi;
+  DateTime _tarih = resmiSinavTarihi;
   MufredatTuru _seciliMufredat = MufredatTuru.speetus;
   late List<HazirDers> _liste = [...mufredatDersleri(_seciliMufredat)];
   late Set<HazirDers> _secili = {...mufredatDersleri(_seciliMufredat)};
@@ -193,7 +193,7 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Sınav tarihin hazır. Çalışacağın dersleri seç, '
+                      'Gireceğin TUS dönemini ve çalışacağın dersleri seç; '
                       'hepsini sonra değiştirebilirsin.',
                       style: tema.textTheme.bodyMedium?.copyWith(color: soluk),
                     ),
@@ -205,23 +205,43 @@ class _KarsilamaEkraniState extends State<KarsilamaEkrani> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: tema.colorScheme.outlineVariant,
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        tarihYaz(_tarih),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                      child: SegmentedButton<int>(
+                        key: const ValueKey('karsilama_sinav_donemi'),
+                        showSelectedIcon: false,
+                        segments: [
+                          for (var i = 0; i < resmiSinavTarihleri.length; i++)
+                            ButtonSegment<int>(
+                              value: i,
+                              label: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      tarihYaz(resmiSinavTarihleri[i].tarih),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    Text(
+                                      resmiSinavTarihleri[i].ad,
+                                      style: const TextStyle(fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                        selected: {
+                          for (var i = 0; i < resmiSinavTarihleri.length; i++)
+                            if (gunBasi(resmiSinavTarihleri[i].tarih) ==
+                                gunBasi(_tarih))
+                              i,
+                        },
+                        onSelectionChanged: (secim) => setState(
+                          () => _tarih = resmiSinavTarihleri[secim.first].tarih,
                         ),
                       ),
                     ),

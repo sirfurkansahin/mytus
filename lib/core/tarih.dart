@@ -93,5 +93,12 @@ int gunFarki(DateTime sonra, DateTime once) {
 /// Günün ait olduğu haftanın Pazartesi'si.
 DateTime haftaBasi(DateTime t) => gunEkle(gunBasi(t), -(t.weekday - 1));
 
-/// Resmi TUS sınav tarihi: 22 Ağustos 2027.
+/// ÖSYM 2027 takvimindeki TUS sınav günleri (25 Kasım 2026 kullanıcı kararı:
+/// kullanıcı bu iki dönemden birini seçer).
+final List<({String ad, DateTime tarih})> resmiSinavTarihleri = [
+  (ad: '1. dönem', tarih: DateTime(2027, 3, 27)),
+  (ad: '2. dönem', tarih: DateTime(2027, 8, 22)),
+];
+
+/// Varsayılan sınav tarihi: 22 Ağustos 2027 (2. dönem).
 final DateTime resmiSinavTarihi = DateTime(2027, 8, 22);

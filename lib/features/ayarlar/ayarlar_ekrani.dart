@@ -153,6 +153,50 @@ class AyarlarEkrani extends StatelessWidget {
     }
   }
 
+  /// Sınav dönemi seçimi (27 Mart / 22 Ağustos 2027). Tekrar günleri yeni
+  /// tarihe göre yeniden hesaplanır.
+  Future<void> _sinavTarihiSec(BuildContext context, PlanDeposu depo) async {
+    final mevcut = gunBasi(depo.sinavTarihi ?? resmiSinavTarihi);
+    final secim = await showDialog<DateTime>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Hangi TUS dönemine gireceksin?'),
+        children: [
+          for (final t in resmiSinavTarihleri)
+            SimpleDialogOption(
+              key: ValueKey('sinav_donemi_${t.tarih.month}'),
+              onPressed: () => Navigator.of(context).pop(t.tarih),
+              child: Row(
+                children: [
+                  Icon(
+                    gunBasi(t.tarih) == mevcut
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text('${tarihYaz(t.tarih)} (${t.ad})')),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    if (secim == null || !context.mounted || gunBasi(secim) == mevcut) return;
+    final sonraki = depo.sinavSonrasiPlanliSayisi(secim);
+    final onay = await onayDialogu(
+      context,
+      baslik: 'Sınav tarihi değişsin mi?',
+      metin: 'Yeni sınav tarihi: ${tarihYaz(secim)}. Tekrar günleri bu tarihe '
+          'göre yeniden hesaplanır.'
+          '${sonraki > 0 ? ' Takviminde bu tarihe veya sonrasına planlanmış '
+              '$sonraki konu var; onları daha erken günlere taşıman gerekir.' : ''}',
+      eylem: 'Değiştir',
+    );
+    if (!onay || !context.mounted) return;
+    depo.sinavTarihiBelirle(secim);
+  }
+
   Future<void> _sifirla(BuildContext context, PlanDeposu depo) async {
     final girisVar = KimlikKapsami.belki(context)?.aktifKullanici != null;
     final onay = await onayDialogu(
@@ -219,6 +263,7 @@ class AyarlarEkrani extends StatelessWidget {
             baslik: 'Sınav tarihi',
             altYazi: kalanMetin,
             deger: tarihYaz(sinav),
+            onTap: () => _sinavTarihiSec(context, depo),
           ),
           AyarSatiri(
             baslik: 'Tur sayısı',

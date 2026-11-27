@@ -629,6 +629,15 @@ class PlanDeposu extends ChangeNotifier {
   /// Planlanmış tüm çalışmalar (tarih sırasıyla).
   List<Calisma> tumCalismalar() => [..._calismalar]..sort(_calismaSirala);
 
+  /// Sınav günü ve sonrasına planlanmış (henüz çalışılmamış) konu sayısı.
+  /// Sınav tarihi değiştirilirken kullanıcıya söylenir.
+  int sinavSonrasiPlanliSayisi(DateTime sinav) {
+    final gun = gunBasi(sinav);
+    return _calismalar
+        .where((c) => !c.tamam && !gunBasi(c.tarih).isBefore(gun))
+        .length;
+  }
+
   /// Çalışmanın tur numarası: aynı konunun çalışmaları arasında tarih sırası (1'den başlar).
   int turNo(Calisma c) {
     final sirali = calismalarKonu(c.konuId);
